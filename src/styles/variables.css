@@ -1,0 +1,16 @@
+:root {
+    --color-bg: #f8f6f1;
+    --color-panel: #efede8;
+    --color-card: #f3f1eb;
+    --color-sidebar: #2b2415;
+    --color-sidebar-muted: #9f988c;
+    --color-gold: #8a6700;
+    --color-gold-light: #f6d98b;
+    --color-text: #1f1c16;
+    --color-muted: #8b867d;
+    --color-line: #dedbd3;
+    --color-white: #ffffff;
+    --color-danger: #c92a2a;
+
+    --sidebar-width: 280px;
+}
