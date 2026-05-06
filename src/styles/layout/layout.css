@@ -28,7 +28,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 28px;
+    font-size: calc(28px * var(--app-font-scale));
     font-weight: 800;
     letter-spacing: -1px;
     color: #fff3d0;
@@ -41,11 +41,12 @@
     border-radius: 50%;
     background-color: #f6d98b;
     display: inline-block;
+    flex-shrink: 0;
 }
 
 .sidebar-subtitle {
     margin: 8px 0 0 0;
-    font-size: 11px;
+    font-size: calc(11px * var(--app-font-scale));
     letter-spacing: 1.2px;
     color: #9c927d;
 }
@@ -62,7 +63,7 @@
     align-items: center;
     gap: 13px;
     color: #958d7d;
-    font-size: 16px;
+    font-size: calc(16px * var(--app-font-scale));
     font-weight: 600;
     transition: color 0.2s ease;
 }
@@ -96,7 +97,7 @@
     align-items: center;
     justify-content: center;
     gap: 9px;
-    font-size: 13px;
+    font-size: calc(13px * var(--app-font-scale));
     font-weight: 500;
 }
 

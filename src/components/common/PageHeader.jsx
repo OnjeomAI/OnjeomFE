@@ -2,18 +2,19 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Bell, CircleUserRound } from "lucide-react";
 
 function PageHeader({
-                        subtitle,
-                        title,
-                        type = "learner",
-                        backTo,
-                        showBack = true,
-                        status,
-                        userName = "unknown",
-                        userLevel = "not level",
-                        showBell = true,
-                        showUser = true,
-                        className = "",
-                    }) {
+    subtitle,
+    title,
+    type = "learner",
+    backTo,
+    showBack = true,
+    status,
+    userName = "unknown",
+    userLevel = "not level",
+    showBell = true,
+    showUser = true,
+    className = "",
+})
+{
     const navigate = useNavigate();
 
     const defaultBackPath = type === "admin" ? "/admin/question" : "/dashboard";

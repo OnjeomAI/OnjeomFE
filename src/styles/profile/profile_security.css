@@ -1,0 +1,46 @@
+.profile-security-card {
+    min-height: 190px;
+    margin-top: 32px;
+}
+
+.profile-security-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.profile-security-header h3 {
+    margin: 0;
+    font-size: calc(19px * var(--app-font-scale));
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.profile-security-header svg {
+    color: var(--color-gold);
+}
+
+.profile-security-description {
+    margin: 0 0 28px;
+    font-size: calc(15px * var(--app-font-scale));
+    line-height: 1.7;
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.profile-security-link-button {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    color: var(--color-gold);
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-security-link-button:hover {
+    color: #745700;
+}

@@ -1,0 +1,27 @@
+.profile-page {
+    width: 100%;
+}
+
+.profile-layout {
+    max-width: 1120px;
+    margin: 42px auto 0;
+    display: grid;
+    grid-template-columns: 430px 620px;
+    gap: 48px;
+}
+
+.profile-left-section,
+.profile-right-section {
+    min-width: 0;
+}
+
+.profile-section-title {
+    margin: 0 0 28px;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 700;
+    color: var(--color-gold);
+}
+
+.profile-notification-card {
+    min-height: 390px;
+}

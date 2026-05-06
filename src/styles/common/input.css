@@ -5,28 +5,44 @@
 }
 
 .common-input-label {
-    font-size: 13px;
+    font-size: calc(13px * var(--app-font-scale));
     font-weight: 700;
     color: var(--color-text);
 }
 
 .common-input {
     width: 100%;
+    color: var(--color-text);
+    font-size: calc(18px * var(--app-font-scale));
+    font-weight: 500;
+    outline: none;
+}
+
+.common-input-box {
     height: 48px;
     border: 1px solid var(--color-line);
     background-color: var(--color-white);
     padding: 0 16px;
-    font-size: 15px;
-    color: var(--color-text);
-    outline: none;
+}
+
+.common-input-box:focus {
+    border-color: var(--color-gold);
+}
+
+.common-input-underline {
+    height: 42px;
+    border: none;
+    border-bottom: 1px solid var(--color-line);
+    background-color: transparent;
+    padding: 0;
+}
+
+.common-input-underline:focus {
+    border-bottom-color: var(--color-gold);
 }
 
 .common-input::placeholder {
     color: #aaa49a;
-}
-
-.common-input:focus {
-    border-color: var(--color-gold);
 }
 
 .common-input:disabled {
@@ -41,6 +57,6 @@
 
 .common-input-message {
     margin: 0;
-    font-size: 12px;
+    font-size: calc(12px * var(--app-font-scale));
     color: var(--color-danger);
 }

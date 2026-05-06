@@ -5,9 +5,16 @@
 @import "common/input.css";
 @import "common/pageheader.css";
 @import "profile/profile.css";
+@import "profile/profile_user.css";
+@import "profile/profile_security.css";
+@import "profile/profile_setting.css";
 
 * {
     box-sizing: border-box;
+}
+
+:root {
+    --app-font-scale: 1;
 }
 
 body {

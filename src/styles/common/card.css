@@ -14,13 +14,13 @@
 
 .common-card-title {
     margin: 0;
-    font-size: 22px;
+    font-size: calc(22px * var(--app-font-scale));
     font-weight: 800;
     color: var(--color-text);
 }
 
 .common-card-subtitle {
     margin: 8px 0 0;
-    font-size: 14px;
+    font-size: calc(14px * var(--app-font-scale));
     color: var(--color-muted);
 }

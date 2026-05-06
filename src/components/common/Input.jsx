@@ -7,11 +7,13 @@ function Input({
     onChange,
     disabled = false,
     error,
+    variant = "box",
     className = "",
 })
 {
     const inputClassName = [
         "common-input",
+        `common-input-${variant}`,
         error ? "common-input-error" : "",
         className,
     ]

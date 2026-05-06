@@ -1,10 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 
+import Landing from "./pages/landing/Landing.jsx";
+
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 
-import GoalOnboarding from "./pages/onboarding/GoalSetting.jsx";
+import GoalSetting from "./pages/onboarding/GoalSetting.jsx";
 import DiagnosisTest from "./pages/onboarding/DiagnosisTest";
 import DiagnosisResult from "./pages/onboarding/DiagnosisResult";
 
@@ -14,23 +16,25 @@ import LearnerResult from "./pages/learner/Today/LearnerResult";
 import LearnerReview from "./pages/learner/LearnerReview";
 import LearningAnalytics from "./pages/learner/LearningAnalytics";
 
-import Profile from "./pages/profile/Profile";
-
 import AdminQuestionManagement from "./pages/admin/AdminQuestionManagement";
 import AdminCurriculum from "./pages/admin/AdminCurriculum";
 import AdminTagManagement from "./pages/admin/AdminTagManagement";
 import AdminStats from "./pages/admin/AdminStats";
 
+import Profile from "./pages/profile/Profile";
+
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/" element={<Navigate to="/landing" replace />} />
+
+                <Route path="/landing" element={<Landing/>} />
 
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
-                <Route path="/onboarding/goal" element={<GoalOnboarding />} />
+                <Route path="/onboarding/goal" element={<GoalSetting />} />
                 <Route path="/onboarding/diagnosis" element={<DiagnosisTest />} />
                 <Route path="/onboarding/result" element={<DiagnosisResult />} />
 
