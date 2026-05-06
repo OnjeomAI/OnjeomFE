@@ -4,12 +4,13 @@ import AppLayout from "./components/layout/AppLayout";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 
-import GoalOnboarding from "./pages/onboarding/GoalOnboarding";
+import GoalOnboarding from "./pages/onboarding/GoalSetting.jsx";
 import DiagnosisTest from "./pages/onboarding/DiagnosisTest";
 import DiagnosisResult from "./pages/onboarding/DiagnosisResult";
 
 import LearnerDashboard from "./pages/learner/LearnerDashboard";
-import LearnerToday from "./pages/learner/LearnerToday";
+import LearnerStudy from "./pages/learner/Today/LearnerStudy";
+import LearnerResult from "./pages/learner/Today/LearnerResult";
 import LearnerReview from "./pages/learner/LearnerReview";
 import LearningAnalytics from "./pages/learner/LearningAnalytics";
 
@@ -33,7 +34,6 @@ function App() {
                 <Route path="/onboarding/diagnosis" element={<DiagnosisTest />} />
                 <Route path="/onboarding/result" element={<DiagnosisResult />} />
 
-                {/* 학습자 페이지 */}
                 <Route
                     path="/dashboard"
                     element={
@@ -47,7 +47,16 @@ function App() {
                     path="/today"
                     element={
                         <AppLayout type="learner">
-                            <LearnerToday />
+                            <LearnerStudy />
+                        </AppLayout>
+                    }
+                />
+
+                <Route
+                    path="/today/result"
+                    element={
+                        <AppLayout type="learner">
+                            <LearnerResult />
                         </AppLayout>
                     }
                 />
@@ -74,14 +83,13 @@ function App() {
                     path="/profile"
                     element={
                         <AppLayout type="learner">
-                            <Profile />
+                            <Profile type="learner" />
                         </AppLayout>
                     }
                 />
 
-                {/* 관리자 페이지 */}
                 <Route
-                    path="/admin/cms"
+                    path="/admin/question"
                     element={
                         <AppLayout type="admin">
                             <AdminQuestionManagement />
@@ -120,7 +128,7 @@ function App() {
                     path="/admin/profile"
                     element={
                         <AppLayout type="admin">
-                            <Profile />
+                            <Profile type="admin" />
                         </AppLayout>
                     }
                 />

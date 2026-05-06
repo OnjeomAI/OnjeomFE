@@ -14,12 +14,12 @@ const learnerLinks  = [
     { to: "/dashboard", label: "대시보드", icon: LayoutDashboard },
     { to: "/today", label: "오늘의 학습", icon: BookOpen },
     { to: "/review", label: "복습하기", icon: RefreshCcw },
-    { to: "/history", label: "학습 기록", icon: BarChart3 },
+    { to: "/history", label: "학습 통계", icon: BarChart3 },
     { to: "/profile", label: "프로필 설정", icon: User },
 ];
 
 const adminLinks = [
-    { to: "/admin/cms", label: "문항 관리", icon: FileQuestion },
+    { to: "/admin/question", label: "문항 관리", icon: FileQuestion },
     { to: "/admin/curriculum", label: "커리큘럼", icon: BookOpen },
     { to: "/admin/tags", label: "태그 관리", icon: Tags },
     { to: "/admin/stats", label: "통계 분석", icon: BarChart3 },
@@ -34,11 +34,11 @@ function Sidebar({ type = "learner" }) {
             <div>
                 <div className="sidebar-logo-area">
                     <div className="sidebar-logo">
-                        <span className="sidebar-logo-dot"></span>
                         <span>온점</span>
+                        <span className="sidebar-logo-dot"></span>
                     </div>
 
-                    <p className="sidebar-subtitle">DIGITAL ARCHIVIST</p>
+                    <p className="sidebar-subtitle">디지털 아카이브</p>
                 </div>
 
                 <nav className="sidebar-nav">

@@ -1,6 +1,6 @@
-import Sidebar from "./Sidebar";
+import Sidebar from "./sidebar";
 
-function AppLayout({ children, type = "user" }) {
+function AppLayout({ children, type = "learner" }) {
     return (
         <div className="app-layout">
             <Sidebar type={type} />

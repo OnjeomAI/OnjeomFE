@@ -1,0 +1,26 @@
+.common-card {
+    background-color: var(--color-panel);
+    padding: 32px;
+    border: 1px solid transparent;
+}
+
+.common-card-accent {
+    border-left: 4px solid var(--color-gold);
+}
+
+.common-card-header {
+    margin-bottom: 24px;
+}
+
+.common-card-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.common-card-subtitle {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--color-muted);
+}
