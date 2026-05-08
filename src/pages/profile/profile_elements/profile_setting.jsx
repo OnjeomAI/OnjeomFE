@@ -5,7 +5,6 @@ function getInitialFontSize(user) {
     if (typeof user.fontSize === "number") {
         return user.fontSize;
     }
-
     return 100;
 }
 

@@ -1,4 +1,4 @@
-export const mockUsers = {
+let mockUsers = {
     learner: {
         role: "learner",
         displayName: "김상우",
@@ -8,6 +8,12 @@ export const mockUsers = {
         joinedAt: "2023년 9월부터 활동 중",
         dailyGoal: 10,
         fontSize: 100,
+        notificationSettings: {
+            reviewReminder: true,
+            goalEncouragement: true,
+            weaknessReport: false,
+            achievementMessage: true,
+        },
     },
 
     admin: {
@@ -40,15 +46,27 @@ export function updateMockUserByType(type, updatedFields) {
     return mockUsers[targetType];
 }
 
+export function updateMockProfile(type, updatedProfile) {
+    return updateMockUserByType(type, {
+        nickname: updatedProfile.nickname,
+        email: updatedProfile.email,
+    });
+}
+
 export function updateMockSettings(type, updatedSettings) {
-    if (type === "admin") {
-        return updateMockUserByType(type, {
-            fontSize: updatedSettings.fontSize,
-        });
+    const nextFields = {};
+
+    if (updatedSettings.fontSize !== undefined) {
+        nextFields.fontSize = updatedSettings.fontSize;
     }
 
-    return updateMockUserByType(type, {
-        dailyGoal: updatedSettings.dailyGoal,
-        fontSize: updatedSettings.fontSize,
-    });
+    if (type === "learner" && updatedSettings.dailyGoal !== undefined) {
+        nextFields.dailyGoal = updatedSettings.dailyGoal;
+    }
+
+    if (type === "learner" && updatedSettings.notificationSettings !== undefined) {
+        nextFields.notificationSettings = updatedSettings.notificationSettings;
+    }
+
+    return updateMockUserByType(type, nextFields);
 }

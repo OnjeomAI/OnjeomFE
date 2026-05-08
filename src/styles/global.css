@@ -8,6 +8,7 @@
 @import "profile/profile_user.css";
 @import "profile/profile_security.css";
 @import "profile/profile_setting.css";
+@import "profile/profile_notification.css";
 
 * {
     box-sizing: border-box;

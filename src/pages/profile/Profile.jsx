@@ -2,21 +2,22 @@ import { useState } from "react";
 import PageHeader from "../../components/common/PageHeader";
 import {
     getMockUserByType,
-    updateMockUserByType,
+    updateMockProfile,
     updateMockSettings,
 } from "../../data/mockData";
 
-import { applyAppFontSize } from "../../utils/fontSize.jsx";
+import { applyAppFontSize } from "../../utils/fontSize";
 
 import ProfileUser from "./profile_elements/profile_user.jsx";
 import ProfileSecurity from "./profile_elements/profile_security.jsx";
 import ProfileSettings from "./profile_elements/profile_setting.jsx";
+import ProfileNotification from "./profile_elements/profile_notification.jsx";
 
 function Profile({ type = "learner" }) {
     const [user, setUser] = useState(getMockUserByType(type));
 
     const handleUpdateProfile = (updatedProfile) => {
-        const updatedUser = updateMockUserByType(type, updatedProfile);
+        const updatedUser = updateMockProfile(type, updatedProfile);
 
         setUser(updatedUser);
 
@@ -68,9 +69,12 @@ function Profile({ type = "learner" }) {
                         onUpdateSettings={handleUpdateSettings}
                     />
 
-                    <div className="profile-box profile-notification-box">
-                        알림 유형 설정 카드
-                    </div>
+                    {type === "learner" && (
+                        <ProfileNotification
+                            user={user}
+                            onUpdateSettings={handleUpdateSettings}
+                        />
+                    )}
                 </section>
             </div>
         </div>
