@@ -25,6 +25,9 @@ import Profile from "./pages/profile/Profile";
 import OnePage from './pages/1page';
 import TwoPage from './pages/2page';
 import ThreePage from './pages/3page';
+import FourPage from './pages/4page';
+import FivePage from './pages/5page';
+import SixPage from './pages/6page';
 
 function App() {
   return (
@@ -155,16 +158,44 @@ function App() {
             </AppLayout>
           }
         />
-        
-        <Route
-    path="/3page"
-    element={
-        <AppLayout type="learner">
-            <ThreePage />
-        </AppLayout>
-    }
-/>
 
+        <Route
+          path="/3page"
+          element={
+            <AppLayout type="learner">
+              <ThreePage />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/4page"
+          element={
+            <AppLayout type="learner">
+              <FourPage />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/5page"
+          element={
+            <AppLayout type="learner">
+              <FivePage />
+            </AppLayout>
+          }
+        />
+
+<Route
+          path="/6page"
+          element={
+            <AppLayout type="learner">
+              <SixPage />
+            </AppLayout>
+          }
+        />
+
+        
       </Routes>
     </BrowserRouter>
   );
