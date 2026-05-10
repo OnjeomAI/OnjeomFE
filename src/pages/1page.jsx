@@ -6,7 +6,7 @@ import Card from '../components/common/Card';
 const OnePage = () => {
   return (
     <div style={{ backgroundColor: '#f9f9f7', minHeight: '100vh', fontFamily: 'serif' }}>
-      {/* 1. 헤더 부분 (상우님 레이아웃이 있다면 생략 가능) */}
+      {/* 1. 헤더 부분  */}
       <header style={{ display: 'flex', justifyContent: 'space-between', padding: '20px 50px', alignItems: 'center' }}>
         <h2 style={{ color: '#4a3f35' }}>온점(.)</h2>
         <nav>
