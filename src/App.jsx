@@ -24,6 +24,7 @@ import AdminStats from "./pages/admin/AdminStats";
 import Profile from "./pages/profile/Profile";
 import OnePage from './pages/1page';
 import TwoPage from './pages/2page';
+import ThreePage from './pages/3page';
 
 function App() {
   return (
@@ -154,6 +155,16 @@ function App() {
             </AppLayout>
           }
         />
+        
+        <Route
+    path="/3page"
+    element={
+        <AppLayout type="learner">
+            <ThreePage />
+        </AppLayout>
+    }
+/>
+
       </Routes>
     </BrowserRouter>
   );
