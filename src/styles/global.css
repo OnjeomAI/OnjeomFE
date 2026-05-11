@@ -11,6 +11,9 @@
 @import "profile/profile_notification.css";
 @import "onboarding/DiagnosisTest.css";
 @import "onboarding/GoalSetting.css";
+@import "onboarding/DiagnosisResult.css";
+@import "landing/landing.css";
+@import "learner/LearnerDashboard.css";
 
 * {
     box-sizing: border-box;

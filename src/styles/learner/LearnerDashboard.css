@@ -1,0 +1,494 @@
+.learner-dashboard-page {
+    width: 100%;
+    color: var(--color-text);
+}
+
+.learner-dashboard-page .page-header {
+    margin-bottom: 66px;
+}
+
+.dashboard-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 36px;
+    margin-bottom: 54px;
+}
+
+.dashboard-summary-card.common-card {
+    min-height: 164px;
+    padding: 36px 44px;
+    background-color: var(--color-panel);
+    border: none;
+}
+
+.summary-card-content {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.summary-label {
+    margin: 0 0 16px;
+    color: var(--color-muted);
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.summary-main-value {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+}
+
+.summary-main-value strong {
+    color: var(--color-text);
+    font-size: calc(34px * var(--app-font-scale));
+    font-weight: 800;
+    letter-spacing: -0.05em;
+}
+
+.summary-main-value span {
+    color: var(--color-muted);
+    font-size: calc(17px * var(--app-font-scale));
+    font-weight: 600;
+}
+
+.summary-sub-text {
+    margin: 8px 0 0;
+    color: #7a7162;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.summary-sub-text.gold {
+    color: var(--color-gold);
+}
+
+.summary-ring {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.summary-ring-inner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--color-panel);
+}
+
+.summary-icon-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: #ffc83d;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(24px * var(--app-font-scale));
+}
+
+.summary-chart-icon {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 42px;
+}
+
+.summary-chart-icon span {
+    width: 8px;
+    background-color: #ffc83d;
+}
+
+.summary-chart-icon span:nth-child(1) {
+    height: 22px;
+}
+
+.summary-chart-icon span:nth-child(2) {
+    height: 34px;
+}
+
+.summary-chart-icon span:nth-child(3) {
+    height: 18px;
+}
+
+.dashboard-main-grid {
+    display: grid;
+    grid-template-columns: 1.45fr 0.92fr;
+    gap: 50px;
+    align-items: start;
+    margin-bottom: 70px;
+}
+
+.dashboard-ability-card.common-card {
+    min-height: 550px;
+    padding: 46px 48px;
+    background-color: var(--color-panel);
+    border: none;
+}
+
+.dashboard-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.dashboard-section-header h2,
+.dashboard-weakness-card h2,
+.dashboard-record-card h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: calc(23px * var(--app-font-scale));
+    font-weight: 800;
+    letter-spacing: -0.05em;
+}
+
+.dashboard-section-header p {
+    margin: 8px 0 0;
+    color: var(--color-muted);
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.ability-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #5b544a;
+    font-size: calc(11px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.ability-legend span {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+}
+
+.ability-legend .current {
+    background-color: var(--color-gold);
+}
+
+.ability-legend .previous {
+    background-color: #d8d3c9;
+}
+
+.ability-radar-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    height: 390px;
+    margin: 28px auto 0;
+}
+
+.ability-radar {
+    width: 100%;
+    height: 100%;
+}
+
+.ability-radar line {
+    stroke: #e5e0d6;
+    stroke-width: 1;
+}
+
+.ability-radar-grid {
+    fill: none;
+    stroke: #e5e0d6;
+    stroke-width: 1;
+}
+
+.ability-radar-previous {
+    fill: rgba(216, 211, 201, 0.38);
+    stroke: #d8d3c9;
+    stroke-width: 2;
+}
+
+.ability-radar-value {
+    fill: var(--color-gold);
+    opacity: 0.95;
+}
+
+.ability-label {
+    position: absolute;
+    color: #211d16;
+    font-size: calc(11px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.ability-top {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.ability-left {
+    top: 130px;
+    left: 0;
+}
+
+.ability-right {
+    top: 130px;
+    right: 0;
+}
+
+.ability-bottom-left {
+    left: 45px;
+    bottom: 12px;
+}
+
+.ability-bottom-right {
+    right: 45px;
+    bottom: 12px;
+}
+
+.dashboard-side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+}
+
+.dashboard-weakness-card.common-card {
+    min-height: 342px;
+    padding: 46px 42px;
+    background-color: var(--color-panel);
+    border: none;
+}
+
+.weakness-list {
+    margin-top: 32px;
+}
+
+.weakness-item {
+    margin-bottom: 26px;
+}
+
+.weakness-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.weakness-title-row span {
+    color: var(--color-text);
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.weakness-title-row strong {
+    color: #d22b2b;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.weakness-track {
+    height: 6px;
+    background-color: #e1ddd4;
+}
+
+.weakness-fill {
+    height: 100%;
+    background-color: #d22b2b;
+}
+
+.ai-recommend-box {
+    margin-top: 46px;
+    padding-top: 36px;
+    border-top: 1px solid #ded9cf;
+    display: flex;
+    gap: 18px;
+}
+
+.ai-recommend-box > span {
+    color: var(--color-gold);
+    font-size: calc(24px * var(--app-font-scale));
+}
+
+.ai-recommend-box h3 {
+    margin: 0 0 8px;
+    color: var(--color-gold);
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.ai-recommend-box p {
+    margin: 0;
+    color: #6c6358;
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.75;
+}
+
+.dashboard-review-card.common-card {
+    min-height: 306px;
+    padding: 44px;
+    background-color: #2b2415;
+    border: none;
+    color: #f6efe2;
+}
+
+.review-card-icon {
+    color: #f6d98b;
+    font-size: calc(24px * var(--app-font-scale));
+}
+
+.review-card-label {
+    margin: 14px 0 22px;
+    color: #8d8067;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.dashboard-review-card h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: calc(29px * var(--app-font-scale));
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.06em;
+}
+
+.dashboard-review-card p:last-of-type {
+    margin: 22px 0 30px;
+    color: #8d8067;
+    font-size: calc(15px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.65;
+}
+
+.review-start-button.common-button {
+    width: 122px;
+    height: 48px;
+    background-color: var(--color-gold);
+    color: #ffffff;
+    font-size: calc(14px * var(--app-font-scale));
+    white-space: nowrap;
+}
+
+.review-start-button.common-button:hover:not(:disabled) {
+    background-color: #6e5700;
+}
+
+.dashboard-record-card.common-card {
+    padding: 48px;
+    background-color: var(--color-panel);
+    border: none;
+}
+
+.record-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 48px;
+}
+
+.record-card-header button {
+    border: none;
+    background-color: transparent;
+    color: var(--color-gold);
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.record-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.record-table th {
+    padding: 0 0 20px;
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+    text-align: left;
+}
+
+.record-table th:nth-child(2),
+.record-table th:nth-child(3),
+.record-table th:nth-child(4),
+.record-table td:nth-child(2),
+.record-table td:nth-child(3),
+.record-table td:nth-child(4) {
+    text-align: center;
+}
+
+.record-table td {
+    padding: 25px 0;
+    border-top: 1px solid #dedad0;
+    color: var(--color-text);
+    font-size: calc(16px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.record-table td:nth-child(2) {
+    color: #6d655a;
+    font-weight: 700;
+}
+
+.record-score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    height: 28px;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.record-score.good,
+.record-score.normal {
+    background-color: #efe6c7;
+    color: #806600;
+}
+
+.record-score.bad {
+    background-color: #f4d8d8;
+    color: #d22b2b;
+}
+
+.record-retry-button {
+    border: none;
+    background-color: transparent;
+    color: var(--color-text);
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 800;
+    cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+    .dashboard-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .learner-dashboard-page .page-header {
+        margin-bottom: 40px;
+    }
+
+    .dashboard-summary-card.common-card,
+    .dashboard-ability-card.common-card,
+    .dashboard-weakness-card.common-card,
+    .dashboard-review-card.common-card,
+    .dashboard-record-card.common-card {
+        padding: 30px 24px;
+    }
+
+    .record-table {
+        min-width: 720px;
+    }
+
+    .dashboard-record-card.common-card {
+        overflow-x: auto;
+    }
+}

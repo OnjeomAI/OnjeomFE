@@ -1,0 +1,479 @@
+.diagnosis-result-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f8f6f1;
+    color: #211d16;
+    font-family: "Pretendard", "Noto Sans KR", sans-serif;
+}
+
+.diagnosis-result-main {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 76px 0 92px;
+    box-sizing: border-box;
+}
+
+.diagnosis-result-hero {
+    text-align: center;
+    margin-bottom: 76px;
+}
+
+.diagnosis-result-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background-color: #f6d98b;
+    color: #5f4a00;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.diagnosis-result-hero h1 {
+    margin: 24px 0 14px;
+    color: #16130e;
+    font-family: "Noto Serif KR", "Nanum Myeongjo", "Batang", serif;
+    font-size: calc(48px * var(--app-font-scale));
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: -0.07em;
+}
+
+.diagnosis-result-hero p {
+    margin: 0 auto;
+    max-width: 520px;
+    color: #4f4a42;
+    font-size: calc(16px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.65;
+    letter-spacing: -0.04em;
+}
+
+.diagnosis-result-summary {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 44px;
+    align-items: start;
+}
+
+.diagnosis-radar-card.common-card {
+    min-height: 635px;
+    padding: 38px 34px 28px;
+    background-color: #efede8;
+    border: none;
+    position: relative;
+}
+
+.radar-card-label {
+    color: #aaa49a;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.radar-chart-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    height: 420px;
+    margin: 0 auto;
+}
+
+.radar-chart {
+    position: absolute;
+    left: 50%;
+    top: 34px;
+    width: 360px;
+    height: 330px;
+    transform: translateX(-50%);
+}
+
+.radar-chart line {
+    stroke: #ddd8ce;
+    stroke-width: 1;
+}
+
+.radar-grid {
+    fill: none;
+    stroke: #ddd8ce;
+    stroke-width: 1;
+}
+
+.radar-score-area {
+    fill: rgba(138, 103, 0, 0.12);
+    stroke: #806600;
+    stroke-width: 6;
+    stroke-linejoin: round;
+}
+
+.radar-score-point {
+    fill: #806600;
+}
+
+.radar-score-label {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #211d16;
+}
+
+.radar-score-label span {
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.radar-score-label strong {
+    font-size: calc(22px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.radar-score-top {
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.radar-score-right {
+    right: -16px;
+    top: 150px;
+    text-align: right;
+}
+
+.radar-score-left {
+    left: -18px;
+    top: 150px;
+}
+
+.radar-score-bottom-right {
+    right: 38px;
+    bottom: -4px;
+    text-align: right;
+}
+
+.radar-score-bottom-left {
+    left: 48px;
+    bottom: -4px;
+}
+
+.diagnosis-level-box {
+    margin-top: 44px;
+    text-align: center;
+}
+
+.diagnosis-level-box span {
+    display: block;
+    margin-bottom: 8px;
+    color: #8a8276;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.diagnosis-level-box strong {
+    color: #16130e;
+    font-family: "Noto Serif KR", "Nanum Myeongjo", "Batang", serif;
+    font-size: calc(48px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.diagnosis-level-box em {
+    margin-left: 12px;
+    color: #aaa49a;
+    font-size: calc(13px * var(--app-font-scale));
+    font-style: normal;
+    font-weight: 800;
+}
+
+.diagnosis-feedback-column {
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+}
+
+.diagnosis-feedback-group h2 {
+    margin: 0 0 18px;
+    color: #4f4a42;
+    font-size: calc(15px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.diagnosis-feedback-card.common-card {
+    min-height: 86px;
+    margin-bottom: 16px;
+    padding: 22px 24px;
+    border: none;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.diagnosis-feedback-card.strength {
+    border-left: 4px solid #8a6700;
+}
+
+.diagnosis-feedback-card.weakness {
+    border-left: 4px solid #d22b2b;
+}
+
+.feedback-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: #8a6700;
+    font-size: calc(22px * var(--app-font-scale));
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.diagnosis-feedback-card.weakness .feedback-icon {
+    color: #d22b2b;
+}
+
+.diagnosis-feedback-card h3 {
+    margin: 0 0 5px;
+    color: #211d16;
+    font-size: calc(19px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: -0.05em;
+}
+
+.diagnosis-feedback-card p {
+    margin: 0;
+    color: #5f584f;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: -0.04em;
+}
+
+.diagnosis-curriculum-card.common-card {
+    margin-top: 70px;
+    padding: 48px 48px 52px;
+    background-color: #2b2415;
+    border: none;
+    color: #f6efe2;
+}
+
+.curriculum-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 44px;
+}
+
+.curriculum-card-header span {
+    color: #8a6700;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.curriculum-card-header h2 {
+    margin: 18px 0 0;
+    color: #ffffff;
+    font-size: calc(30px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.curriculum-period {
+    text-align: right;
+}
+
+.curriculum-period span {
+    display: block;
+    color: #c8b479;
+    font-size: calc(12px * var(--app-font-scale));
+}
+
+.curriculum-period strong {
+    display: block;
+    margin-top: 8px;
+    color: #8a6700;
+    font-size: calc(22px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.curriculum-step-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.curriculum-step-card.common-card {
+    min-height: 150px;
+    padding: 24px 22px;
+    background-color: #3a3020;
+    border: none;
+    border-top: 2px solid #5d523a;
+}
+
+.curriculum-step-card.active {
+    border-top-color: #8a6700;
+}
+
+.curriculum-step-card span {
+    color: #a09787;
+    font-size: calc(11px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.curriculum-step-card h3 {
+    margin: 18px 0 12px;
+    color: #ffffff;
+    font-size: calc(20px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: -0.05em;
+}
+
+.curriculum-step-card p {
+    margin: 0;
+    color: #8f8675;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.55;
+    letter-spacing: -0.04em;
+}
+
+.diagnosis-result-action {
+    margin-top: 72px;
+    text-align: center;
+}
+
+.diagnosis-start-button.common-button {
+    width: 220px;
+    height: 64px;
+    background-color: #806600;
+    color: #ffffff;
+    font-size: calc(17px * var(--app-font-scale));
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.diagnosis-start-button.common-button:hover:not(:disabled) {
+    background-color: #6e5700;
+}
+
+.diagnosis-result-footer {
+    height: 120px;
+    padding: 0 160px;
+    box-sizing: border-box;
+    border-top: 1px solid #eeeae2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #aaa49a;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.diagnosis-result-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.diagnosis-result-logo-mark {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #211d16;
+    border-radius: 8px;
+    position: relative;
+}
+
+.diagnosis-result-logo-mark::after {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #211d16;
+}
+
+.diagnosis-result-logo strong {
+    display: block;
+    color: #211d16;
+    font-size: calc(24px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1;
+}
+
+.diagnosis-result-logo p {
+    margin: 3px 0 0;
+    color: #5f584f;
+    font-size: calc(11px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+@media (max-width: 1024px) {
+    .diagnosis-result-main {
+        max-width: none;
+        padding: 64px 32px 84px;
+    }
+
+    .diagnosis-result-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .curriculum-step-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .diagnosis-result-footer {
+        padding: 0 32px;
+    }
+}
+
+@media (max-width: 640px) {
+    .diagnosis-result-hero h1 {
+        font-size: calc(34px * var(--app-font-scale));
+    }
+
+    .diagnosis-result-hero p {
+        font-size: calc(14px * var(--app-font-scale));
+    }
+
+    .diagnosis-radar-card.common-card {
+        padding: 30px 20px;
+    }
+
+    .radar-chart-wrap {
+        transform: scale(0.86);
+        transform-origin: top center;
+        margin-bottom: -40px;
+    }
+
+    .curriculum-card-header {
+        flex-direction: column;
+    }
+
+    .curriculum-period {
+        text-align: left;
+    }
+
+    .curriculum-step-list {
+        grid-template-columns: 1fr;
+    }
+
+    .diagnosis-start-button.common-button {
+        width: 100%;
+    }
+
+    .diagnosis-result-footer {
+        height: auto;
+        padding: 28px 24px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 22px;
+    }
+}

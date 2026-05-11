@@ -13,7 +13,7 @@ import {
 const learnerLinks  = [
     { to: "/dashboard", label: "대시보드", icon: LayoutDashboard },
     { to: "/today", label: "오늘의 학습", icon: BookOpen },
-    { to: "/review", label: "복습하기", icon: RefreshCcw },
+    { to: "/review", label: "복습 노트", icon: RefreshCcw },
     { to: "/history", label: "학습 통계", icon: BarChart3 },
     { to: "/profile", label: "프로필 설정", icon: User },
 ];
