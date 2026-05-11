@@ -413,7 +413,7 @@ function LearnerDashboard() {
                             variant="primary"
                             size="medium"
                             className="review-start-button"
-                            onClick={handleReview}
+                            onClick={handleStartStudy}
                         >
                             지금 풀기
                         </Button>

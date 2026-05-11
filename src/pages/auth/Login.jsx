@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
+import { getMockAfterLoginPath } from "../../data/mockData";
 
 function Login() {
     const navigate = useNavigate();
 
     const handleLoginClick = () => {
-        navigate("/dashboard");
+        const nextPath = getMockAfterLoginPath("learner");
+        navigate(nextPath);
     };
     const handleSignUpClick = () => {
         navigate("/signup");

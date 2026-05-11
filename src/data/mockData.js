@@ -8,6 +8,13 @@ let mockUsers = {
         joinedAt: "2023년 9월부터 활동 중",
         dailyGoal: 10,
         fontSize: 100,
+
+        learningState: {
+            hasCompletedDiagnosis: false,
+            todayStudyStatus: "NOT_STARTED",
+            todayStudyCompletedAt: null,
+        },
+
         notificationSettings: {
             reviewReminder: true,
             goalEncouragement: true,
@@ -69,4 +76,83 @@ export function updateMockSettings(type, updatedSettings) {
     }
 
     return updateMockUserByType(type, nextFields);
+}
+
+export function getMockAfterLoginPath(type) {
+    if (type === "admin") {
+        return "/admin/question";
+    }
+
+    const learner = mockUsers.learner;
+
+    if (learner.learningState.hasCompletedDiagnosis) {
+        return "/dashboard";
+    }
+
+    return "/onboarding/diagnosis";
+}
+
+export function markMockDiagnosisCompleted() {
+    mockUsers.learner = {
+        ...mockUsers.learner,
+        learningState: {
+            ...mockUsers.learner.learningState,
+            hasCompletedDiagnosis: true,
+        },
+    };
+
+    return mockUsers.learner.learningState;
+}
+
+export function getMockTodayStudyStatus() {
+    return mockUsers.learner.learningState.todayStudyStatus;
+}
+
+export function getMockTodayStudyPath() {
+    const status = getMockTodayStudyStatus();
+
+    if (status === "COMPLETED") {
+        return "/today/result";
+    }
+
+    return "/today";
+}
+
+export function startMockTodayStudy() {
+    mockUsers.learner = {
+        ...mockUsers.learner,
+        learningState: {
+            ...mockUsers.learner.learningState,
+            todayStudyStatus: "IN_PROGRESS",
+            todayStudyCompletedAt: null,
+        },
+    };
+
+    return mockUsers.learner.learningState;
+}
+
+export function completeMockTodayStudy() {
+    mockUsers.learner = {
+        ...mockUsers.learner,
+        learningState: {
+            ...mockUsers.learner.learningState,
+            todayStudyStatus: "COMPLETED",
+            todayStudyCompletedAt: new Date().toISOString(),
+        },
+    };
+
+    return mockUsers.learner.learningState;
+}
+
+export function resetMockTodayStudy() {
+    mockUsers.learner = {
+        ...mockUsers.learner,
+        learningState: {
+            ...mockUsers.learner.learningState,
+            todayStudyStatus: "IN_PROGRESS",
+            todayStudyCompletedAt: null,
+        },
+    };
+
+    return mockUsers.learner.learningState;
 }

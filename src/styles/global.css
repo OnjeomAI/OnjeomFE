@@ -14,6 +14,9 @@
 @import "onboarding/DiagnosisResult.css";
 @import "landing/landing.css";
 @import "learner/LearnerDashboard.css";
+@import "learner/LearnerReview.css";
+@import "learner/today/LearnerStudy.css";
+@import "learner/today/LearnerResult.css";
 
 * {
     box-sizing: border-box;

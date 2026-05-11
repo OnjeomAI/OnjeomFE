@@ -144,60 +144,6 @@ function App() {
                         </AppLayout>
                     }
                 />
-
-                <Route
-                    path="/1page"
-                    element={
-                        <OnePage/>
-                    }
-                />
-
-                <Route
-                    path="/2page"
-                    element={
-                        <AppLayout type="learner">
-                            <TwoPage/>
-                        </AppLayout>
-                    }
-                />
-
-                <Route
-                    path="/3page"
-                    element={
-                        <AppLayout type="learner">
-                            <ThreePage/>
-                        </AppLayout>
-                    }
-                />
-
-                <Route
-                    path="/4page"
-                    element={
-                        <AppLayout type="learner">
-                            <FourPage/>
-                        </AppLayout>
-                    }
-                />
-
-                <Route
-                    path="/5page"
-                    element={
-                        <AppLayout type="learner">
-                            <FivePage/>
-                        </AppLayout>
-                    }
-                />
-
-                <Route
-                    path="/6page"
-                    element={
-                        <AppLayout type="learner">
-                            <SixPage/>
-                        </AppLayout>
-                    }
-                />
-
-
             </Routes>
         </BrowserRouter>
     );

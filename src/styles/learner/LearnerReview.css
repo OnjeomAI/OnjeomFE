@@ -1,0 +1,418 @@
+.learner-review-page {
+    width: 100%;
+    color: var(--color-text);
+}
+
+.learner-review-page .page-header {
+    margin-bottom: 58px;
+}
+
+.review-hero-card.common-card {
+    padding: 0;
+    margin-bottom: 48px;
+    border: none;
+    background-color: var(--color-panel);
+    overflow: hidden;
+}
+
+.review-hero-content {
+    min-height: 200px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+}
+
+.review-hero-content > div:first-child {
+    padding: 42px 44px;
+}
+
+.review-hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.review-hero-badge {
+    height: 28px;
+    padding: 0 14px;
+    background-color: #ffc83d;
+    color: #806600;
+
+    display: inline-flex;
+    align-items: center;
+
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.review-hero-code {
+    color: #8f887d;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.review-hero-content h2 {
+    margin: 0;
+    max-width: 680px;
+    color: #16130e;
+    font-size: calc(38px * var(--app-font-scale));
+    font-weight: 900;
+    line-height: 1.3;
+    letter-spacing: -0.07em;
+    word-break: keep-all;
+}
+
+.review-hero-image {
+    min-height: 200px;
+    background:
+            linear-gradient(
+                    rgba(248, 246, 241, 0.35),
+                    rgba(248, 246, 241, 0.72)
+            ),
+            linear-gradient(135deg, #d8d6d0, #efede8);
+    position: relative;
+    overflow: hidden;
+}
+
+.review-hero-image::before {
+    content: "";
+    position: absolute;
+    right: -20px;
+    top: 42px;
+    width: 220px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.52);
+    transform: rotate(-18deg);
+}
+
+.review-hero-image::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    bottom: 22px;
+    width: 250px;
+    height: 80px;
+    background: repeating-linear-gradient(
+            0deg,
+            rgba(145, 140, 130, 0.16) 0,
+            rgba(145, 140, 130, 0.16) 2px,
+            transparent 2px,
+            transparent 8px
+    );
+    transform: rotate(-10deg);
+}
+
+.review-analysis-grid {
+    display: grid;
+    grid-template-columns: 1.65fr 0.78fr;
+    gap: 42px;
+    margin-bottom: 50px;
+}
+
+.review-chart-card.common-card {
+    padding: 36px 44px 30px;
+    min-height: 345px;
+    border: none;
+    background-color: var(--color-panel);
+}
+
+.review-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.review-card-header h2 {
+    margin: 0;
+    color: #4f473d;
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.review-chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4f473d;
+    font-size: calc(11px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.review-chart-legend span {
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-gold);
+    display: inline-block;
+}
+
+.review-chart-wrap {
+    position: relative;
+}
+
+.review-line-chart {
+    width: 100%;
+    height: 250px;
+}
+
+.review-line-chart line {
+    stroke: #dedad0;
+    stroke-width: 1;
+    stroke-dasharray: 7 8;
+}
+
+.review-line-chart polyline {
+    fill: none;
+    stroke: var(--color-gold);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.review-line-chart circle {
+    fill: var(--color-gold);
+}
+
+.review-chart-labels {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    color: #8f887d;
+    font-size: calc(11px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.review-chart-labels span {
+    text-align: center;
+}
+
+.review-insight-card.common-card {
+    padding: 48px 42px;
+    border: none;
+    background-color: #ffe0a0;
+    color: #2b2415;
+}
+
+.review-insight-card svg {
+    color: var(--color-gold);
+    margin-bottom: 24px;
+}
+
+.review-insight-card h2 {
+    margin: 0 0 22px;
+    color: #16130e;
+    font-size: calc(29px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.review-insight-card p {
+    margin: 0;
+    color: #5f584f;
+    font-size: calc(17px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.7;
+    word-break: keep-all;
+}
+
+.review-insight-divider {
+    height: 1px;
+    margin: 34px 0 28px;
+    background-color: rgba(138, 103, 0, 0.25);
+}
+
+.review-insight-card strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #4f473d;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.review-insight-card > span {
+    display: block;
+    color: #5f584f;
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.review-submission-section {
+    margin-top: 26px;
+}
+
+.review-submission-section > h2 {
+    margin: 0 0 26px;
+    color: #4f473d;
+    font-size: calc(15px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.review-submission-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.review-submission-card.common-card {
+    min-height: 112px;
+    padding: 28px 32px;
+    border: none;
+    background-color: #efede8;
+
+    display: grid;
+    grid-template-columns: 74px 1fr 40px;
+    align-items: center;
+    gap: 30px;
+
+    opacity: 0.72;
+}
+
+.review-submission-card.current {
+    background-color: #ffffff;
+    border-left: 4px solid var(--color-gold);
+    opacity: 1;
+}
+
+.review-submission-score {
+    width: 64px;
+    height: 64px;
+    background-color: #e4e0d7;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.review-submission-card.current .review-submission-score {
+    background-color: var(--color-gold);
+    color: #ffffff;
+}
+
+.review-submission-score span {
+    color: inherit;
+    font-size: calc(11px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.review-submission-score strong {
+    color: inherit;
+    font-size: calc(27px * var(--app-font-scale));
+    font-weight: 900;
+    line-height: 1.1;
+}
+
+.review-submission-content h3 {
+    margin: 0 0 7px;
+    color: var(--color-text);
+    font-size: calc(21px * var(--app-font-scale));
+    font-weight: 900;
+    letter-spacing: -0.05em;
+}
+
+.review-submission-content p {
+    margin: 0 0 12px;
+    color: #aaa49a;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.review-submission-content span {
+    color: #6d655a;
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.review-submission-more {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background-color: transparent;
+    color: #8f887d;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.review-submission-more:hover {
+    color: var(--color-gold);
+}
+
+.review-action-area {
+    margin-top: 70px;
+    text-align: center;
+}
+
+.review-new-attempt-button.common-button {
+    min-width: 280px;
+    height: 58px;
+    background-color: var(--color-gold);
+    color: #ffffff;
+    font-size: calc(16px * var(--app-font-scale));
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.review-new-attempt-button.common-button:hover:not(:disabled) {
+    background-color: #6e5700;
+}
+
+.review-footer {
+    margin-top: 250px;
+    padding-bottom: 28px;
+    text-align: center;
+    color: #bbb4aa;
+    font-size: calc(11px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+    .review-hero-content {
+        grid-template-columns: 1fr;
+    }
+
+    .review-hero-image {
+        display: none;
+    }
+
+    .review-analysis-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .review-hero-content > div:first-child,
+    .review-chart-card.common-card,
+    .review-insight-card.common-card,
+    .review-submission-card.common-card {
+        padding: 30px 24px;
+    }
+
+    .review-hero-content h2 {
+        font-size: calc(28px * var(--app-font-scale));
+    }
+
+    .review-submission-card.common-card {
+        grid-template-columns: 64px 1fr;
+    }
+
+    .review-submission-more {
+        display: none;
+    }
+
+    .review-new-attempt-button.common-button {
+        width: 100%;
+    }
+
+    .review-footer {
+        margin-top: 120px;
+    }
+}
