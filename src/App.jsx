@@ -22,123 +22,183 @@ import AdminTagManagement from "./pages/admin/AdminTagManagement";
 import AdminStats from "./pages/admin/AdminStats";
 
 import Profile from "./pages/profile/Profile";
+import OnePage from './pages/1page';
+import TwoPage from './pages/2page';
+import ThreePage from './pages/3page';
+import FourPage from './pages/4page';
+import FivePage from './pages/5page';
+import SixPage from './pages/6page';
 
 function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Navigate to="/landing" replace />} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/landing" replace />} />
 
-                <Route path="/landing" element={<Landing/>} />
+        <Route path="/landing" element={<Landing />} />
 
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
-                <Route path="/onboarding/goal" element={<GoalSetting />} />
-                <Route path="/onboarding/diagnosis" element={<DiagnosisTest />} />
-                <Route path="/onboarding/result" element={<DiagnosisResult />} />
+        <Route path="/onboarding/goal" element={<GoalSetting />} />
+        <Route path="/onboarding/diagnosis" element={<DiagnosisTest />} />
+        <Route path="/onboarding/result" element={<DiagnosisResult />} />
 
-                <Route
-                    path="/dashboard"
-                    element={
-                        <AppLayout type="learner">
-                            <LearnerDashboard />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/dashboard"
+          element={
+            <AppLayout type="learner">
+              <LearnerDashboard />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/today"
-                    element={
-                        <AppLayout type="learner">
-                            <LearnerStudy />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/today"
+          element={
+            <AppLayout type="learner">
+              <LearnerStudy />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/today/result"
-                    element={
-                        <AppLayout type="learner">
-                            <LearnerResult />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/today/result"
+          element={
+            <AppLayout type="learner">
+              <LearnerResult />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/review"
-                    element={
-                        <AppLayout type="learner">
-                            <LearnerReview />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/review"
+          element={
+            <AppLayout type="learner">
+              <LearnerReview />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/history"
-                    element={
-                        <AppLayout type="learner">
-                            <LearningAnalytics />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/history"
+          element={
+            <AppLayout type="learner">
+              <LearningAnalytics />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/profile"
-                    element={
-                        <AppLayout type="learner">
-                            <Profile type="learner" />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/profile"
+          element={
+            <AppLayout type="learner">
+              <Profile type="learner" />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/admin/question"
-                    element={
-                        <AppLayout type="admin">
-                            <AdminQuestionManagement />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/admin/question"
+          element={
+            <AppLayout type="admin">
+              <AdminQuestionManagement />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/admin/curriculum"
-                    element={
-                        <AppLayout type="admin">
-                            <AdminCurriculum />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/admin/curriculum"
+          element={
+            <AppLayout type="admin">
+              <AdminCurriculum />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/admin/tags"
-                    element={
-                        <AppLayout type="admin">
-                            <AdminTagManagement />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/admin/tags"
+          element={
+            <AppLayout type="admin">
+              <AdminTagManagement />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/admin/stats"
-                    element={
-                        <AppLayout type="admin">
-                            <AdminStats />
-                        </AppLayout>
-                    }
-                />
+        <Route
+          path="/admin/stats"
+          element={
+            <AppLayout type="admin">
+              <AdminStats />
+            </AppLayout>
+          }
+        />
 
-                <Route
-                    path="/admin/profile"
-                    element={
-                        <AppLayout type="admin">
-                            <Profile type="admin" />
-                        </AppLayout>
-                    }
-                />
-            </Routes>
-        </BrowserRouter>
-    );
+        <Route
+          path="/admin/profile"
+          element={
+            <AppLayout type="admin">
+              <Profile type="admin" />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/1page"
+          element={
+            <OnePage />
+          }
+        />
+
+        <Route
+          path="/2page"
+          element={
+            <AppLayout type="learner">
+              <TwoPage />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/3page"
+          element={
+            <AppLayout type="learner">
+              <ThreePage />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/4page"
+          element={
+            <AppLayout type="learner">
+              <FourPage />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/5page"
+          element={
+            <AppLayout type="learner">
+              <FivePage />
+            </AppLayout>
+          }
+        />
+
+<Route
+          path="/6page"
+          element={
+            <AppLayout type="learner">
+              <SixPage />
+            </AppLayout>
+          }
+        />
+
+        
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
