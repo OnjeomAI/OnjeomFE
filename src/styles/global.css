@@ -10,6 +10,7 @@
 @import "profile/profile_setting.css";
 @import "profile/profile_notification.css";
 @import "onboarding/DiagnosisTest.css";
+@import "onboarding/GoalSetting.css";
 
 * {
     box-sizing: border-box;
