@@ -1,9 +1,10 @@
 let mockDiagnosisSession = {
     sessionId: "diagnosis-session-001",
     status: "IN_PROGRESS",
+    completedReason: null,
     currentQuestionId: "question-01",
     totalQuestions: 3,
-    remainingTime: 862,
+    remainingTime: 60,
 
     questions: [
         {
@@ -140,11 +141,20 @@ export function submitMockDiagnosisAnswer(questionId, answer) {
 
     if (isLastQuestion) {
         mockDiagnosisSession.status = "COMPLETED";
+        mockDiagnosisSession.completedReason = "NORMAL";
         return mockDiagnosisSession;
     }
 
     const nextQuestion = mockDiagnosisSession.questions[currentIndex + 1];
     mockDiagnosisSession.currentQuestionId = nextQuestion.id;
+
+    return mockDiagnosisSession;
+}
+
+export function completeMockDiagnosisSession(reason = "NORMAL") {
+    mockDiagnosisSession.status = "COMPLETED";
+    mockDiagnosisSession.completedReason = reason;
+    mockDiagnosisSession.remainingTime = 0;
 
     return mockDiagnosisSession;
 }
