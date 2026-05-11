@@ -60,3 +60,8 @@
     font-size: calc(12px * var(--app-font-scale));
     color: var(--color-danger);
 }
+
+.common-input-textarea {
+    resize: none;
+    line-height: 1.7;
+}

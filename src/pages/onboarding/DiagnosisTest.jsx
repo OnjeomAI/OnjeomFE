@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import Input from "../../components/common/Input";
 import {
     getMockDiagnosisSession,
     getCurrentDiagnosisQuestion,
     updateMockDiagnosisAnswer,
     submitMockDiagnosisAnswer,
+    completeMockDiagnosisSession,
 } from "../../data/mockDiagnosis";
 
 function formatRemainingTime(seconds) {
@@ -16,6 +19,7 @@ function formatRemainingTime(seconds) {
 
 function DiagnosisTest() {
     const navigate = useNavigate();
+    const isFinishedRef = useRef(false);
 
     const [session, setSession] = useState(() => getMockDiagnosisSession());
 
@@ -32,12 +36,6 @@ function DiagnosisTest() {
         const currentSession = getMockDiagnosisSession();
         return currentSession.remainingTime || 0;
     });
-
-    useEffect(() => {
-        if (session.status === "COMPLETED") {
-            navigate("/onboarding/result");
-        }
-    }, [session.status, navigate]);
 
     useEffect(() => {
         if (remainingTime <= 0) {
@@ -57,6 +55,29 @@ function DiagnosisTest() {
 
         return () => clearInterval(timerId);
     }, []);
+
+    useEffect(() => {
+        if (remainingTime !== 0) {
+            return;
+        }
+
+        if (!currentQuestion) {
+            return;
+        }
+
+        if (isFinishedRef.current) {
+            return;
+        }
+
+        isFinishedRef.current = true;
+
+        updateMockDiagnosisAnswer(currentQuestion.id, answer);
+
+        const completedSession = completeMockDiagnosisSession("TIMEOUT");
+        setSession({ ...completedSession });
+
+        navigate("/onboarding/result");
+    }, [remainingTime, currentQuestion, answer, navigate]);
 
     if (!currentQuestion) {
         return (
@@ -82,6 +103,14 @@ function DiagnosisTest() {
     };
 
     const handleSubmit = () => {
+        if (isFinishedRef.current) {
+            return;
+        }
+
+        if (remainingTime <= 0) {
+            return;
+        }
+
         if (!isAnswerValid) {
             alert(`최소 ${minLength}자 이상 작성해주세요.`);
             return;
@@ -95,6 +124,7 @@ function DiagnosisTest() {
         setSession({ ...nextSession });
 
         if (nextSession.status === "COMPLETED") {
+            isFinishedRef.current = true;
             navigate("/onboarding/result");
             return;
         }
@@ -188,11 +218,15 @@ function DiagnosisTest() {
                         <h2>{currentQuestion.questionText}</h2>
 
                         <div className="diagnosis-answer-wrap">
-                            <textarea
-                                className="diagnosis-answer"
+                            <Input
+                                multiline
+                                name="diagnosisAnswer"
                                 value={answer}
                                 onChange={handleAnswerChange}
                                 placeholder="지문을 읽고 답변을 작성해주세요"
+                                variant="box"
+                                className="diagnosis-answer"
+                                disabled={remainingTime <= 0}
                             />
 
                             <span className="diagnosis-min-text">
@@ -204,6 +238,7 @@ function DiagnosisTest() {
                             className="diagnosis-submit-button"
                             type="button"
                             onClick={handleSubmit}
+                            disabled={remainingTime <= 0}
                         >
                             답변 제출 및 다음 단계로
                         </button>
