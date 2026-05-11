@@ -9,6 +9,7 @@
 @import "profile/profile_security.css";
 @import "profile/profile_setting.css";
 @import "profile/profile_notification.css";
+@import "onboarding/DiagnosisTest.css";
 
 * {
     box-sizing: border-box;
