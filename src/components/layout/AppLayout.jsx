@@ -1,4 +1,4 @@
-import Sidebar from "./sidebar";
+import Sidebar from "./Sidebar";
 
 function AppLayout({ children, type = "learner" }) {
     return (
