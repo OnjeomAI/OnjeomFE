@@ -17,6 +17,7 @@
 @import "learner/LearnerReview.css";
 @import "learner/today/LearnerStudy.css";
 @import "learner/today/LearnerResult.css";
+@import "learner/LearningAnalytics.css";
 
 * {
     box-sizing: border-box;
