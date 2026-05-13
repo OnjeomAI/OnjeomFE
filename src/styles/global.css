@@ -9,15 +9,19 @@
 @import "profile/profile_security.css";
 @import "profile/profile_setting.css";
 @import "profile/profile_notification.css";
+
 @import "onboarding/DiagnosisTest.css";
 @import "onboarding/GoalSetting.css";
 @import "onboarding/DiagnosisResult.css";
+
 @import "landing/landing.css";
 @import "learner/LearnerDashboard.css";
 @import "learner/LearnerReview.css";
+@import "learner/LearningAnalytics.css";
 @import "learner/today/LearnerStudy.css";
 @import "learner/today/LearnerResult.css";
-@import "learner/LearningAnalytics.css";
+
+@import "auth/login.css";
 
 * {
     box-sizing: border-box;

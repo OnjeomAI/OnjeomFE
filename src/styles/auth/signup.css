@@ -1,0 +1,47 @@
+@import "./Login.css";
+
+/* 회원가입은 입력 필드가 더 많아서 세로 간격만 조금 줄임 */
+
+.signup-page .auth-form-section {
+    padding-top: 56px;
+    padding-bottom: 56px;
+}
+
+.signup-page .auth-title-box {
+    margin-bottom: 34px;
+}
+
+.signup-page .auth-social-buttons {
+    gap: 12px;
+}
+
+.signup-page .auth-divider {
+    margin: 28px 0;
+}
+
+.signup-page .auth-input-list {
+    gap: 16px;
+}
+
+.signup-page .auth-input-with-icon .common-input-box,
+.signup-page .auth-input-with-icon .common-input-underline {
+    height: 54px;
+}
+
+.signup-page .auth-check-row {
+    margin: 24px 0 28px;
+}
+
+.signup-page .auth-submit-button.common-button {
+    height: 58px;
+}
+
+.signup-page .auth-bottom-link {
+    margin-top: 28px;
+}
+
+@media (max-width: 560px) {
+    .signup-page .auth-form-section {
+        padding: 42px 24px;
+    }
+}
