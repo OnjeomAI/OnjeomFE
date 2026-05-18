@@ -4,21 +4,26 @@ import { LockKeyhole, Mail, MessageSquare } from "lucide-react";
 
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
+import { getMockAfterLoginPath, verifyMockLogin } from "../../data/mockData";
 
 function Login() {
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState("scholar@onjeom.ai");
+    const [email, setEmail] = useState("ksw@onjeom.ai");
     const [password, setPassword] = useState("12345678");
     const [rememberMe, setRememberMe] = useState(false);
+    const [loginError, setLoginError] = useState("");
 
     const handleLoginClick = () => {
-        if (email === "admin@onjeom.ai") {
-            navigate("/admin/question");
+        const loginResult = verifyMockLogin(email, password);
+
+        if (!loginResult) {
+            setLoginError("이메일 또는 비밀번호를 확인해주세요.");
             return;
         }
 
-        navigate("/dashboard");
+        setLoginError("");
+        navigate(getMockAfterLoginPath(loginResult.userType));
     };
 
     const handleSignupClick = () => {
@@ -26,7 +31,7 @@ function Login() {
     };
 
     const handleSocialLogin = () => {
-        navigate("/dashboard");
+        navigate(getMockAfterLoginPath("learner"));
     };
 
     return (
@@ -104,7 +109,7 @@ function Login() {
                                 type="email"
                                 name="email"
                                 value={email}
-                                placeholder="scholar@onjeom.ai"
+                                placeholder="ksw@onjeom.ai"
                                 variant="box"
                                 onChange={(event) => setEmail(event.target.value)}
                             />
@@ -145,6 +150,10 @@ function Login() {
 
                         <span>로그인 상태 유지</span>
                     </label>
+
+                    {loginError && (
+                        <p className="auth-login-error">{loginError}</p>
+                    )}
 
                     <Button
                         variant="primary"

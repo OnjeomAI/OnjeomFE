@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Bell,
@@ -12,43 +12,12 @@ import {
 import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";
 import Input from "../../../components/common/Input";
-
-const studyData = {
-    sessionLabel: "진행 중인 세션",
-    title: "학습 3일차 - 문항 3",
-    category: "추론형",
-    difficulty: 4,
-    timeLeft: "14:52",
-
-    passageTitle: "디지털 시대의 아카이브: 기억의 보존과 알고리즘의 선택",
-
-    passageParagraphs: [
-        {
-            id: "p1",
-            text: "디지털 기술의 발전은 인류가 정보를 기록하고 저장하는 방식을 근본적으로 변화시켰다. 과거의 아카이브가 물리적 공간의 제약을 받는 종이 문서와 유물 위주였다면, 현대의 디지털 아카이브는 방대한 양의 데이터를 빛의 속도로 복제하고 공유한다. 그러나 이러한 '무한한 저장'의 가능성이 곧 '완벽한 기억'을 의미하지는 않는다.",
-            type: "normal",
-        },
-        {
-            id: "p2",
-            text: "오히려 정보의 과잉 속에서 무엇을 남기고 무엇을 삭제할 것인가를 결정하는 주체로서의 인공지능과 알고리즘의 역할이 부각되고 있다. 과거에는 전문 사서나 역사가가 가치 판단의 주체였다면, 이제는 이용자의 데이터 패턴을 분석하여 '중요도'를 할당하는 수치적 모델이 그 자리를 대신하고 있다.",
-            type: "highlight",
-            highlightText: "주체로서의 인공지능과 알고리즘",
-        },
-        {
-            id: "p3",
-            text: "이 지점에서 우리는 중요한 질문을 던져야 한다. 알고리즘이 선택한 기억은 객관적인가? 혹은 그것이 우리가 미래에 보게 될 역사를 편향적으로 재구성하고 있지는 않은가? 디지털 아카이브는 단순한 데이터 저장소가 아니라, 당대의 권력 구조와 기술적 한계가 투영된 유동적인 공간이다.",
-            type: "notice",
-        },
-        {
-            id: "p4",
-            text: "결국 미래 세대에게 전달될 기록은 기술적 보존의 문제를 넘어, 우리가 현재 어떤 가치관을 가지고 데이터를 선별하느냐에 달려 있다. 인공지능이 도출하는 결과물은 결국 인간이 제공한 데이터의 편향을 학습한 결과이기 때문이다.",
-            type: "normal",
-        },
-    ],
-
-    question:
-        "작가가 주장하는 '디지털 아카이브의 주체성 변화'가 미래 역사관에 미칠 수 있는 영향에 대해 지문의 핵심 키워드를 포함하여 서술하시오.",
-};
+import { getMockTodayStudy } from "../../../data/mockStudy";
+import {
+    completeMockTodayStudy,
+    getMockTodayStudyStatus,
+    startMockTodayStudy,
+} from "../../../data/mockData";
 
 function renderParagraph(paragraph) {
     if (paragraph.type !== "highlight") {
@@ -70,6 +39,7 @@ function renderParagraph(paragraph) {
 
 function LearnerStudy() {
     const navigate = useNavigate();
+    const studyData = getMockTodayStudy();
 
     const [answer, setAnswer] = useState("");
     const [chatInput, setChatInput] = useState("");
@@ -77,7 +47,17 @@ function LearnerStudy() {
     const answerMaxLength = 500;
     const answerLength = answer.length;
 
+    useEffect(() => {
+        if (getMockTodayStudyStatus() === "COMPLETED") {
+            navigate("/today/result", { replace: true });
+            return;
+        }
+
+        startMockTodayStudy();
+    }, [navigate]);
+
     const handleSubmit = () => {
+        completeMockTodayStudy();
         navigate("/today/result");
     };
 

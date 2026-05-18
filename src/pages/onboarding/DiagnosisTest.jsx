@@ -9,6 +9,7 @@ import {
     submitMockDiagnosisAnswer,
     completeMockDiagnosisSession,
 } from "../../data/mockDiagnosis";
+import { markMockDiagnosisCompleted } from "../../data/mockData";
 
 function formatRemainingTime(seconds) {
     const minute = Math.floor(seconds / 60);
@@ -74,9 +75,10 @@ function DiagnosisTest() {
         updateMockDiagnosisAnswer(currentQuestion.id, answer);
 
         const completedSession = completeMockDiagnosisSession("TIMEOUT");
+        markMockDiagnosisCompleted();
         setSession({ ...completedSession });
 
-        navigate("/onboarding/result");
+        navigate("/onboarding/result", { replace: true });
     }, [remainingTime, currentQuestion, answer, navigate]);
 
     if (!currentQuestion) {
@@ -125,7 +127,8 @@ function DiagnosisTest() {
 
         if (nextSession.status === "COMPLETED") {
             isFinishedRef.current = true;
-            navigate("/onboarding/result");
+            markMockDiagnosisCompleted();
+            navigate("/onboarding/result", { replace: true });
             return;
         }
 

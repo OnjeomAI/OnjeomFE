@@ -1,133 +1,7 @@
 import PageHeader from "../../components/common/PageHeader";
 import Card from "../../components/common/Card";
 import { getMockUserByType } from "../../data/mockData";
-
-const analyticsData = {
-    periodTabs: ["일간", "주간", "월간"],
-
-    summaryCards: [
-        {
-            id: "total",
-            label: "누적 풀이 문항 수",
-            value: "1,284",
-            suffix: "",
-            subText: "↗ +12%",
-            accent: true,
-        },
-        {
-            id: "time",
-            label: "총 학습 시간",
-            value: "142h",
-            suffix: "30m",
-            subText: "◷",
-            accent: false,
-        },
-        {
-            id: "accuracy",
-            label: "평균 정답률",
-            value: "88.5",
-            suffix: "%",
-            subText: "",
-            accent: false,
-        },
-        {
-            id: "weekly",
-            label: "이번 주 풀이 수",
-            value: "42",
-            suffix: "",
-            subText: "목표: 50",
-            accent: false,
-        },
-    ],
-
-    scoreTrend: [
-        { day: "월", score: 62 },
-        { day: "화", score: 70 },
-        { day: "수", score: 67 },
-        { day: "목", score: 78 },
-        { day: "금", score: 75 },
-        { day: "토", score: 86 },
-        { day: "일", score: 83 },
-    ],
-
-    studyMinutes: [
-        { day: "월", minutes: 28 },
-        { day: "화", minutes: 46 },
-        { day: "수", minutes: 21 },
-        { day: "목", minutes: 64 },
-        { day: "금", minutes: 54 },
-        { day: "토", minutes: 38 },
-        { day: "일", minutes: 59 },
-    ],
-
-    abilityStats: [
-        {
-            id: "ability-001",
-            title: "사실적 이해",
-            level: "심화 (DEEP)",
-            score: 94,
-            change: 12,
-            changeType: "up",
-            expanded: false,
-        },
-        {
-            id: "ability-002",
-            title: "추론적 사고",
-            level: "고급 (ADVANCED)",
-            score: 78,
-            change: 3,
-            changeType: "down",
-            expanded: false,
-        },
-        {
-            id: "ability-003",
-            title: "비판적 평가",
-            level: "중급 (INTERMEDIATE)",
-            score: 62,
-            change: 8,
-            changeType: "up",
-            expanded: true,
-            recentHistory: [
-                {
-                    title: "흄의 철학적 논증 분석",
-                    date: "2023년 10월 24일",
-                    score: 85,
-                    scoreType: "good",
-                },
-                {
-                    title: "인플레이션의 경제 모델링",
-                    date: "2023년 10월 22일",
-                    score: 45,
-                    scoreType: "bad",
-                },
-                {
-                    title: "비교 문학: 제임스 조이스",
-                    date: "2023년 10월 20일",
-                    score: 72,
-                    scoreType: "normal",
-                },
-            ],
-        },
-        {
-            id: "ability-004",
-            title: "맥락적 통합",
-            level: "초급 (BEGINNER)",
-            score: 34,
-            change: 5,
-            changeType: "up",
-            expanded: false,
-        },
-        {
-            id: "ability-005",
-            title: "어휘 구사력",
-            level: "심화 (DEEP)",
-            score: 98,
-            change: null,
-            changeType: "none",
-            expanded: false,
-        },
-    ],
-};
+import { getMockAnalyticsData } from "../../data/mockAnalytics";
 
 function getScoreLinePoints(items) {
     const width = 420;
@@ -153,6 +27,7 @@ function getScoreLinePoints(items) {
 
 function LearningAnalytics() {
     const user = getMockUserByType("learner");
+    const analyticsData = getMockAnalyticsData();
     const scoreLinePoints = getScoreLinePoints(analyticsData.scoreTrend);
 
     return (

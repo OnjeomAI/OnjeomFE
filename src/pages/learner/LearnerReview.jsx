@@ -4,85 +4,7 @@ import { ChevronRight, Edit3, Sparkles } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
-
-const reviewData = {
-    subtitle: "성취도 분석",
-    title: "답변 변화 추적",
-
-    archive: {
-        badge: "비판적 읽기",
-        code: "ARCH-402",
-        title: "19세기 영국 산업 자동화의 사회경제적 영향에 대하여",
-    },
-
-    achievement: {
-        title: "성취도 변화 곡선",
-        scores: [
-            {
-                id: "attempt-001",
-                label: "1회차",
-                score: 45,
-            },
-            {
-                id: "attempt-002",
-                label: "2회차",
-                score: 62,
-            },
-            {
-                id: "attempt-003",
-                label: "3회차",
-                score: 77,
-            },
-            {
-                id: "attempt-004",
-                label: "최근",
-                score: 92,
-            },
-        ],
-    },
-
-    insight: {
-        title: "지속적인 진화",
-        description:
-            '"핵심 키워드를 2개 더 포함했습니다. 점수가 15점 올랐어요! 🎉"',
-        detail: "세 번째 문단의 논리적 연결성이 개선되었습니다.",
-    },
-
-    submissions: [
-        {
-            id: "submit-004",
-            score: 92,
-            title: "현재 제출분",
-            date: "2026년 10월 24일 · 14:20 PM",
-            text: "기술 발전과 노동력 대체의 상호 작용은 미묘한 관점을 시사하며...",
-            current: true,
-        },
-        {
-            id: "submit-003",
-            score: 77,
-            title: "3회차 제출",
-            date: "2026년 10월 20일 · 11:45 AM",
-            text: "영국의 산업 자동화는 노동 시장의 급격한 변화를 가져왔으며...",
-            current: false,
-        },
-        {
-            id: "submit-002",
-            score: 62,
-            title: "2회차 제출",
-            date: "2026년 10월 15일 · 09:12 AM",
-            text: "당시 숙련된 장인들에게 있어 가장 큰 영향은 일자리의 상실이었습니다...",
-            current: false,
-        },
-        {
-            id: "submit-001",
-            score: 45,
-            title: "1회차 제출",
-            date: "2026년 10월 12일 · 16:30 PM",
-            text: "본문은 19세기에 기계가 어떻게 모든 것을 바꾸었는지 설명합니다.",
-            current: false,
-        },
-    ],
-};
+import { getMockReviewData } from "../../data/mockReview";
 
 function getLinePoints(scores) {
     const maxScore = 100;
@@ -109,6 +31,7 @@ function getLinePoints(scores) {
 
 function LearnerReview() {
     const navigate = useNavigate();
+    const reviewData = getMockReviewData();
 
     const linePoints = getLinePoints(reviewData.achievement.scores);
 
@@ -174,9 +97,7 @@ function LearnerReview() {
                             <polyline points={linePoints} />
 
                             {reviewData.achievement.scores.map((item, index) => {
-                                const points = linePoints
-                                    .split(" ")
-                                    [index].split(",");
+                                const points = linePoints.split(" ")[index].split(",");
 
                                 return (
                                     <circle

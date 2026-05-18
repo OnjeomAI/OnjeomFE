@@ -8,7 +8,13 @@ let mockUsers = {
         joinedAt: "2023년 9월부터 활동 중",
         dailyGoal: 10,
         fontSize: 100,
-
+        currentStudy: {
+            sessionId: "today-study-session-001",
+            status: "IN_PROGRESS",
+            day: 3,
+            questionNumber: 3,
+            questionId: "study-question-03",
+        },
         learningState: {
             hasCompletedDiagnosis: false,
             todayStudyStatus: "NOT_STARTED",
@@ -34,8 +40,50 @@ let mockUsers = {
     },
 };
 
+const mockCredentials = [
+    {
+        email: mockUsers.learner.email,
+        password: "12345678",
+        userType: "learner",
+    },
+    {
+        email: mockUsers.admin.email,
+        password: "admin1234",
+        userType: "admin",
+    },
+];
+
 export function getMockUserByType(type) {
     return type === "admin" ? mockUsers.admin : mockUsers.learner;
+}
+
+export function getMockUserByEmail(email) {
+    const credential = mockCredentials.find(
+        (item) => item.email.toLowerCase() === email.trim().toLowerCase()
+    );
+
+    if (!credential) {
+        return null;
+    }
+
+    return getMockUserByType(credential.userType);
+}
+
+export function verifyMockLogin(email, password) {
+    const credential = mockCredentials.find(
+        (item) =>
+            item.email.toLowerCase() === email.trim().toLowerCase() &&
+            item.password === password
+    );
+
+    if (!credential) {
+        return null;
+    }
+
+    return {
+        userType: credential.userType,
+        user: getMockUserByType(credential.userType),
+    };
 }
 
 export function updateMockUserByType(type, updatedFields) {
@@ -83,13 +131,9 @@ export function getMockAfterLoginPath(type) {
         return "/admin/question";
     }
 
-    const learner = mockUsers.learner;
-
-    if (learner.learningState.hasCompletedDiagnosis) {
-        return "/dashboard";
-    }
-
-    return "/onboarding/diagnosis";
+    return mockUsers.learner.learningState.hasCompletedDiagnosis
+        ? "/dashboard"
+        : "/onboarding/diagnosis";
 }
 
 export function markMockDiagnosisCompleted() {
@@ -109,18 +153,18 @@ export function getMockTodayStudyStatus() {
 }
 
 export function getMockTodayStudyPath() {
-    const status = getMockTodayStudyStatus();
-
-    if (status === "COMPLETED") {
-        return "/today/result";
-    }
-
-    return "/today";
+    return getMockTodayStudyStatus() === "COMPLETED"
+        ? "/today/result"
+        : "/today";
 }
 
 export function startMockTodayStudy() {
     mockUsers.learner = {
         ...mockUsers.learner,
+        currentStudy: {
+            ...mockUsers.learner.currentStudy,
+            status: "IN_PROGRESS",
+        },
         learningState: {
             ...mockUsers.learner.learningState,
             todayStudyStatus: "IN_PROGRESS",
@@ -134,23 +178,14 @@ export function startMockTodayStudy() {
 export function completeMockTodayStudy() {
     mockUsers.learner = {
         ...mockUsers.learner,
+        currentStudy: {
+            ...mockUsers.learner.currentStudy,
+            status: "COMPLETED",
+        },
         learningState: {
             ...mockUsers.learner.learningState,
             todayStudyStatus: "COMPLETED",
             todayStudyCompletedAt: new Date().toISOString(),
-        },
-    };
-
-    return mockUsers.learner.learningState;
-}
-
-export function resetMockTodayStudy() {
-    mockUsers.learner = {
-        ...mockUsers.learner,
-        learningState: {
-            ...mockUsers.learner.learningState,
-            todayStudyStatus: "IN_PROGRESS",
-            todayStudyCompletedAt: null,
         },
     };
 
