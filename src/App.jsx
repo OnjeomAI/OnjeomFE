@@ -6,6 +6,7 @@ import Landing from "./pages/landing/Landing.jsx";
 
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import AdminLogin from "./pages/auth/AdminLogin";
 
 import GoalSetting from "./pages/onboarding/GoalSetting.jsx";
 import DiagnosisTest from "./pages/onboarding/DiagnosisTest";
@@ -41,6 +42,7 @@ function App() {
 
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/signup" element={<Signup/>}/>
+                <Route path="/admin" element={<AdminLogin/>}/>
 
                 <Route path="/onboarding/goal" element={<GoalSetting/>}/>
                 <Route path="/onboarding/diagnosis" element={<DiagnosisTest/>}/>

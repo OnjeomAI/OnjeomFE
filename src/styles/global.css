@@ -22,6 +22,7 @@
 @import "learner/today/LearnerResult.css";
 
 @import "auth/login.css";
+@import "auth/adminLogin.css";
 
 * {
     box-sizing: border-box;
