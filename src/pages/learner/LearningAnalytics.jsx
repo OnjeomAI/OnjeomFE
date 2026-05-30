@@ -1,50 +1,47 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageHeader from "../../components/common/PageHeader";
 import Card from "../../components/common/Card";
 import { getUserByType } from "../../data/services/learnerService";
 import { getLearningAnalytics } from "../../data/services/analyticsService";
+import { formatDotDate } from "../../data/selectors/dateSelectors";
 
-function getScoreLinePoints(items) {
-    const width = 420;
-    const height = 230;
-    const paddingX = 24;
-    const paddingY = 30;
+function mapReadingTypeLabel(type) {
+    const labels = {
+        FACTUAL: "사실 이해",
+        INFERENTIAL: "추론 이해",
+        CRITICAL: "비판 이해",
+        CREATIVE: "창의 이해",
+    };
 
-    return items
-        .map((item, index) => {
-            const x =
-                paddingX +
-                ((width - paddingX * 2) / (items.length - 1)) * index;
-
-            const y =
-                height -
-                paddingY -
-                ((height - paddingY * 2) * item.score) / 100;
-
-            return `${x},${y}`;
-        })
-        .join(" ");
+    return labels[type] || type || "-";
 }
 
 function LearningAnalytics() {
     const [user, setUser] = useState(null);
     const [analyticsData, setAnalyticsData] = useState(null);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         let ignore = false;
 
         async function loadAnalytics() {
-            const [nextUser, nextAnalyticsData] = await Promise.all([
-                getUserByType("learner"),
-                getLearningAnalytics(),
-            ]);
+            try {
+                const [nextUser, nextAnalyticsData] = await Promise.all([
+                    getUserByType("learner"),
+                    getLearningAnalytics(),
+                ]);
 
-            if (ignore) {
-                return;
+                if (ignore) {
+                    return;
+                }
+
+                setUser(nextUser);
+                setAnalyticsData(nextAnalyticsData);
+            } catch (loadError) {
+                if (!ignore) {
+                    setError(loadError.message);
+                }
             }
-
-            setUser(nextUser);
-            setAnalyticsData(nextAnalyticsData);
         }
 
         loadAnalytics();
@@ -54,11 +51,61 @@ function LearningAnalytics() {
         };
     }, []);
 
+    const summaryCards = useMemo(() => {
+        if (!analyticsData) {
+            return [];
+        }
+
+        const recentResponses = analyticsData.recentResponses || [];
+        const averageScore =
+            recentResponses.length > 0
+                ? (
+                      recentResponses.reduce(
+                          (sum, item) => sum + (item.finalScore || 0),
+                          0
+                      ) / recentResponses.length
+                  ).toFixed(1)
+                : "0.0";
+
+        return [
+            {
+                id: "responses",
+                label: "최근 응답 수",
+                value: recentResponses.length,
+                suffix: "건",
+            },
+            {
+                id: "average",
+                label: "최근 평균 점수",
+                value: averageScore,
+                suffix: "점",
+            },
+            {
+                id: "adjustment",
+                label: "커리큘럼 재조정",
+                value: analyticsData.adjustmentResult?.needsAdjustment
+                    ? "필요"
+                    : "안정",
+                suffix: "",
+            },
+            {
+                id: "priority",
+                label: "우선 보완 역량",
+                value: mapReadingTypeLabel(
+                    analyticsData.weaknessReportResult?.priorityCompetency
+                ),
+                suffix: "",
+            },
+        ];
+    }, [analyticsData]);
+
+    if (error) {
+        return <div className="learning-analytics-page">{error}</div>;
+    }
+
     if (!user || !analyticsData) {
         return <div className="learning-analytics-page"></div>;
     }
-
-    const scoreLinePoints = getScoreLinePoints(analyticsData.scoreTrend);
 
     return (
         <div className="learning-analytics-page">
@@ -70,31 +117,14 @@ function LearningAnalytics() {
                 userLevel={user.levelLabel}
                 showBell={true}
                 showUser={true}
-                status={
-                    <span className="analytics-period-tabs">
-                        {analyticsData.periodTabs.map((tab, index) => (
-                            <button
-                                key={tab}
-                                type="button"
-                                className={
-                                    index === 0
-                                        ? "analytics-period-tab active"
-                                        : "analytics-period-tab"
-                                }
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </span>
-                }
             />
 
             <section className="analytics-summary-grid">
-                {analyticsData.summaryCards.map((card) => (
+                {summaryCards.map((card) => (
                     <Card
                         key={card.id}
                         className={
-                            card.accent
+                            card.id === "adjustment"
                                 ? "analytics-summary-card accent"
                                 : "analytics-summary-card"
                         }
@@ -103,193 +133,207 @@ function LearningAnalytics() {
 
                         <div className="analytics-summary-value-row">
                             <strong>{card.value}</strong>
-
-                            {card.suffix && <span>{card.suffix}</span>}
-
-                            {card.subText && (
-                                <em
-                                    className={
-                                        card.id === "total"
-                                            ? "positive"
-                                            : ""
-                                    }
-                                >
-                                    {card.subText}
-                                </em>
-                            )}
+                            {card.suffix ? <span>{card.suffix}</span> : null}
                         </div>
-
-                        {card.id === "accuracy" && (
-                            <div className="analytics-small-line"></div>
-                        )}
                     </Card>
                 ))}
             </section>
 
-            <section className="analytics-chart-grid">
-                <Card className="analytics-chart-card">
+            <section className="analytics-writing-grid">
+                <Card className="analytics-writing-card">
                     <div className="analytics-card-header">
-                        <h2>일별 평균 점수 추이</h2>
-                        <button type="button">•••</button>
+                        <h2>답변 비교</h2>
                     </div>
 
-                    <div className="analytics-line-chart-wrap">
-                        <svg
-                            className="analytics-line-chart"
-                            viewBox="0 0 420 230"
-                            role="img"
-                            aria-label="일별 평균 점수 추이"
-                        >
-                            <line x1="24" y1="62" x2="396" y2="62" />
-                            <line x1="24" y1="120" x2="396" y2="120" />
-                            <line x1="24" y1="178" x2="396" y2="178" />
+                    {analyticsData.compareResult ? (
+                        <div className="analytics-writing-body">
+                            <div className="analytics-writing-metric">
+                                <span>점수 차이</span>
+                                <strong>
+                                    {analyticsData.compareResult.scoreDiff}
+                                </strong>
+                            </div>
 
-                            <polyline points={scoreLinePoints} />
+                            <div className="analytics-writing-metric">
+                                <span>성장 여부</span>
+                                <strong>
+                                    {analyticsData.compareResult.isImproved
+                                        ? "향상"
+                                        : "유지/하락"}
+                                </strong>
+                            </div>
 
-                            {scoreLinePoints.split(" ").map((point, index) => {
-                                const [x, y] = point.split(",");
+                            <p className="analytics-writing-message">
+                                {analyticsData.compareResult.growthMessage}
+                            </p>
 
-                                return (
-                                    <circle
-                                        key={analyticsData.scoreTrend[index].day}
-                                        cx={x}
-                                        cy={y}
-                                        r="5"
-                                    />
-                                );
-                            })}
-                        </svg>
+                            <div className="analytics-tag-row">
+                                {(analyticsData.compareResult
+                                    .newlyIncludedKeywords || []
+                                ).map((keyword) => (
+                                    <span key={keyword} className="analytics-tag">
+                                        + {keyword}
+                                    </span>
+                                ))}
 
-                        <div className="analytics-chart-labels">
-                            {analyticsData.scoreTrend.map((item) => (
-                                <span key={item.day}>{item.day}</span>
-                            ))}
+                                {(analyticsData.compareResult
+                                    .stillMissingKeywords || []
+                                ).map((keyword) => (
+                                    <span
+                                        key={keyword}
+                                        className="analytics-tag muted"
+                                    >
+                                        - {keyword}
+                                    </span>
+                                ))}
+                            </div>
+
+                            <p className="analytics-writing-analysis">
+                                {analyticsData.compareResult.analysis}
+                            </p>
                         </div>
-                    </div>
+                    ) : (
+                        <p className="analytics-empty-text">
+                            비교 가능한 이전 응답이 아직 없습니다.
+                        </p>
+                    )}
                 </Card>
 
-                <Card className="analytics-chart-card">
+                <Card className="analytics-writing-card">
                     <div className="analytics-card-header">
-                        <h2>일일 학습 시간</h2>
-
-                        <div className="analytics-chart-legend">
-                            <span></span>
-                            분 (Minutes)
-                        </div>
+                        <h2>커리큘럼 동적 재조정</h2>
                     </div>
 
-                    <div className="analytics-bar-chart">
-                        {analyticsData.studyMinutes.map((item, index) => (
-                            <div className="analytics-bar-item" key={item.day}>
-                                <div
-                                    className={
-                                        index === 3
-                                            ? "analytics-bar active"
-                                            : "analytics-bar"
-                                    }
-                                    style={{ height: `${item.minutes * 2.3}px` }}
-                                ></div>
-                                <span>{item.day}</span>
+                    {analyticsData.adjustmentResult ? (
+                        <div className="analytics-writing-body">
+                            <div className="analytics-writing-metric">
+                                <span>재조정 필요</span>
+                                <strong>
+                                    {analyticsData.adjustmentResult.needsAdjustment
+                                        ? "예"
+                                        : "아니오"}
+                                </strong>
                             </div>
-                        ))}
-                    </div>
+
+                            <div className="analytics-writing-metric">
+                                <span>추천 집중 영역</span>
+                                <strong>
+                                    {mapReadingTypeLabel(
+                                        analyticsData.adjustmentResult.recommendedFocus
+                                    )}
+                                </strong>
+                            </div>
+
+                            <p className="analytics-writing-message">
+                                {analyticsData.adjustmentResult.adjustmentMessage}
+                            </p>
+
+                            <div className="analytics-tag-row">
+                                {(analyticsData.adjustmentResult.weakCompetencies || []).map(
+                                    (competency) => (
+                                        <span
+                                            key={competency}
+                                            className="analytics-tag muted"
+                                        >
+                                            {mapReadingTypeLabel(competency)}
+                                        </span>
+                                    )
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="analytics-empty-text">
+                            재조정 분석에 필요한 응답 이력이 부족합니다.
+                        </p>
+                    )}
                 </Card>
             </section>
 
             <section className="analytics-ability-section">
                 <div className="analytics-section-title-row">
-                    <h2>영역별 숙련도</h2>
-                    <span>기록 분석 평가</span>
+                    <h2>약점 분석 리포트</h2>
+                    <span>Writing API 기반 분석</span>
                 </div>
 
-                <div className="analytics-ability-list">
-                    {analyticsData.abilityStats.map((ability) => (
-                        <Card
-                            key={ability.id}
-                            className={
-                                ability.expanded
-                                    ? "analytics-ability-card expanded"
-                                    : "analytics-ability-card"
-                            }
-                        >
-                            <div className="analytics-ability-main-row">
-                                <div className="analytics-ability-title">
-                                    <h3>{ability.title}</h3>
-                                    <span>{ability.level}</span>
-                                </div>
+                <Card className="analytics-report-card">
+                    {analyticsData.weaknessReportResult ? (
+                        <>
+                            <p className="analytics-report-text">
+                                {analyticsData.weaknessReportResult.report}
+                            </p>
 
-                                <div className="analytics-ability-score">
-                                    <strong>{ability.score}</strong>
-                                    <span>/ 100</span>
-
-                                    {ability.change !== null && (
-                                        <em
-                                            className={
-                                                ability.changeType === "down"
-                                                    ? "down"
-                                                    : "up"
-                                            }
-                                        >
-                                            {ability.changeType === "down"
-                                                ? "▼"
-                                                : "▲"}{" "}
-                                            {ability.change}
-                                        </em>
-                                    )}
-
-                                    {ability.change === null && <em>—</em>}
-
-                                    <button type="button">
-                                        {ability.expanded ? "⌃" : "⌄"}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="analytics-progress-track">
-                                <div
-                                    className="analytics-progress-fill"
-                                    style={{ width: `${ability.score}%` }}
-                                ></div>
-                            </div>
-
-                            {ability.expanded && (
-                                <div className="analytics-recent-box">
-                                    <p>최근 풀이 내역</p>
-
-                                    {ability.recentHistory.map((history) => (
-                                        <div
-                                            key={history.title}
-                                            className="analytics-history-row"
-                                        >
-                                            <span>{history.title}</span>
-
-                                            <div>
-                                                <em>{history.date}</em>
-                                                <strong
-                                                    className={
-                                                        history.scoreType
-                                                    }
-                                                >
-                                                    {history.score} 점
-                                                </strong>
-                                            </div>
+                            <div className="analytics-weakness-list">
+                                {(
+                                    analyticsData.weaknessReportResult
+                                        .weakCompetencies || []
+                                ).map((item) => (
+                                    <div
+                                        key={item.competencyType}
+                                        className="analytics-weakness-item"
+                                    >
+                                        <div>
+                                            <h3>
+                                                {mapReadingTypeLabel(
+                                                    item.competencyType
+                                                )}
+                                            </h3>
+                                            <span>{item.level}</span>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </Card>
-                    ))}
-                </div>
+
+                                        <strong>{item.averageScore}점</strong>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="analytics-tag-row">
+                                {(
+                                    analyticsData.weaknessReportResult
+                                        .recommendations || []
+                                ).map((item) => (
+                                    <span key={item} className="analytics-tag">
+                                        {item}
+                                    </span>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <p className="analytics-empty-text">
+                            약점 분석 리포트를 생성할 데이터가 부족합니다.
+                        </p>
+                    )}
+                </Card>
             </section>
 
-            <footer className="analytics-footer">
-                <div className="analytics-footer-left">
-                    <div className="analytics-footer-icon"></div>
-                    <span>큐레이션 ID : ON-29402-KR</span>
+            <section className="analytics-ability-section">
+                <div className="analytics-section-title-row">
+                    <h2>최근 응답 기록</h2>
+                    <span>{analyticsData.recentResponses.length}건</span>
                 </div>
 
-                <span>© 2024 온점 디지털 아카이브</span>
-            </footer>
+                <Card className="analytics-record-card">
+                    <div className="analytics-record-list">
+                        {analyticsData.recentResponses.map((response) => (
+                            <div
+                                key={response.responseId}
+                                className="analytics-record-item"
+                            >
+                                <div>
+                                    <h3>{response.questionText}</h3>
+                                    <p>
+                                        {mapReadingTypeLabel(response.readingType)} ·{" "}
+                                        문제 {response.problemId}
+                                    </p>
+                                </div>
+
+                                <div className="analytics-record-meta">
+                                    <strong>{response.finalScore}점</strong>
+                                    <span>{formatDotDate(response.createdAt)}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+            </section>
         </div>
     );
 }

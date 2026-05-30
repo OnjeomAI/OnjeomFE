@@ -52,6 +52,18 @@ function getRadarGridPointString(itemCount, radius) {
         .join(" ");
 }
 
+function getStudyButtonLabel(status) {
+    if (status === "IN_PROGRESS") {
+        return "이어 하기";
+    }
+
+    if (status === "COMPLETED") {
+        return "오늘 학습 보기";
+    }
+
+    return "오늘 학습 시작";
+}
+
 function LearnerDashboard() {
     const navigate = useNavigate();
 
@@ -90,19 +102,24 @@ function LearnerDashboard() {
         return <div className="learner-dashboard-page"></div>;
     }
 
-    const dailyGoal = learner.dailyGoal || 10;
     const todaySummary = dashboard.todaySummary;
+    const activitySummary = dashboard.activitySummary;
+    const scoreSummary = dashboard.scoreSummary;
     const abilityItems = dashboard.abilityStats;
     const weaknessItems = dashboard.weaknessItems;
     const aiRecommendation = dashboard.aiRecommendation;
     const reviewSummary = dashboard.reviewSummary;
     const recentRecords = dashboard.recentRecords;
 
-    const completedCount = todaySummary.completedCount;
-    const goalRate = Math.min(
-        100,
-        Math.round((completedCount / dailyGoal) * 100)
-    );
+    const goalRate =
+        todaySummary.dailyGoal > 0
+            ? Math.min(
+                  100,
+                  Math.round(
+                      (todaySummary.completedCount / todaySummary.dailyGoal) * 100
+                  )
+              )
+            : 0;
 
     const currentRadarPoints = getRadarPointString(abilityItems, "current");
     const previousRadarPoints = getRadarPointString(abilityItems, "previous");
@@ -131,15 +148,17 @@ function LearnerDashboard() {
                 <Card className="dashboard-summary-card">
                     <div className="summary-card-content">
                         <div>
-                            <p className="summary-label">목표 달성률</p>
+                            <p className="summary-label">오늘 목표</p>
 
                             <div className="summary-main-value">
-                                <strong>{completedCount}</strong>
-                                <span>/ {dailyGoal}</span>
+                                <strong>{todaySummary.completedCount}</strong>
+                                <span>/ {todaySummary.dailyGoal}</span>
                             </div>
 
                             <p className="summary-sub-text gold">
-                                완료한 문항 수
+                                {todaySummary.goalAchieved
+                                    ? "오늘 목표를 달성했습니다"
+                                    : `남은 학습 ${todaySummary.remainingCount}개`}
                             </p>
                         </div>
 
@@ -148,7 +167,7 @@ function LearnerDashboard() {
                             style={{
                                 background: `conic-gradient(#806600 ${goalRate}%, #dedad0 ${goalRate}% 100%)`,
                             }}
-                            aria-label={`목표 달성률 ${goalRate}%`}
+                            aria-label={`오늘 목표 달성률 ${goalRate}%`}
                         >
                             <div className="summary-ring-inner"></div>
                         </div>
@@ -158,19 +177,19 @@ function LearnerDashboard() {
                 <Card className="dashboard-summary-card">
                     <div className="summary-card-content">
                         <div>
-                            <p className="summary-label">학습 시간</p>
+                            <p className="summary-label">누적 응답 수</p>
 
                             <div className="summary-main-value">
-                                <strong>{todaySummary.studyMinutes}</strong>
-                                <span>분</span>
+                                <strong>{activitySummary.totalResponses}</strong>
+                                <span>건</span>
                             </div>
 
                             <p className="summary-sub-text gold">
-                                어제 대비 +{todaySummary.studyTimeChangeRate}%
+                                연속 학습 {activitySummary.streakDays}일
                             </p>
                         </div>
 
-                        <div className="summary-icon-circle">◔</div>
+                        <div className="summary-icon-circle">↗</div>
                     </div>
                 </Card>
 
@@ -180,12 +199,12 @@ function LearnerDashboard() {
                             <p className="summary-label">평균 점수</p>
 
                             <div className="summary-main-value">
-                                <strong>{todaySummary.averageScore}</strong>
+                                <strong>{scoreSummary.averageScore}</strong>
                                 <span>점</span>
                             </div>
 
                             <p className="summary-sub-text">
-                                {todaySummary.scoreTrendLabel}
+                                최근 집계 응답 {scoreSummary.recentResponseCount}건
                             </p>
                         </div>
 
@@ -202,8 +221,8 @@ function LearnerDashboard() {
                 <Card className="dashboard-ability-card">
                     <div className="dashboard-section-header">
                         <div>
-                            <h2>영역별 숙련도</h2>
-                            <p>지난주 대비 현재 핵심 역량 분포</p>
+                            <h2>역량별 레이더 차트</h2>
+                            <p>최근 학습 응답을 바탕으로 집계한 문해 역량입니다.</p>
                         </div>
 
                         <div className="ability-legend">
@@ -219,7 +238,7 @@ function LearnerDashboard() {
                             className="ability-radar"
                             viewBox="0 0 420 420"
                             role="img"
-                            aria-label="영역별 숙련도 그래프"
+                            aria-label="역량별 레이더 차트"
                         >
                             <polygon
                                 className="ability-radar-grid"
@@ -251,7 +270,7 @@ function LearnerDashboard() {
                                 const radius = 155;
                                 const angle =
                                     ((Math.PI * 2) / abilityItems.length) *
-                                    index -
+                                        index -
                                     Math.PI / 2;
 
                                 const x = centerX + radius * Math.cos(angle);
@@ -280,7 +299,7 @@ function LearnerDashboard() {
                         </svg>
 
                         <span className="ability-label ability-top">
-                            {abilityItems[0]?.label} △
+                            {abilityItems[0]?.label}
                         </span>
 
                         <span className="ability-label ability-right">
@@ -296,24 +315,21 @@ function LearnerDashboard() {
                         </span>
 
                         <span className="ability-label ability-left">
-                            {abilityItems[1]?.label} △
+                            {abilityItems[1]?.label}
                         </span>
                     </div>
                 </Card>
 
                 <div className="dashboard-side-column">
                     <Card className="dashboard-weakness-card">
-                        <h2>취약점 분석</h2>
+                        <h2>약점 리포트</h2>
 
                         <div className="weakness-list">
                             {weaknessItems.map((item) => (
-                                <div
-                                    className="weakness-item"
-                                    key={item.key}
-                                >
+                                <div className="weakness-item" key={item.key}>
                                     <div className="weakness-title-row">
                                         <span>{item.label}</span>
-                                        <strong>{item.percent}%</strong>
+                                        <strong>{item.score}점</strong>
                                     </div>
 
                                     <div className="weakness-track">
@@ -329,7 +345,7 @@ function LearnerDashboard() {
                         </div>
 
                         <div className="ai-recommend-box">
-                            <span>✦</span>
+                            <span>!</span>
 
                             <div>
                                 <h3>{aiRecommendation.title}</h3>
@@ -339,11 +355,9 @@ function LearnerDashboard() {
                     </Card>
 
                     <Card className="dashboard-review-card">
-                        <span className="review-card-icon">↻</span>
+                        <span className="review-card-icon">↺</span>
 
-                        <p className="review-card-label">
-                            에빙하우스 망각곡선 알림
-                        </p>
+                        <p className="review-card-label">복습 리마인드</p>
 
                         <h2>{reviewSummary.title}</h2>
 
@@ -355,9 +369,7 @@ function LearnerDashboard() {
                             className="review-start-button"
                             onClick={handleStartStudy}
                         >
-                            {todayStudyStatus === "COMPLETED"
-                                ? "결과 보기"
-                                : "지금 풀기"}
+                            {getStudyButtonLabel(todayStudyStatus)}
                         </Button>
                     </Card>
                 </div>
@@ -365,7 +377,7 @@ function LearnerDashboard() {
 
             <Card className="dashboard-record-card">
                 <div className="record-card-header">
-                    <h2>최근 학습 기록</h2>
+                    <h2>최근 응답 기록</h2>
 
                     <button type="button" onClick={handleViewHistory}>
                         전체 보기
@@ -374,37 +386,43 @@ function LearnerDashboard() {
 
                 <table className="record-table">
                     <thead>
-                    <tr>
-                        <th>학습 문항</th>
-                        <th>완료일</th>
-                        <th>점수</th>
-                        <th>관리</th>
-                    </tr>
+                        <tr>
+                            <th>문항</th>
+                            <th>완료일</th>
+                            <th>점수</th>
+                            <th>관리</th>
+                        </tr>
                     </thead>
 
                     <tbody>
-                    {recentRecords.map((record) => (
-                        <tr key={record.id}>
-                            <td>{record.title}</td>
-                            <td>{record.completedAt}</td>
-                            <td>
-                                    <span
-                                        className={`record-score ${record.scoreType}`}
-                                    >
-                                        {record.score} 점
-                                    </span>
-                            </td>
-                            <td>
-                                <button
-                                    type="button"
-                                    className="record-retry-button"
-                                    onClick={handleStartStudy}
-                                >
-                                    다시 풀기 ↻
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                        {recentRecords.length === 0 ? (
+                            <tr>
+                                <td colSpan="4">최근 응답 기록이 없습니다.</td>
+                            </tr>
+                        ) : (
+                            recentRecords.map((record) => (
+                                <tr key={record.id}>
+                                    <td>{record.title}</td>
+                                    <td>{record.completedAt}</td>
+                                    <td>
+                                        <span
+                                            className={`record-score ${record.scoreType}`}
+                                        >
+                                            {record.score}점
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            className="record-retry-button"
+                                            onClick={handleStartStudy}
+                                        >
+                                            다시 풀기
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </Card>

@@ -185,6 +185,10 @@
     border-bottom: 1px solid #dedad0;
 }
 
+.result-answer-compare.single {
+    grid-template-columns: 1fr;
+}
+
 .answer-column {
     min-width: 0;
 }

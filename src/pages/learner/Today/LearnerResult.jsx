@@ -1,42 +1,84 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     ArrowLeft,
     Bell,
     CircleUserRound,
-    Check,
     ExternalLink,
-    X,
-    Zap,
+    Hash,
+    MessageSquareText,
+    Tags,
+    Timer,
 } from "lucide-react";
 
 import Card from "../../../components/common/Card";
 import Button from "../../../components/common/Button";
 import {
-    getLatestStudyResult,
-    restartTodayStudy,
-} from "../../../data/services/studyService";
+    getLatestResponseContext,
+    getResponseById,
+} from "../../../data/services/responseService";
+
+function getScoreLabel(score) {
+    if (score >= 85) {
+        return "우수";
+    }
+
+    if (score >= 70) {
+        return "양호";
+    }
+
+    if (score >= 50) {
+        return "보통";
+    }
+
+    return "보완 필요";
+}
+
+function formatDateLabel(value) {
+    if (!value) {
+        return "-";
+    }
+
+    return new Intl.DateTimeFormat("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(new Date(value));
+}
 
 function LearnerResult() {
     const navigate = useNavigate();
-    const [resultData, setResultData] = useState(null);
+    const [responseData, setResponseData] = useState(null);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         let ignore = false;
 
         async function loadResult() {
-            const nextResultData = await getLatestStudyResult();
+            const latestContext = getLatestResponseContext();
 
-            if (ignore) {
-                return;
-            }
-
-            if (!nextResultData) {
+            if (!latestContext?.responseId) {
                 navigate("/today", { replace: true });
                 return;
             }
 
-            setResultData(nextResultData);
+            try {
+                const nextResponseData = await getResponseById(
+                    latestContext.responseId
+                );
+
+                if (ignore) {
+                    return;
+                }
+
+                setResponseData(nextResponseData);
+            } catch (loadError) {
+                if (!ignore) {
+                    setError(loadError.message);
+                }
+            }
         }
 
         loadResult();
@@ -46,12 +88,17 @@ function LearnerResult() {
         };
     }, [navigate]);
 
+    const foundKeywords = useMemo(() => {
+        return Array.isArray(responseData?.foundKeywords)
+            ? responseData.foundKeywords
+            : [];
+    }, [responseData]);
+
     const handleBack = () => {
         navigate("/today");
     };
 
     const handleNextProblem = async () => {
-        await restartTodayStudy();
         navigate("/today");
     };
 
@@ -63,7 +110,11 @@ function LearnerResult() {
         navigate("/review");
     };
 
-    if (!resultData) {
+    if (error) {
+        return <div className="learner-result-page">{error}</div>;
+    }
+
+    if (!responseData) {
         return <div className="learner-result-page"></div>;
     }
 
@@ -80,7 +131,7 @@ function LearnerResult() {
                         <ArrowLeft size={22} strokeWidth={2.2} />
                     </button>
 
-                    <h1>{resultData.sessionTitle}</h1>
+                    <h1>응답 결과 조회</h1>
                 </div>
 
                 <div className="result-header-icons">
@@ -97,102 +148,101 @@ function LearnerResult() {
             <main className="result-main">
                 <section className="result-score-section">
                     <div className="result-score-left">
-                        <p className="result-score-label">최종 평가</p>
+                        <p className="result-score-label">최종 점수</p>
 
                         <div className="result-score-row">
-                            <strong>{resultData.score}</strong>
+                            <strong>{responseData.finalScore ?? 0}</strong>
                             <span>/100</span>
 
-                            <em>{resultData.statusLabel}</em>
+                            <em>{getScoreLabel(responseData.finalScore ?? 0)}</em>
                         </div>
 
                         <p className="result-grading-time">
-                            <Zap size={14} strokeWidth={2.2} />
-                            {resultData.gradingTime}
+                            <Timer size={14} strokeWidth={2.2} />
+                            제출 시각 {formatDateLabel(responseData.createdAt)}
                         </p>
                     </div>
 
                     <div className="result-point-summary">
-                        <span>현황</span>
+                        <span>채점 정보</span>
 
                         <div>
-                            <strong>우수 포인트 {resultData.strongPoints}</strong>
+                            <strong>원점수 {responseData.rawScore ?? 0}</strong>
                             <strong className="weak">
-                                부족 포인트 {resultData.weakPoints}
+                                시도 {responseData.attemptNumber ?? 1}회
                             </strong>
                         </div>
                     </div>
                 </section>
 
-                <section className="result-answer-compare">
+                <section className="result-answer-compare single">
                     <div className="answer-column">
                         <div className="answer-column-header">
                             <span className="answer-dot"></span>
-                            <h2>나의 답변</h2>
+                            <h2>제출 답안</h2>
                         </div>
 
                         <Card className="answer-card user-answer-card">
-                            <p>{resultData.userAnswer}</p>
-                        </Card>
-                    </div>
-
-                    <div className="answer-column">
-                        <div className="answer-column-header model">
-                            <span className="answer-dot"></span>
-                            <h2>모범 답안</h2>
-                            <em>아카이브 표준</em>
-                        </div>
-
-                        <Card className="answer-card model-answer-card">
-                            <p>{resultData.modelAnswer}</p>
+                            <p>{responseData.answerText}</p>
                         </Card>
                     </div>
                 </section>
 
                 <section className="result-detail-section">
                     <div className="result-analysis-area">
-                        <h2>왜 이런 점수가 나왔나요?</h2>
-                        <p>
-                            키워드 통합 및 개념적 깊이에 대한 상세
-                            분석입니다.
-                        </p>
+                        <h2>응답 분석 정보</h2>
+                        <p>Response API가 제공하는 채점 결과와 피드백입니다.</p>
 
                         <div className="analysis-list">
-                            {resultData.analysisItems.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className={
-                                        item.type === "good"
-                                            ? "analysis-item good"
-                                            : "analysis-item bad"
-                                    }
-                                >
-                                    <span className="analysis-icon">
-                                        {item.type === "good" ? (
-                                            <Check size={16} strokeWidth={2.4} />
-                                        ) : (
-                                            <X size={16} strokeWidth={2.4} />
-                                        )}
-                                    </span>
+                            <div className="analysis-item good">
+                                <span className="analysis-icon">
+                                    <Hash size={16} strokeWidth={2.4} />
+                                </span>
 
-                                    <div>
-                                        <h3>{item.title}</h3>
-                                        <p>{item.description}</p>
-                                    </div>
+                                <div>
+                                    <h3>응답 ID</h3>
+                                    <p>{responseData.id}</p>
                                 </div>
-                            ))}
+                            </div>
+
+                            <div className="analysis-item good">
+                                <span className="analysis-icon">
+                                    <MessageSquareText
+                                        size={16}
+                                        strokeWidth={2.4}
+                                    />
+                                </span>
+
+                                <div>
+                                    <h3>피드백</h3>
+                                    <p>{responseData.feedbackText || "피드백 없음"}</p>
+                                </div>
+                            </div>
+
+                            <div className="analysis-item good">
+                                <span className="analysis-icon">
+                                    <Tags size={16} strokeWidth={2.4} />
+                                </span>
+
+                                <div>
+                                    <h3>채점 기준</h3>
+                                    <p>{responseData.scoringBasis || "-"}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <aside className="result-side-actions">
                         <Card className="expert-insight-card">
-                            <p className="expert-label">
-                                {resultData.expertInsight.label}
+                            <p className="expert-label">핵심 키워드</p>
+
+                            <span>{foundKeywords.length}개 추출</span>
+
+                            <p>
+                                {foundKeywords.length > 0
+                                    ? foundKeywords.join(", ")
+                                    : "추출된 키워드가 없습니다."}
                             </p>
-
-                            <span>{resultData.expertInsight.category}</span>
-
-                            <p>{resultData.expertInsight.description}</p>
 
                             <Button
                                 variant="primary"
@@ -200,7 +250,7 @@ function LearnerResult() {
                                 className="concept-review-button"
                                 onClick={handleReviewConcept}
                             >
-                                개념 복습하기
+                                응답 이력 보기
                                 <ExternalLink size={14} strokeWidth={2.2} />
                             </Button>
                         </Card>
@@ -212,7 +262,7 @@ function LearnerResult() {
                             className="next-problem-button"
                             onClick={handleNextProblem}
                         >
-                            다음 문제 풀기 (#2)
+                            다음 문제 풀기
                         </Button>
 
                         <Button
@@ -229,11 +279,11 @@ function LearnerResult() {
 
                 <section className="result-bottom-banner">
                     <div className="result-bottom-overlay">
-                        <h2>학습의 깊이를 더하세요</h2>
+                        <h2>답안 기록이 저장되었습니다</h2>
 
                         <p>
-                            온점 기록관은 더 나은 균형 논리 학습을 위해
-                            “국부론” 제4장을 정독할 것을 제안합니다.
+                            같은 문제의 이전 응답과 점수 변화를 리뷰 화면에서
+                            비교할 수 있습니다.
                         </p>
                     </div>
                 </section>

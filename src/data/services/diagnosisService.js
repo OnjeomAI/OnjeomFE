@@ -1,104 +1,147 @@
-// 진단 테스트 세션 조회, 답변 저장, 제출 완료를 담당하는 mock API 서비스입니다.
-import { diagnosisSessions } from "../mockDb/diagnosisSessions.js";
-import { questions } from "../mockDb/questions.js";
-import { toDiagnosisQuestionViewModel } from "../selectors/questionSelectors.js";
+import { getAccessToken } from "../../utils/authStorage";
 
-function getSession() {
-    return diagnosisSessions[0];
-}
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const DIAGNOSIS_SESSION_KEY = "onjeom-diagnosis-session";
 
-function getQuestionState(session, questionId) {
-    const order = session.questionIds.indexOf(questionId) + 1;
-    const answerState = session.answers[questionId] || {};
+function getAuthHeaders() {
+    const accessToken = getAccessToken();
 
-    return {
-        order,
-        answer: answerState.answer || "",
-        submitted: Boolean(answerState.submitted),
-    };
-}
-
-function getQuestion(questionId) {
-    return questions.find((question) => question.id === questionId);
-}
-
-function getDiagnosisQuestions(session) {
-    return session.questionIds.map((questionId) =>
-        toDiagnosisQuestionViewModel(
-            getQuestion(questionId),
-            getQuestionState(session, questionId)
-        )
-    );
-}
-
-export async function getDiagnosisSession() {
-    const session = getSession();
-
-    return {
-        ...session,
-        sessionId: session.id,
-        totalQuestions: session.questionIds.length,
-        questions: getDiagnosisQuestions(session),
-    };
-}
-
-export async function getCurrentDiagnosisQuestion() {
-    const session = getSession();
-
-    return toDiagnosisQuestionViewModel(
-        getQuestion(session.currentQuestionId),
-        getQuestionState(session, session.currentQuestionId)
-    );
-}
-
-export async function updateDiagnosisAnswer(questionId, answer) {
-    const session = getSession();
-
-    session.answers = {
-        ...session.answers,
-        [questionId]: {
-            ...session.answers[questionId],
-            answer,
-        },
-    };
-
-    return getCurrentDiagnosisQuestion();
-}
-
-export async function submitDiagnosisAnswer(questionId, answer) {
-    const session = getSession();
-
-    session.answers = {
-        ...session.answers,
-        [questionId]: {
-            ...session.answers[questionId],
-            answer,
-            submitted: true,
-        },
-    };
-
-    const currentIndex = session.questionIds.indexOf(session.currentQuestionId);
-    const isLastQuestion = currentIndex === session.questionIds.length - 1;
-
-    if (isLastQuestion) {
-        session.status = "COMPLETED";
-        session.completedReason = "NORMAL";
-        session.completedAt = new Date().toISOString();
-        return getDiagnosisSession();
+    if (!accessToken) {
+        return {};
     }
 
-    session.currentQuestionId = session.questionIds[currentIndex + 1];
-
-    return getDiagnosisSession();
+    return {
+        Authorization: `Bearer ${accessToken}`,
+    };
 }
 
-export async function completeDiagnosisSession(reason = "NORMAL") {
-    const session = getSession();
+async function requestDiagnosis(path, options = {}) {
+    const response = await fetch(`${apiBaseUrl}${path}`, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+            ...options.headers,
+        },
+    });
 
-    session.status = "COMPLETED";
-    session.completedReason = reason;
-    session.remainingTime = 0;
-    session.completedAt = new Date().toISOString();
+    const contentType = response.headers.get("content-type") || "";
+    const result = contentType.includes("application/json")
+        ? await response.json()
+        : null;
 
-    return getDiagnosisSession();
+    if (!response.ok || !result?.success) {
+        throw new Error(
+            result?.message || "진단 요청을 처리하지 못했습니다."
+        );
+    }
+
+    return result;
+}
+
+function readDiagnosisSession() {
+    const rawValue = localStorage.getItem(DIAGNOSIS_SESSION_KEY);
+
+    if (!rawValue) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(rawValue);
+    } catch {
+        return null;
+    }
+}
+
+function writeDiagnosisSession(session) {
+    localStorage.setItem(DIAGNOSIS_SESSION_KEY, JSON.stringify(session));
+}
+
+function clearDiagnosisSession() {
+    localStorage.removeItem(DIAGNOSIS_SESSION_KEY);
+}
+
+function toDiagnosisQuestion(data, questionIndex) {
+    return {
+        diagnosisId: data.diagnosisId,
+        problemId: data.problemId,
+        title: `지문 ${String(questionIndex).padStart(2, "0")}`,
+        passageParagraphs: String(data.passageText || "")
+            .split("\n")
+            .map((paragraph) => paragraph.trim())
+            .filter(Boolean),
+        questionText: data.questionText || "",
+    };
+}
+
+export async function startDiagnosisSession() {
+    const previousSession = readDiagnosisSession();
+    const result = await requestDiagnosis("/api/diagnostic/start", {
+        method: "POST",
+    });
+    const data = result.data || {};
+    const isSameDiagnosis =
+        previousSession &&
+        previousSession.diagnosisId === data.diagnosisId &&
+        previousSession.currentProblemId !== data.problemId;
+    const questionIndex = isSameDiagnosis
+        ? (previousSession.questionIndex || 0) + 1
+        : 1;
+
+    writeDiagnosisSession({
+        diagnosisId: data.diagnosisId,
+        currentProblemId: data.problemId,
+        questionIndex,
+    });
+
+    return {
+        diagnosisId: data.diagnosisId,
+        questionIndex,
+        question: toDiagnosisQuestion(data, questionIndex),
+    };
+}
+
+export async function submitDiagnosisAnswer({
+    problemId,
+    answerText,
+    responseTimeSec,
+}) {
+    const session = readDiagnosisSession();
+    const result = await requestDiagnosis("/api/diagnostic/submit", {
+        method: "POST",
+        body: JSON.stringify({
+            problemId,
+            answerText,
+            responseTimeSec,
+        }),
+    });
+
+    if (!result.data) {
+        return {
+            completed: true,
+        };
+    }
+
+    const nextQuestionIndex = (session?.questionIndex || 1) + 1;
+
+    writeDiagnosisSession({
+        diagnosisId: session?.diagnosisId || result.data.diagnosisId,
+        currentProblemId: result.data.problemId,
+        questionIndex: nextQuestionIndex,
+    });
+
+    return {
+        completed: false,
+        diagnosisId: result.data.diagnosisId,
+        questionIndex: nextQuestionIndex,
+        question: toDiagnosisQuestion(result.data, nextQuestionIndex),
+    };
+}
+
+export async function getLatestDiagnosisResult() {
+    const result = await requestDiagnosis("/api/diagnostic/result");
+
+    clearDiagnosisSession();
+
+    return result.data || null;
 }

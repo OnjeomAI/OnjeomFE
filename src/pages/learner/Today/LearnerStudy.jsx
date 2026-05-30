@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Bell,
@@ -14,10 +14,15 @@ import Card from "../../../components/common/Card";
 import Input from "../../../components/common/Input";
 import {
     getTodayStudySession,
-    getTodayStudyStatus,
+    markTodayStudySubmitted,
+    skipTodayStudyItem,
     startTodayStudy,
-    submitStudyAnswer,
 } from "../../../data/services/studyService";
+import {
+    saveLatestResponseContext,
+    submitResponse,
+} from "../../../data/services/responseService";
+import { askAiTutor } from "../../../data/services/aiTutorService";
 
 function renderParagraph(paragraph) {
     if (paragraph.type !== "highlight") {
@@ -37,12 +42,34 @@ function renderParagraph(paragraph) {
     );
 }
 
+function formatElapsedTime(seconds) {
+    const minute = Math.floor(seconds / 60);
+    const second = seconds % 60;
+
+    return `${String(minute).padStart(2, "0")}:${String(second).padStart(2, "0")}`;
+}
+
 function LearnerStudy() {
     const navigate = useNavigate();
+    const timerRef = useRef(0);
 
     const [studyData, setStudyData] = useState(null);
     const [answer, setAnswer] = useState("");
     const [chatInput, setChatInput] = useState("");
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSkipping, setIsSkipping] = useState(false);
+    const [isAskingTutor, setIsAskingTutor] = useState(false);
+    const [error, setError] = useState("");
+    const [tutorError, setTutorError] = useState("");
+    const [chatMessages, setChatMessages] = useState([
+        {
+            id: "ai-default",
+            role: "ai",
+            text: "질문을 보내면 지문과 문제를 바탕으로 풀이 방향을 설명합니다.",
+            references: [],
+        },
+    ]);
 
     const answerMaxLength = 500;
     const answerLength = answer.length;
@@ -51,19 +78,37 @@ function LearnerStudy() {
         let ignore = false;
 
         async function loadTodayStudy() {
-            if (await getTodayStudyStatus() === "COMPLETED") {
-                navigate("/today/result", { replace: true });
-                return;
+            setError("");
+
+            try {
+                const nextStudyData = await getTodayStudySession();
+
+                if (ignore) {
+                    return;
+                }
+
+                if (nextStudyData?.itemId && nextStudyData.status === "PENDING") {
+                    await startTodayStudy(nextStudyData.itemId);
+
+                    const startedStudyData = await getTodayStudySession();
+
+                    if (ignore) {
+                        return;
+                    }
+
+                    setStudyData(startedStudyData);
+                } else {
+                    setStudyData(nextStudyData);
+                }
+
+                setAnswer("");
+                setElapsedSeconds(0);
+                timerRef.current = Date.now();
+            } catch (loadError) {
+                if (!ignore) {
+                    setError(loadError.message);
+                }
             }
-
-            await startTodayStudy();
-            const nextStudyData = await getTodayStudySession();
-
-            if (ignore) {
-                return;
-            }
-
-            setStudyData(nextStudyData);
         }
 
         loadTodayStudy();
@@ -71,32 +116,155 @@ function LearnerStudy() {
         return () => {
             ignore = true;
         };
-    }, [navigate]);
+    }, []);
+
+    useEffect(() => {
+        if (!studyData) {
+            return undefined;
+        }
+
+        const intervalId = window.setInterval(() => {
+            const diffInSeconds = Math.max(
+                0,
+                Math.floor((Date.now() - timerRef.current) / 1000)
+            );
+
+            setElapsedSeconds(diffInSeconds);
+        }, 1000);
+
+        return () => window.clearInterval(intervalId);
+    }, [studyData]);
 
     const handleSubmit = async () => {
-        await submitStudyAnswer({
-            sessionId: studyData.sessionId,
-            questionId: studyData.questionId,
-            answerText: answer,
-        });
-
-        navigate("/today/result");
-    };
-
-    const handleAskAI = () => {
-        setChatInput("데이터 패턴 분석이 어떤 의미인가요?");
-    };
-
-    const handleSendQuestion = () => {
-        if (!chatInput.trim()) {
+        if (!studyData || isSubmitting || isSkipping) {
             return;
         }
 
-        setChatInput("");
+        if (!answer.trim()) {
+            setError("답변 내용을 입력해 주세요.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        setError("");
+
+        try {
+            const response = await submitResponse({
+                problemId: studyData.problemId,
+                answerText: answer.trim(),
+                responseTimeSec: Math.max(0, elapsedSeconds),
+                curriculumItemId: studyData.curriculumItemId,
+            });
+
+            await markTodayStudySubmitted({
+                itemId: studyData.itemId,
+            });
+
+            saveLatestResponseContext({
+                responseId: response.id,
+                problemId: response.problemId,
+                curriculumItemId: studyData.curriculumItemId,
+            });
+
+            navigate("/today/result");
+        } catch (submitError) {
+            setError(submitError.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
+    const handleSkip = async () => {
+        if (!studyData?.itemId || isSubmitting || isSkipping) {
+            return;
+        }
+
+        setIsSkipping(true);
+        setError("");
+
+        try {
+            await skipTodayStudyItem(studyData.itemId);
+
+            const nextStudyData = await getTodayStudySession();
+
+            setStudyData(nextStudyData);
+            setAnswer("");
+            setElapsedSeconds(0);
+            timerRef.current = Date.now();
+        } catch (skipError) {
+            setError(skipError.message);
+        } finally {
+            setIsSkipping(false);
+        }
+    };
+
+    const handleAskAI = () => {
+        setChatInput("이 지문에서 주제를 찾는 방법이 뭔가요?");
+    };
+
+    const handleSendQuestion = async () => {
+        const trimmedQuestion = chatInput.trim();
+
+        if (!trimmedQuestion || !studyData || isAskingTutor) {
+            return;
+        }
+
+        const userMessage = {
+            id: `user-${Date.now()}`,
+            role: "user",
+            text: trimmedQuestion,
+        };
+
+        setChatMessages((prev) => [...prev, userMessage]);
+        setChatInput("");
+        setTutorError("");
+        setIsAskingTutor(true);
+
+        try {
+            const result = await askAiTutor({
+                question: trimmedQuestion,
+                problemId: studyData.problemId,
+                passageText: studyData.passageText,
+            });
+
+            setChatMessages((prev) => [
+                ...prev,
+                {
+                    id: `ai-${Date.now()}`,
+                    role: "ai",
+                    text: result?.answer || "응답을 생성하지 못했습니다.",
+                    references: Array.isArray(result?.references)
+                        ? result.references
+                        : [],
+                },
+            ]);
+        } catch (askError) {
+            setTutorError(askError.message);
+        } finally {
+            setIsAskingTutor(false);
+        }
+    };
+
+    if (error && !studyData) {
+        return <div className="learner-study-page">{error}</div>;
+    }
+
     if (!studyData) {
-        return <div className="learner-study-page"></div>;
+        return (
+            <div className="learner-study-page">
+                <Card className="study-empty-card">
+                    <h2>오늘 예정된 학습이 없습니다.</h2>
+                    <p>커리큘럼 항목이 모두 완료되었거나 아직 배정되지 않았습니다.</p>
+                    <Button
+                        variant="primary"
+                        size="large"
+                        onClick={() => navigate("/dashboard")}
+                    >
+                        대시보드로 이동
+                    </Button>
+                </Card>
+            </div>
+        );
     }
 
     return (
@@ -113,8 +281,8 @@ function LearnerStudy() {
                         </span>
 
                         <div className="study-stars" aria-label="난이도 별점">
-                            {"★".repeat(studyData.difficulty)}
-                            {"☆".repeat(5 - studyData.difficulty)}
+                            {"★".repeat(studyData.difficulty || 0)}
+                            {"☆".repeat(5 - (studyData.difficulty || 0))}
                         </div>
                     </div>
                 </div>
@@ -122,7 +290,7 @@ function LearnerStudy() {
                 <div className="study-header-right">
                     <div className="study-timer">
                         <Clock size={18} strokeWidth={2.2} />
-                        <span>{studyData.timeLeft}</span>
+                        <span>{formatElapsedTime(elapsedSeconds)}</span>
                     </div>
 
                     <div className="study-font-controls">
@@ -166,7 +334,7 @@ function LearnerStudy() {
                 <aside className="study-side-area">
                     <Card className="study-answer-card">
                         <div className="study-question-box">
-                            <span className="study-question-icon">●</span>
+                            <span className="study-question-icon">?</span>
                             <h2>{studyData.question}</h2>
                         </div>
 
@@ -178,7 +346,7 @@ function LearnerStudy() {
                                 onChange={(event) =>
                                     setAnswer(event.target.value.slice(0, answerMaxLength))
                                 }
-                                placeholder="지문의 내용을 바탕으로 답변을 작성해주세요"
+                                placeholder="지문의 내용을 바탕으로 답변을 작성해 주세요."
                                 variant="box"
                                 className="study-answer-input"
                             />
@@ -188,14 +356,28 @@ function LearnerStudy() {
                             </span>
                         </div>
 
+                        {error ? <p className="study-submit-error">{error}</p> : null}
+
                         <Button
                             variant="dark"
                             size="large"
                             fullWidth
                             className="study-submit-button"
                             onClick={handleSubmit}
+                            disabled={isSubmitting || isSkipping}
                         >
-                            정답 제출하기
+                            {isSubmitting ? "제출 중..." : "정답 제출하기"}
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            size="large"
+                            fullWidth
+                            className="study-skip-button"
+                            onClick={handleSkip}
+                            disabled={isSubmitting || isSkipping}
+                        >
+                            {isSkipping ? "건너뛰는 중..." : "오늘 항목 건너뛰기"}
                         </Button>
 
                         <Button
@@ -206,7 +388,7 @@ function LearnerStudy() {
                             onClick={handleAskAI}
                         >
                             <HelpCircle size={18} strokeWidth={2.2} />
-                            도움이 필요한가요? AI에게 묻기
+                            AI에게 질문하기
                         </Button>
                     </Card>
 
@@ -214,30 +396,45 @@ function LearnerStudy() {
                         <div className="study-ai-title-row">
                             <div>
                                 <Sparkles size={20} strokeWidth={2.2} />
-                                <span>인공지능 연구 보조</span>
+                                <span>AI 튜터</span>
                             </div>
 
                             <span className="study-ai-status-dot"></span>
                         </div>
 
-                        <div className="study-chat-user">
-                            "데이터 패턴 분석"이 어떤 의미인가요?
+                        <div className="study-chat-thread">
+                            {chatMessages.map((message) =>
+                                message.role === "user" ? (
+                                    <div key={message.id} className="study-chat-user">
+                                        {message.text}
+                                    </div>
+                                ) : (
+                                    <div key={message.id} className="study-chat-ai">
+                                        <p>{message.text}</p>
+
+                                        {message.references?.length ? (
+                                            <div className="study-chat-references">
+                                                {message.references.map((reference) => (
+                                                    <span key={reference}>
+                                                        {reference}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                )
+                            )}
+
+                            {isAskingTutor ? (
+                                <div className="study-chat-ai loading">
+                                    <p>AI 튜터가 답변을 준비하는 중입니다.</p>
+                                </div>
+                            ) : null}
                         </div>
 
-                        <div className="study-chat-ai">
-                            <p>
-                                데이터 패턴 분석이란, 알고리즘이 이용자의 클릭,
-                                체류 시간, 검색어 등을 수집하여 무엇이 가치 있는
-                                정보인지를 스스로 학습하는 과정을 의미합니다.
-                            </p>
-
-                            <p>
-                                이는 전통적인 사서의 주관적 판단과는 달리 통계적
-                                빈도수와 상관관계에 의존하기 때문에, 대중적인
-                                정보가 곧 역사적 가치로 오인될 수 있는 위험성을
-                                내포하고 있습니다.
-                            </p>
-                        </div>
+                        {tutorError ? (
+                            <p className="study-submit-error">{tutorError}</p>
+                        ) : null}
 
                         <div className="study-chat-input-row">
                             <Input
@@ -246,7 +443,7 @@ function LearnerStudy() {
                                 onChange={(event) =>
                                     setChatInput(event.target.value)
                                 }
-                                placeholder="추가 질문을 입력하세요..."
+                                placeholder="AI 튜터에게 질문을 입력하세요."
                                 variant="box"
                                 className="study-chat-input"
                             />
@@ -255,6 +452,7 @@ function LearnerStudy() {
                                 type="button"
                                 className="study-chat-send-button"
                                 onClick={handleSendQuestion}
+                                disabled={isAskingTutor}
                             >
                                 <Send size={20} strokeWidth={2.4} />
                             </button>

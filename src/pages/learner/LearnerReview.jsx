@@ -8,6 +8,14 @@ import Button from "../../components/common/Button";
 import { getReviewArchive } from "../../data/services/reviewService";
 
 function getLinePoints(scores) {
+    if (scores.length === 1) {
+        const score = scores[0].score;
+        const x = 280;
+        const y = 220 - 24 - ((220 - 48) * score) / 100;
+
+        return `${x},${y}`;
+    }
+
     const maxScore = 100;
     const width = 560;
     const height = 220;

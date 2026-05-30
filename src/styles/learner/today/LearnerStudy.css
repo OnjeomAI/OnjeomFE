@@ -3,6 +3,33 @@
     color: var(--color-text);
 }
 
+.study-empty-card.common-card {
+    min-height: 320px;
+    border: none;
+    background-color: var(--color-panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.study-empty-card h2 {
+    margin: 0;
+    font-size: calc(28px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.study-empty-card p {
+    margin: 0;
+    max-width: 520px;
+    color: #5f584f;
+    font-size: calc(15px * var(--app-font-scale));
+    font-weight: 600;
+    line-height: 1.7;
+}
+
 .study-header {
     width: 100%;
     min-height: 70px;
@@ -250,6 +277,13 @@
     font-weight: 800;
 }
 
+.study-submit-error {
+    margin: 0 0 16px;
+    color: #bf2f2f;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 700;
+}
+
 .study-submit-button.common-button {
     height: 58px;
     background-color: #2b2415;
@@ -280,10 +314,31 @@
     color: #2b2415;
 }
 
+.study-skip-button.common-button {
+    height: 56px;
+    margin-top: 14px;
+    border: 1px solid #c9c1b1;
+    background-color: transparent;
+    color: #4f473d;
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.study-skip-button.common-button:hover:not(:disabled) {
+    background-color: #efede8;
+}
+
 .study-ai-card.common-card {
     padding: 34px 36px;
     background-color: var(--color-panel);
     border: none;
+}
+
+.study-chat-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
 .study-ai-title-row {
@@ -335,6 +390,10 @@
     color: #4f473d;
 }
 
+.study-chat-ai.loading {
+    opacity: 0.72;
+}
+
 .study-chat-ai p {
     margin: 0 0 22px;
     font-size: calc(15px * var(--app-font-scale));
@@ -345,6 +404,24 @@
 
 .study-chat-ai p:last-child {
     margin-bottom: 0;
+}
+
+.study-chat-references {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.study-chat-references span {
+    min-height: 28px;
+    padding: 0 12px;
+    background-color: #efe6c7;
+    color: #806600;
+    display: inline-flex;
+    align-items: center;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
 }
 
 .study-chat-input-row {
@@ -384,6 +461,11 @@
     justify-content: center;
 
     cursor: pointer;
+}
+
+.study-chat-send-button:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 .study-chat-send-button:hover {

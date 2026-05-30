@@ -113,6 +113,84 @@
     margin-bottom: 54px;
 }
 
+.analytics-writing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+    margin-bottom: 42px;
+}
+
+.analytics-writing-card.common-card,
+.analytics-report-card.common-card,
+.analytics-record-card.common-card {
+    border: none;
+    background-color: var(--color-panel);
+}
+
+.analytics-writing-card.common-card {
+    min-height: 300px;
+    padding: 34px 38px;
+}
+
+.analytics-writing-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.analytics-writing-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #dedad0;
+}
+
+.analytics-writing-metric span {
+    color: #6d655a;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.analytics-writing-metric strong {
+    color: #211d16;
+    font-size: calc(22px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.analytics-writing-message,
+.analytics-writing-analysis,
+.analytics-report-text,
+.analytics-empty-text {
+    margin: 0;
+    color: #4f473d;
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.7;
+}
+
+.analytics-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.analytics-tag {
+    min-height: 28px;
+    padding: 0 12px;
+    background-color: #efe6c7;
+    color: #806600;
+    display: inline-flex;
+    align-items: center;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.analytics-tag.muted {
+    background-color: #efede8;
+    color: #5f584f;
+}
+
 .analytics-chart-card.common-card {
     min-height: 360px;
     padding: 34px 38px 30px;
@@ -233,6 +311,104 @@
 
 .analytics-ability-section {
     margin-top: 10px;
+}
+
+.analytics-report-card.common-card,
+.analytics-record-card.common-card {
+    padding: 32px 36px;
+}
+
+.analytics-weakness-list {
+    margin: 26px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.analytics-weakness-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0;
+    border-top: 1px solid #dedad0;
+}
+
+.analytics-weakness-item:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.analytics-weakness-item h3 {
+    margin: 0 0 6px;
+    color: #211d16;
+    font-size: calc(18px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.analytics-weakness-item span {
+    color: #8f887d;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.analytics-weakness-item strong {
+    color: #d22b2b;
+    font-size: calc(18px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.analytics-record-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.analytics-record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 18px 0;
+    border-top: 1px solid #dedad0;
+}
+
+.analytics-record-item:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.analytics-record-item h3 {
+    margin: 0 0 6px;
+    color: #211d16;
+    font-size: calc(17px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.analytics-record-item p {
+    margin: 0;
+    color: #6d655a;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.analytics-record-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.analytics-record-meta strong {
+    color: #806600;
+    font-size: calc(17px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.analytics-record-meta span {
+    color: #8f887d;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 700;
 }
 
 .analytics-section-title-row {
@@ -460,6 +636,10 @@
     .analytics-chart-grid {
         grid-template-columns: 1fr;
     }
+
+    .analytics-writing-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 760px) {
@@ -480,7 +660,8 @@
 
     .analytics-history-row,
     .analytics-history-row div,
-    .analytics-footer {
+    .analytics-footer,
+    .analytics-record-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;

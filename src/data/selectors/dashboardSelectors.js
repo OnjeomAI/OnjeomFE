@@ -1,36 +1,104 @@
-// 대시보드 원천 데이터를 카드, 차트, 최근 기록 화면 모델로 가공합니다.
-import { getScoreType, getTrendLabel } from "../mockFormatters.js";
+import { getScoreType } from "../mockFormatters.js";
 import { formatDotDate } from "./dateSelectors.js";
 
+function mapReadingTypeLabel(readingType) {
+    const labels = {
+        FACTUAL: "사실 이해",
+        INFERENTIAL: "추론 이해",
+        CRITICAL: "비판 이해",
+        CREATIVE: "창의 이해",
+    };
+
+    return labels[readingType] || readingType || "기타";
+}
+
+function mapLevelLabel(level) {
+    const labels = {
+        HIGH: "높음",
+        MEDIUM: "보통",
+        LOW: "낮음",
+    };
+
+    return labels[level] || level || "-";
+}
+
 export function toDashboardViewModel({
-    summary,
-    abilityStats,
-    weaknessItems,
-    recentRecords,
+    radar,
+    stats,
+    today,
+    recentResponses,
+    weakPoints,
 }) {
+    const competencies = radar?.competencies || [];
+    const weakCompetencies = weakPoints?.weakCompetencies || [];
+    const dueReviews = today?.dueReviews || [];
+    const responses = recentResponses?.responses || [];
+    const topWeakness = weakCompetencies[0] || null;
+    const primaryReview = dueReviews[0] || null;
+
     return {
         todaySummary: {
-            ...summary,
-            scoreTrendLabel: getTrendLabel(summary.scoreTrend),
+            dailyGoal: today?.dailyGoal || 0,
+            completedCount: today?.completedToday || 0,
+            goalAchieved: Boolean(today?.goalAchieved),
+            remainingCount: Math.max(
+                0,
+                (today?.dailyGoal || 0) - (today?.completedToday || 0)
+            ),
         },
-        abilityStats,
-        weaknessItems,
-        aiRecommendation: {
-            title: "AI 맞춤 추천",
-            description:
-                "추론적 독해 연습에 집중하세요. 복합적인 한국어 서사 지문에서 직역으로 인한 오류 패턴이 관찰됩니다.",
+        activitySummary: {
+            totalResponses: stats?.totalResponses || 0,
+            streakDays: stats?.streakDays || 0,
+            recentStats: stats?.recentStats || [],
         },
-        reviewSummary: {
-            title: "복습이 필요한 3개의 항목",
-            description:
-                "기억 보유량이 62% 수준입니다. 장기 기억 전환을 위해 지금 확인하세요.",
-            retentionRate: 62,
-            reviewCount: 3,
+        scoreSummary: {
+            averageScore: stats?.averageScore || 0,
+            recentResponseCount: (stats?.recentStats || []).reduce(
+                (sum, item) => sum + (item.count || 0),
+                0
+            ),
         },
-        recentRecords: recentRecords.map((record) => ({
-            ...record,
-            completedAt: formatDotDate(record.completedAt),
-            scoreType: getScoreType(record.score),
+        abilityStats: competencies.map((item) => ({
+            key: item.type,
+            label: mapReadingTypeLabel(item.type),
+            current: item.score || 0,
+            previous: Math.max(0, (item.score || 0) - (item.delta || 0)),
+            delta: item.delta || 0,
+            level: mapLevelLabel(item.level),
+        })),
+        weaknessItems: weakCompetencies.map((item) => ({
+            key: item.type,
+            label: mapReadingTypeLabel(item.type),
+            score: item.score || 0,
+            percent: Math.max(0, Math.min(100, 100 - (item.score || 0))),
+            level: mapLevelLabel(item.level),
+        })),
+        aiRecommendation: topWeakness
+            ? {
+                  title: `${mapReadingTypeLabel(topWeakness.type)} 보완 권장`,
+                  description: `현재 ${mapReadingTypeLabel(topWeakness.type)} 점수는 ${topWeakness.score}점이며, 복습 대기 ${weakPoints?.reviewDueCount || 0}건이 잡혀 있습니다.`,
+              }
+            : {
+                  title: "균형 잡힌 학습 상태",
+                  description: "현재 별도로 강조된 약점 영역이 없습니다.",
+              },
+        reviewSummary: primaryReview
+            ? {
+                  title: `${today?.dueReviews?.length || 0}개의 복습 대기 항목`,
+                  description: `${mapReadingTypeLabel(primaryReview.readingType)} · ${primaryReview.questionText}`,
+              }
+            : {
+                  title: "오늘 예정된 복습이 없습니다",
+                  description: "새 학습을 시작하거나 최근 응답 이력을 확인해 보세요.",
+              },
+        recentRecords: responses.map((response) => ({
+            id: response.responseId,
+            title: response.questionText,
+            completedAt: formatDotDate(response.createdAt),
+            score: response.finalScore,
+            scoreType: getScoreType(response.finalScore || 0),
+            problemId: response.problemId,
+            readingType: mapReadingTypeLabel(response.readingType),
         })),
     };
 }

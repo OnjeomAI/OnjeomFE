@@ -1,4 +1,3 @@
-// 여러 화면에서 공통으로 쓰는 점수, 변화량, 학습 시간 표시값을 계산합니다.
 export function getScoreType(score) {
     if (score >= 80) {
         return "good";

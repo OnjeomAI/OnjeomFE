@@ -1,4 +1,3 @@
-// API 원천 날짜 문자열을 화면 표시용 날짜 포맷으로 변환합니다.
 export function formatDotDate(dateText) {
     const date = new Date(dateText);
 
@@ -16,9 +15,10 @@ export function formatKoreanDateTime(dateText) {
         return dateText;
     }
 
-    const period = date.getHours() >= 12 ? "PM" : "AM";
-    const hour = String(date.getHours()).padStart(2, "0");
+    const period = date.getHours() >= 12 ? "오후" : "오전";
+    const hours12 = date.getHours() % 12 || 12;
+    const hour = String(hours12).padStart(2, "0");
     const minute = String(date.getMinutes()).padStart(2, "0");
 
-    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 · ${hour}:${minute} ${period}`;
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${period} ${hour}:${minute}`;
 }
