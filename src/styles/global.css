@@ -20,6 +20,7 @@
 @import "learner/LearningAnalytics.css";
 @import "learner/today/LearnerStudy.css";
 @import "learner/today/LearnerResult.css";
+@import "admin/questionManagement.css";
 
 @import "auth/login.css";
 @import "auth/signup.css";
