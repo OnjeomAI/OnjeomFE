@@ -79,7 +79,7 @@ function Profile({ type = "learner" }) {
                         onUpdateProfile={handleUpdateProfile}
                     />
 
-                    <ProfileSecurity />
+                    <ProfileSecurity type={type} />
                 </section>
 
                 <section className="profile-right-section">

@@ -9,6 +9,7 @@ import {
 
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
+import { signup } from "../../data/services/authService";
 
 function Signup() {
     const navigate = useNavigate();
@@ -19,8 +20,35 @@ function Signup() {
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [agreeTerms, setAgreeTerms] = useState(false);
 
-    const handleSignupClick = () => {
-        navigate("/onboarding/diagnosis");
+    const handleSignupClick = async () => {
+        if (!nickname || !email || !password || !passwordConfirm) {
+            alert("모든 항목을 입력해주세요.");
+            return;
+        }
+
+        if (password !== passwordConfirm) {
+            alert("비밀번호가 일치하지 않습니다.");
+            return;
+        }
+
+        if (!agreeTerms) {
+            alert("약관 동의가 필요합니다.");
+            return;
+        }
+
+        try {
+            await signup({
+                email,
+                password,
+                nickname,
+            });
+            navigate("/signup/verify", {
+                state: { email },
+            });
+        } catch (error) {
+            console.error(error);
+            alert(error.message || "서버 요청 중 오류가 발생했습니다.");
+        }
     };
 
     const handleSocialSignup = () => {

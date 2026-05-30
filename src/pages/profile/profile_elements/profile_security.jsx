@@ -1,9 +1,32 @@
 import { Shield } from "lucide-react";
-import Card from "../../../components/common/Card.jsx";
+import { useNavigate } from "react-router-dom";
 
-function ProfileSecurity() {
+import Card from "../../../components/common/Card.jsx";
+import { logoutAll } from "../../../data/services/authService";
+
+function ProfileSecurity({ type = "learner" }) {
+    const navigate = useNavigate();
+
     const handleChangePassword = () => {
-        alert("비밀번호 변경 기능은 백엔드 연결 후 구현 예정.");
+        navigate("/password/reset-request");
+    };
+
+    const handleLogoutAll = async () => {
+        const confirmed = window.confirm(
+            "모든 기기에서 로그아웃하시겠습니까?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await logoutAll();
+            navigate(type === "admin" ? "/admin" : "/login");
+        } catch (error) {
+            console.error(error);
+            alert(error.message || "전체 기기 로그아웃에 실패했습니다.");
+        }
     };
 
     return (
@@ -14,17 +37,27 @@ function ProfileSecurity() {
             </div>
 
             <p className="profile-security-description">
-                아카이브 접근 보안을 위해 복잡한 암호를 사용하세요.
+                계정 보안을 위해 비밀번호 관리와 세션 정리를 할 수 있습니다.
             </p>
 
-            <button
-                className="profile-security-link-button"
-                type="button"
-                onClick={handleChangePassword}
-            >
-                비밀번호 변경하기
-                <span>→</span>
-            </button>
+            <div className="profile-security-actions">
+                <button
+                    className="profile-security-link-button"
+                    type="button"
+                    onClick={handleChangePassword}
+                >
+                    비밀번호 변경하기
+                    <span>&gt;</span>
+                </button>
+
+                <button
+                    className="profile-security-danger-button"
+                    type="button"
+                    onClick={handleLogoutAll}
+                >
+                    전체 기기 로그아웃
+                </button>
+            </div>
         </Card>
     );
 }

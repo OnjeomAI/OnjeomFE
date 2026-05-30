@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     BookOpen,
@@ -10,7 +10,9 @@ import {
     FileQuestion,
 } from "lucide-react";
 
-const learnerLinks  = [
+import { logout } from "../../data/services/authService";
+
+const learnerLinks = [
     { to: "/dashboard", label: "대시보드", icon: LayoutDashboard },
     { to: "/today", label: "오늘의 학습", icon: BookOpen },
     { to: "/review", label: "복습 노트", icon: RefreshCcw },
@@ -27,7 +29,18 @@ const adminLinks = [
 ];
 
 function Sidebar({ type = "learner" }) {
+    const navigate = useNavigate();
     const links = type === "admin" ? adminLinks : learnerLinks;
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            navigate(type === "admin" ? "/admin" : "/login");
+        }
+    };
 
     return (
         <aside className="sidebar">
@@ -46,7 +59,11 @@ function Sidebar({ type = "learner" }) {
                         const Icon = link.icon;
 
                         return (
-                            <NavLink key={link.to} to={link.to} className="sidebar-link">
+                            <NavLink
+                                key={link.to}
+                                to={link.to}
+                                className="sidebar-link"
+                            >
                                 <Icon size={19} strokeWidth={1.8} />
                                 <span>{link.label}</span>
                             </NavLink>
@@ -55,7 +72,7 @@ function Sidebar({ type = "learner" }) {
                 </nav>
             </div>
 
-            <button className="sidebar-logout-button">
+            <button className="sidebar-logout-button" onClick={handleLogout}>
                 <LogOut size={15} />
                 <span>로그아웃</span>
             </button>

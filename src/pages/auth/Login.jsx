@@ -4,29 +4,32 @@ import { LockKeyhole, Mail, MessageSquare } from "lucide-react";
 
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
-import {
-    getAfterLoginPath,
-    verifyLogin,
-} from "../../data/services/learnerService";
+import { getAfterLoginPath } from "../../data/services/learnerService";
+import { getUserTypeFromRole, login } from "../../data/services/authService";
 
 function Login() {
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState("ksw@onjeom.ai");
-    const [password, setPassword] = useState("12345678");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
     const [loginError, setLoginError] = useState("");
 
     const handleLoginClick = async () => {
-        const loginResult = await verifyLogin(email, password);
-
-        if (!loginResult) {
-            setLoginError("이메일 또는 비밀번호를 확인해주세요.");
+        if (!email || !password) {
+            setLoginError("이메일과 비밀번호를 입력해주세요.");
             return;
         }
 
-        setLoginError("");
-        navigate(await getAfterLoginPath(loginResult.userType));
+        try {
+            const loginResult = await login({ email, password });
+            const userType = getUserTypeFromRole(loginResult.role);
+
+            setLoginError("");
+            navigate(await getAfterLoginPath(userType));
+        } catch (error) {
+            setLoginError(error.message || "로그인에 실패했습니다.");
+        }
     };
 
     const handleSignupClick = () => {
@@ -35,6 +38,10 @@ function Login() {
 
     const handleSocialLogin = async () => {
         navigate(await getAfterLoginPath("learner"));
+    };
+
+    const handleForgotPasswordClick = () => {
+        navigate("/password/reset-request");
     };
 
     return (
@@ -112,7 +119,7 @@ function Login() {
                                 type="email"
                                 name="email"
                                 value={email}
-                                placeholder="ksw@onjeom.ai"
+                                placeholder="user@example.com"
                                 variant="box"
                                 onChange={(event) => setEmail(event.target.value)}
                             />
@@ -136,6 +143,7 @@ function Login() {
                             <button
                                 type="button"
                                 className="auth-forgot-button"
+                                onClick={handleForgotPasswordClick}
                             >
                                 비밀번호를 잊으셨나요?
                             </button>

@@ -7,6 +7,9 @@ import Landing from "./pages/landing/Landing.jsx";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import AdminLogin from "./pages/auth/AdminLogin";
+import EmailVerification from "./pages/auth/EmailVerification";
+import PasswordReset from "./pages/auth/PasswordReset";
+import PasswordResetRequest from "./pages/auth/PasswordResetRequest";
 
 import GoalSetting from "./pages/onboarding/GoalSetting.jsx";
 import DiagnosisTest from "./pages/onboarding/DiagnosisTest";
@@ -42,6 +45,9 @@ function App() {
 
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/signup" element={<Signup/>}/>
+                <Route path="/signup/verify" element={<EmailVerification/>}/>
+                <Route path="/password/reset-request" element={<PasswordResetRequest/>}/>
+                <Route path="/password/reset" element={<PasswordReset/>}/>
                 <Route path="/admin" element={<AdminLogin/>}/>
 
                 <Route path="/onboarding/goal" element={<GoalSetting/>}/>

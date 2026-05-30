@@ -44,3 +44,26 @@
 .profile-security-link-button:hover {
     color: #745700;
 }
+
+.profile-security-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.profile-security-danger-button {
+    min-height: 42px;
+    padding: 0 16px;
+    border: 1px solid #d9c7c3;
+    border-radius: 999px;
+    background-color: #fff4f2;
+    color: #b42318;
+    font-size: calc(13px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.profile-security-danger-button:hover {
+    background-color: #fde7e3;
+}

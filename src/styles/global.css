@@ -22,6 +22,9 @@
 @import "learner/today/LearnerResult.css";
 
 @import "auth/login.css";
+@import "auth/signup.css";
+@import "auth/emailVerification.css";
+@import "auth/passwordReset.css";
 @import "auth/adminLogin.css";
 
 * {
