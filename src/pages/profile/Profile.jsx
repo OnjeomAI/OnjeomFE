@@ -5,6 +5,10 @@ import {
     updateProfile,
     updateSettings,
 } from "../../data/services/learnerService";
+import {
+    getMyProfile,
+    updateMyProfile,
+} from "../../data/services/userService";
 
 import { applyAppFontSize } from "../../utils/fontSize";
 
@@ -20,7 +24,10 @@ function Profile({ type = "learner" }) {
         let ignore = false;
 
         async function loadUser() {
-            const nextUser = await getUserByType(type);
+            const nextUser =
+                type === "learner"
+                    ? await getMyProfile(type)
+                    : await getUserByType(type);
 
             if (ignore) {
                 return;
@@ -37,7 +44,14 @@ function Profile({ type = "learner" }) {
     }, [type]);
 
     const handleUpdateProfile = async (updatedProfile) => {
-        const updatedUser = await updateProfile(type, updatedProfile);
+        const updatedUser =
+            type === "learner"
+                ? await updateMyProfile(type, {
+                      nickname: updatedProfile.nickname ?? user.nickname,
+                      dailyGoal: user.dailyGoal,
+                      alarmEnabled: user.alarmEnabled,
+                  })
+                : await updateProfile(type, updatedProfile);
 
         setUser(updatedUser);
 
@@ -46,7 +60,21 @@ function Profile({ type = "learner" }) {
     };
 
     const handleUpdateSettings = async (updatedSettings) => {
-        const updatedUser = await updateSettings(type, updatedSettings);
+        const updatedUser =
+            type === "learner"
+                ? await updateMyProfile(type, {
+                      nickname: user.nickname,
+                      dailyGoal:
+                          updatedSettings.dailyGoal ?? user.dailyGoal ?? 10,
+                      alarmEnabled:
+                          updatedSettings.alarmEnabled ??
+                          (updatedSettings.notificationSettings
+                              ? Object.values(
+                                    updatedSettings.notificationSettings
+                                ).some(Boolean)
+                              : user.alarmEnabled),
+                  })
+                : await updateSettings(type, updatedSettings);
 
         setUser(updatedUser);
 

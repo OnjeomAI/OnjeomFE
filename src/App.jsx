@@ -27,12 +27,6 @@ import AdminTagManagement from "./pages/admin/AdminTagManagement";
 import AdminStats from "./pages/admin/AdminStats";
 
 import Profile from "./pages/profile/Profile";
-import OnePage from './pages/1page';
-import TwoPage from './pages/2page';
-import ThreePage from './pages/3page';
-import FourPage from './pages/4page';
-import FivePage from './pages/5page';
-import SixPage from './pages/6page';
 
 function App() {
     return (
