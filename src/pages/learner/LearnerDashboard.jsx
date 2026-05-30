@@ -1,13 +1,14 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
+import { getUserByType } from "../../data/services/learnerService";
+import { getLearnerDashboard } from "../../data/services/dashboardService";
 import {
-    getMockTodayStudyPath,
-    getMockTodayStudyStatus,
-    getMockUserByType,
-} from "../../data/mockData";
-import { getMockDashboardData } from "../../data/mockDashboard";
+    getTodayStudyPath,
+    getTodayStudyStatus,
+} from "../../data/services/studyService";
 
 function getRadarPointString(items, valueKey = "current") {
     const centerX = 210;
@@ -54,9 +55,40 @@ function getRadarGridPointString(itemCount, radius) {
 function LearnerDashboard() {
     const navigate = useNavigate();
 
-    const learner = getMockUserByType("learner");
-    const todayStudyStatus = getMockTodayStudyStatus();
-    const dashboard = getMockDashboardData();
+    const [learner, setLearner] = useState(null);
+    const [todayStudyStatus, setTodayStudyStatus] = useState("NOT_STARTED");
+    const [dashboard, setDashboard] = useState(null);
+
+    useEffect(() => {
+        let ignore = false;
+
+        async function loadDashboard() {
+            const [nextLearner, nextTodayStudyStatus, nextDashboard] =
+                await Promise.all([
+                    getUserByType("learner"),
+                    getTodayStudyStatus(),
+                    getLearnerDashboard(),
+                ]);
+
+            if (ignore) {
+                return;
+            }
+
+            setLearner(nextLearner);
+            setTodayStudyStatus(nextTodayStudyStatus);
+            setDashboard(nextDashboard);
+        }
+
+        loadDashboard();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
+
+    if (!learner || !dashboard) {
+        return <div className="learner-dashboard-page"></div>;
+    }
 
     const dailyGoal = learner.dailyGoal || 10;
     const todaySummary = dashboard.todaySummary;
@@ -75,8 +107,8 @@ function LearnerDashboard() {
     const currentRadarPoints = getRadarPointString(abilityItems, "current");
     const previousRadarPoints = getRadarPointString(abilityItems, "previous");
 
-    const handleStartStudy = () => {
-        navigate(getMockTodayStudyPath());
+    const handleStartStudy = async () => {
+        navigate(await getTodayStudyPath());
     };
 
     const handleViewHistory = () => {

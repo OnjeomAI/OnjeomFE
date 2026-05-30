@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Button from "../../components/common/Button";
 import {
-    getMockUserByType,
-    updateMockSettings,
-} from "../../data/mockData";
+    getUserByType,
+    updateSettings,
+} from "../../data/services/learnerService";
 
 const goalOptions = [
     {
@@ -34,27 +34,49 @@ const goalOptions = [
 function GoalSetting() {
     const navigate = useNavigate();
 
-    const learner = getMockUserByType("learner");
+    const [learner, setLearner] = useState(null);
+    const [selectedGoal, setSelectedGoal] = useState(10);
 
-    const [selectedGoal, setSelectedGoal] = useState(
-        learner.dailyGoal || 10
-    );
+    useEffect(() => {
+        let ignore = false;
 
-    const handleGoalSelect = (goalValue) => {
+        async function loadLearner() {
+            const nextLearner = await getUserByType("learner");
+
+            if (ignore) {
+                return;
+            }
+
+            setLearner(nextLearner);
+            setSelectedGoal(nextLearner.dailyGoal || 10);
+        }
+
+        loadLearner();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
+
+    const handleGoalSelect = async (goalValue) => {
         setSelectedGoal(goalValue);
 
-        updateMockSettings("learner", {
+        await updateSettings("learner", {
             dailyGoal: goalValue,
         });
     };
 
-    const handleNext = () => {
-        updateMockSettings("learner", {
+    const handleNext = async () => {
+        await updateSettings("learner", {
             dailyGoal: selectedGoal,
         });
 
         navigate("/dashboard");
     };
+
+    if (!learner) {
+        return <div className="goal-setting-page"></div>;
+    }
 
     return (
         <div className="goal-setting-page">

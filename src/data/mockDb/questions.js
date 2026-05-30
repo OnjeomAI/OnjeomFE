@@ -1,7 +1,9 @@
-const mockQuestions = [
+// 진단/학습 문항의 본문, 프롬프트, 난이도 같은 원천 문항 데이터를 보관합니다.
+export const questions = [
     {
-        id: "diagnosis-question-01",
-        type: "essay",
+        id: "question-diagnosis-001",
+        usage: "DIAGNOSIS",
+        type: "ESSAY",
         title: "디지털 아카이브와 기억의 가소성",
         category: "진단",
         difficulty: 3,
@@ -11,7 +13,7 @@ const mockQuestions = [
             title: "디지털 아카이브와 기억의 가소성",
             paragraphs: [
                 {
-                    id: "diagnosis-01-p1",
+                    id: "diagnosis-001-p1",
                     variant: "normal",
                     segments: [
                         {
@@ -29,7 +31,7 @@ const mockQuestions = [
                     ],
                 },
                 {
-                    id: "diagnosis-01-p2",
+                    id: "diagnosis-001-p2",
                     variant: "normal",
                     segments: [
                         {
@@ -44,8 +46,9 @@ const mockQuestions = [
             "본문에서 언급된 디지털 아카이브의 특징과 그것이 인간의 기억 방식에 미치는 영향을 서술하시오.",
     },
     {
-        id: "diagnosis-question-02",
-        type: "essay",
+        id: "question-diagnosis-002",
+        usage: "DIAGNOSIS",
+        type: "ESSAY",
         title: "알고리즘 추천과 정보 편향",
         category: "진단",
         difficulty: 3,
@@ -55,7 +58,7 @@ const mockQuestions = [
             title: "알고리즘 추천과 정보 편향",
             paragraphs: [
                 {
-                    id: "diagnosis-02-p1",
+                    id: "diagnosis-002-p1",
                     variant: "normal",
                     segments: [
                         {
@@ -65,7 +68,7 @@ const mockQuestions = [
                     ],
                 },
                 {
-                    id: "diagnosis-02-p2",
+                    id: "diagnosis-002-p2",
                     variant: "normal",
                     segments: [
                         {
@@ -84,8 +87,9 @@ const mockQuestions = [
             "알고리즘 추천 시스템이 편리함을 제공하면서도 정보 편향을 강화할 수 있는 이유를 설명하시오.",
     },
     {
-        id: "diagnosis-question-03",
-        type: "essay",
+        id: "question-diagnosis-003",
+        usage: "DIAGNOSIS",
+        type: "ESSAY",
         title: "인공지능과 학습자의 자기주도성",
         category: "진단",
         difficulty: 3,
@@ -95,7 +99,7 @@ const mockQuestions = [
             title: "인공지능과 학습자의 자기주도성",
             paragraphs: [
                 {
-                    id: "diagnosis-03-p1",
+                    id: "diagnosis-003-p1",
                     variant: "normal",
                     segments: [
                         {
@@ -105,7 +109,7 @@ const mockQuestions = [
                     ],
                 },
                 {
-                    id: "diagnosis-03-p2",
+                    id: "diagnosis-003-p2",
                     variant: "normal",
                     segments: [
                         {
@@ -124,8 +128,9 @@ const mockQuestions = [
             "인공지능 기반 학습 시스템이 학습자에게 주는 장점과 함께 주의해야 할 점을 서술하시오.",
     },
     {
-        id: "study-question-03",
-        type: "essay",
+        id: "question-study-003",
+        usage: "STUDY",
+        type: "ESSAY",
         title: "디지털 시대의 아카이브",
         category: "추론형",
         difficulty: 4,
@@ -135,7 +140,7 @@ const mockQuestions = [
             title: "디지털 시대의 아카이브: 기억의 보존과 알고리즘의 선택",
             paragraphs: [
                 {
-                    id: "p1",
+                    id: "study-003-p1",
                     variant: "normal",
                     segments: [
                         {
@@ -145,18 +150,18 @@ const mockQuestions = [
                     ],
                 },
                 {
-                    id: "p2",
+                    id: "study-003-p2",
                     variant: "highlight",
+                    highlightText: "주체로서의 인공지능과 알고리즘",
                     segments: [
                         {
                             text: "오히려 정보의 과잉 속에서 무엇을 남기고 무엇을 삭제할 것인가를 결정하는 주체로서의 인공지능과 알고리즘의 역할이 부각되고 있다. 과거에는 전문 사서나 역사가가 가치 판단의 주체였다면, 이제는 이용자의 데이터 패턴을 분석하여 '중요도'를 할당하는 수치적 모델이 그 자리를 대신하고 있다.",
                             highlighted: false,
                         },
                     ],
-                    highlightText: "주체로서의 인공지능과 알고리즘",
                 },
                 {
-                    id: "p3",
+                    id: "study-003-p3",
                     variant: "notice",
                     segments: [
                         {
@@ -166,7 +171,7 @@ const mockQuestions = [
                     ],
                 },
                 {
-                    id: "p4",
+                    id: "study-003-p4",
                     variant: "normal",
                     segments: [
                         {
@@ -181,54 +186,3 @@ const mockQuestions = [
             "작가가 주장하는 '디지털 아카이브의 주체성 변화'가 미래 역사관에 미칠 수 있는 영향에 대해 지문의 핵심 키워드를 포함하여 서술하시오.",
     },
 ];
-
-export function getMockQuestionById(questionId) {
-    return mockQuestions.find((question) => question.id === questionId);
-}
-
-export function getMockQuestionsByIds(questionIds) {
-    return questionIds
-        .map((questionId) => getMockQuestionById(questionId))
-        .filter(Boolean);
-}
-
-export function toDiagnosisQuestion(question, state = {}) {
-    if (!question) {
-        return null;
-    }
-
-    return {
-        id: question.id,
-        order: state.order,
-        title: question.title,
-        passageParagraphs: question.passage.paragraphs.map((paragraph) =>
-            paragraph.segments.map((segment) => ({ ...segment }))
-        ),
-        questionText: question.prompt,
-        minLength: question.minLength,
-        answer: state.answer || "",
-        submitted: Boolean(state.submitted),
-    };
-}
-
-export function toStudyQuestion(question) {
-    if (!question) {
-        return null;
-    }
-
-    return {
-        title: question.title,
-        category: question.category,
-        difficulty: question.difficulty,
-        passageTitle: question.passage.title,
-        passageParagraphs: question.passage.paragraphs.map((paragraph) => ({
-            id: paragraph.id,
-            text: paragraph.segments.map((segment) => segment.text).join(""),
-            type: paragraph.variant,
-            highlightText: paragraph.highlightText,
-        })),
-        question: question.prompt,
-        minLength: question.minLength,
-        maxLength: question.maxLength,
-    };
-}

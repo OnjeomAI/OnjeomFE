@@ -1,8 +1,17 @@
+import { useEffect, useState } from "react";
 import PageHeader from "../../components/common/PageHeader";
-import { getMockUserByType } from "../../data/mockData";
+import { getUserByType } from "../../data/services/learnerService";
 
 function AdminTagManagement() {
-    const user = getMockUserByType("admin");
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        getUserByType("admin").then(setUser);
+    }, []);
+
+    if (!user) {
+        return <div></div>;
+    }
 
     return (
         <div>

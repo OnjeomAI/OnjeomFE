@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import PageHeader from "../../components/common/PageHeader";
 import Card from "../../components/common/Card";
-import { getMockUserByType } from "../../data/mockData";
-import { getMockAnalyticsData } from "../../data/mockAnalytics";
+import { getUserByType } from "../../data/services/learnerService";
+import { getLearningAnalytics } from "../../data/services/analyticsService";
 
 function getScoreLinePoints(items) {
     const width = 420;
@@ -26,8 +27,37 @@ function getScoreLinePoints(items) {
 }
 
 function LearningAnalytics() {
-    const user = getMockUserByType("learner");
-    const analyticsData = getMockAnalyticsData();
+    const [user, setUser] = useState(null);
+    const [analyticsData, setAnalyticsData] = useState(null);
+
+    useEffect(() => {
+        let ignore = false;
+
+        async function loadAnalytics() {
+            const [nextUser, nextAnalyticsData] = await Promise.all([
+                getUserByType("learner"),
+                getLearningAnalytics(),
+            ]);
+
+            if (ignore) {
+                return;
+            }
+
+            setUser(nextUser);
+            setAnalyticsData(nextAnalyticsData);
+        }
+
+        loadAnalytics();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
+
+    if (!user || !analyticsData) {
+        return <div className="learning-analytics-page"></div>;
+    }
+
     const scoreLinePoints = getScoreLinePoints(analyticsData.scoreTrend);
 
     return (

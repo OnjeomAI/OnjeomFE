@@ -1,0 +1,86 @@
+// 제출 답변에 대한 채점 결과, 분석 항목, 전문가 인사이트 데이터를 보관합니다.
+export const gradingResults = [
+    {
+        id: "grading-archive-001",
+        submissionId: "submission-archive-001",
+        score: 92,
+        maxScore: 100,
+        status: "GRADED",
+        engine: "AI",
+        elapsedSeconds: 2.1,
+        modelAnswer:
+            "산업 자동화는 생산성 향상과 노동 구조 재편을 동시에 가져왔으며, 사회경제적 영향은 기술 수용 방식과 제도적 대응에 따라 달라졌다.",
+        analysisItems: [
+            {
+                id: "analysis-archive-001",
+                type: "GOOD",
+                title: "핵심 키워드 통합",
+                description: "기술 변화와 사회경제적 맥락을 함께 연결했습니다.",
+            },
+            {
+                id: "analysis-archive-002",
+                type: "GOOD",
+                title: "논리적 연결",
+                description: "문단 간 인과 관계가 이전 제출보다 명확합니다.",
+            },
+        ],
+        expertInsight: {
+            label: "AI 전문가 인사이트",
+            category: "논리 구조",
+            description:
+                "개념 간 연결성이 개선되었습니다. 다음 단계에서는 반론 가능성을 함께 제시해 보세요.",
+        },
+        gradedAt: "2026-10-24T14:20:03+09:00",
+    },
+    {
+        id: "grading-archive-002",
+        submissionId: "submission-archive-002",
+        score: 77,
+        maxScore: 100,
+        status: "GRADED",
+        engine: "AI",
+        elapsedSeconds: 2.4,
+        modelAnswer: "",
+        analysisItems: [],
+        expertInsight: {
+            label: "AI 전문가 인사이트",
+            category: "논리 구조",
+            description: "",
+        },
+        gradedAt: "2026-10-20T11:45:03+09:00",
+    },
+    {
+        id: "grading-archive-003",
+        submissionId: "submission-archive-003",
+        score: 62,
+        maxScore: 100,
+        status: "GRADED",
+        engine: "AI",
+        elapsedSeconds: 2.5,
+        modelAnswer: "",
+        analysisItems: [],
+        expertInsight: {
+            label: "AI 전문가 인사이트",
+            category: "논리 구조",
+            description: "",
+        },
+        gradedAt: "2026-10-15T09:12:03+09:00",
+    },
+    {
+        id: "grading-archive-004",
+        submissionId: "submission-archive-004",
+        score: 45,
+        maxScore: 100,
+        status: "GRADED",
+        engine: "AI",
+        elapsedSeconds: 2.6,
+        modelAnswer: "",
+        analysisItems: [],
+        expertInsight: {
+            label: "AI 전문가 인사이트",
+            category: "논리 구조",
+            description: "",
+        },
+        gradedAt: "2026-10-12T16:30:03+09:00",
+    },
+];

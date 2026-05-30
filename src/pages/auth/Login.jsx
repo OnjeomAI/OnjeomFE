@@ -4,7 +4,10 @@ import { LockKeyhole, Mail, MessageSquare } from "lucide-react";
 
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
-import { getMockAfterLoginPath, verifyMockLogin } from "../../data/mockData";
+import {
+    getAfterLoginPath,
+    verifyLogin,
+} from "../../data/services/learnerService";
 
 function Login() {
     const navigate = useNavigate();
@@ -14,8 +17,8 @@ function Login() {
     const [rememberMe, setRememberMe] = useState(false);
     const [loginError, setLoginError] = useState("");
 
-    const handleLoginClick = () => {
-        const loginResult = verifyMockLogin(email, password);
+    const handleLoginClick = async () => {
+        const loginResult = await verifyLogin(email, password);
 
         if (!loginResult) {
             setLoginError("이메일 또는 비밀번호를 확인해주세요.");
@@ -23,15 +26,15 @@ function Login() {
         }
 
         setLoginError("");
-        navigate(getMockAfterLoginPath(loginResult.userType));
+        navigate(await getAfterLoginPath(loginResult.userType));
     };
 
     const handleSignupClick = () => {
         navigate("/signup");
     };
 
-    const handleSocialLogin = () => {
-        navigate(getMockAfterLoginPath("learner"));
+    const handleSocialLogin = async () => {
+        navigate(await getAfterLoginPath("learner"));
     };
 
     return (

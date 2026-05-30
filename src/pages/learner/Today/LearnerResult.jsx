@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     ArrowLeft,
@@ -11,19 +12,46 @@ import {
 
 import Card from "../../../components/common/Card";
 import Button from "../../../components/common/Button";
-import { startMockTodayStudy } from "../../../data/mockData";
-import { getMockStudyResult } from "../../../data/mockStudyResult";
+import {
+    getLatestStudyResult,
+    restartTodayStudy,
+} from "../../../data/services/studyService";
 
 function LearnerResult() {
     const navigate = useNavigate();
-    const resultData = getMockStudyResult();
+    const [resultData, setResultData] = useState(null);
+
+    useEffect(() => {
+        let ignore = false;
+
+        async function loadResult() {
+            const nextResultData = await getLatestStudyResult();
+
+            if (ignore) {
+                return;
+            }
+
+            if (!nextResultData) {
+                navigate("/today", { replace: true });
+                return;
+            }
+
+            setResultData(nextResultData);
+        }
+
+        loadResult();
+
+        return () => {
+            ignore = true;
+        };
+    }, [navigate]);
 
     const handleBack = () => {
         navigate("/today");
     };
 
-    const handleNextProblem = () => {
-        startMockTodayStudy();
+    const handleNextProblem = async () => {
+        await restartTodayStudy();
         navigate("/today");
     };
 
@@ -34,6 +62,10 @@ function LearnerResult() {
     const handleReviewConcept = () => {
         navigate("/review");
     };
+
+    if (!resultData) {
+        return <div className="learner-result-page"></div>;
+    }
 
     return (
         <div className="learner-result-page">

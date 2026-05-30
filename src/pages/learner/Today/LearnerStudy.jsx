@@ -12,12 +12,12 @@ import {
 import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";
 import Input from "../../../components/common/Input";
-import { getMockTodayStudy } from "../../../data/mockStudy";
 import {
-    completeMockTodayStudy,
-    getMockTodayStudyStatus,
-    startMockTodayStudy,
-} from "../../../data/mockData";
+    getTodayStudySession,
+    getTodayStudyStatus,
+    startTodayStudy,
+    submitStudyAnswer,
+} from "../../../data/services/studyService";
 
 function renderParagraph(paragraph) {
     if (paragraph.type !== "highlight") {
@@ -39,8 +39,8 @@ function renderParagraph(paragraph) {
 
 function LearnerStudy() {
     const navigate = useNavigate();
-    const studyData = getMockTodayStudy();
 
+    const [studyData, setStudyData] = useState(null);
     const [answer, setAnswer] = useState("");
     const [chatInput, setChatInput] = useState("");
 
@@ -48,16 +48,38 @@ function LearnerStudy() {
     const answerLength = answer.length;
 
     useEffect(() => {
-        if (getMockTodayStudyStatus() === "COMPLETED") {
-            navigate("/today/result", { replace: true });
-            return;
+        let ignore = false;
+
+        async function loadTodayStudy() {
+            if (await getTodayStudyStatus() === "COMPLETED") {
+                navigate("/today/result", { replace: true });
+                return;
+            }
+
+            await startTodayStudy();
+            const nextStudyData = await getTodayStudySession();
+
+            if (ignore) {
+                return;
+            }
+
+            setStudyData(nextStudyData);
         }
 
-        startMockTodayStudy();
+        loadTodayStudy();
+
+        return () => {
+            ignore = true;
+        };
     }, [navigate]);
 
-    const handleSubmit = () => {
-        completeMockTodayStudy();
+    const handleSubmit = async () => {
+        await submitStudyAnswer({
+            sessionId: studyData.sessionId,
+            questionId: studyData.questionId,
+            answerText: answer,
+        });
+
         navigate("/today/result");
     };
 
@@ -72,6 +94,10 @@ function LearnerStudy() {
 
         setChatInput("");
     };
+
+    if (!studyData) {
+        return <div className="learner-study-page"></div>;
+    }
 
     return (
         <div className="learner-study-page">

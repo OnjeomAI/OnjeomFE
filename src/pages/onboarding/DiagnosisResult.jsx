@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
-import { markMockDiagnosisCompleted } from "../../data/mockData";
+import { markDiagnosisCompleted } from "../../data/services/learnerService";
 
 const radarScores = [
     { label: "사실적", score: 85, x: 200, y: 58 },
@@ -65,7 +65,7 @@ function DiagnosisResult() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        markMockDiagnosisCompleted();
+        markDiagnosisCompleted();
     }, []);
 
     const handleStartLearning = () => {

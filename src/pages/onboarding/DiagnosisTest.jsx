@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 
 import Input from "../../components/common/Input";
 import {
-    getMockDiagnosisSession,
+    completeDiagnosisSession,
     getCurrentDiagnosisQuestion,
-    updateMockDiagnosisAnswer,
-    submitMockDiagnosisAnswer,
-    completeMockDiagnosisSession,
-} from "../../data/mockDiagnosis";
-import { markMockDiagnosisCompleted } from "../../data/mockData";
+    getDiagnosisSession,
+    submitDiagnosisAnswer,
+    updateDiagnosisAnswer,
+} from "../../data/services/diagnosisService";
+import { markDiagnosisCompleted } from "../../data/services/learnerService";
 
 function formatRemainingTime(seconds) {
     const minute = Math.floor(seconds / 60);
@@ -22,21 +22,39 @@ function DiagnosisTest() {
     const navigate = useNavigate();
     const isFinishedRef = useRef(false);
 
-    const [session, setSession] = useState(() => getMockDiagnosisSession());
+    const [session, setSession] = useState(null);
 
-    const [currentQuestion, setCurrentQuestion] = useState(() =>
-        getCurrentDiagnosisQuestion()
-    );
+    const [currentQuestion, setCurrentQuestion] = useState(null);
 
-    const [answer, setAnswer] = useState(() => {
-        const question = getCurrentDiagnosisQuestion();
-        return question?.answer || "";
-    });
+    const [answer, setAnswer] = useState("");
 
-    const [remainingTime, setRemainingTime] = useState(() => {
-        const currentSession = getMockDiagnosisSession();
-        return currentSession.remainingTime || 0;
-    });
+    const [remainingTime, setRemainingTime] = useState(0);
+
+    useEffect(() => {
+        let ignore = false;
+
+        async function loadDiagnosis() {
+            const [nextSession, nextQuestion] = await Promise.all([
+                getDiagnosisSession(),
+                getCurrentDiagnosisQuestion(),
+            ]);
+
+            if (ignore) {
+                return;
+            }
+
+            setSession(nextSession);
+            setCurrentQuestion(nextQuestion);
+            setAnswer(nextQuestion?.answer || "");
+            setRemainingTime(nextSession.remainingTime || 0);
+        }
+
+        loadDiagnosis();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
 
     useEffect(() => {
         if (remainingTime <= 0) {
@@ -55,7 +73,7 @@ function DiagnosisTest() {
         }, 1000);
 
         return () => clearInterval(timerId);
-    }, []);
+    }, [remainingTime]);
 
     useEffect(() => {
         if (remainingTime !== 0) {
@@ -72,16 +90,20 @@ function DiagnosisTest() {
 
         isFinishedRef.current = true;
 
-        updateMockDiagnosisAnswer(currentQuestion.id, answer);
+        updateDiagnosisAnswer(currentQuestion.id, answer);
 
-        const completedSession = completeMockDiagnosisSession("TIMEOUT");
-        markMockDiagnosisCompleted();
-        setSession({ ...completedSession });
+        async function finishByTimeout() {
+            const completedSession = await completeDiagnosisSession("TIMEOUT");
+            await markDiagnosisCompleted();
+            setSession({ ...completedSession });
 
-        navigate("/onboarding/result", { replace: true });
+            navigate("/onboarding/result", { replace: true });
+        }
+
+        finishByTimeout();
     }, [remainingTime, currentQuestion, answer, navigate]);
 
-    if (!currentQuestion) {
+    if (!session || !currentQuestion) {
         return (
             <div className="diagnosis-test-page">
                 <div className="diagnosis-empty">
@@ -101,10 +123,10 @@ function DiagnosisTest() {
         const nextAnswer = event.target.value;
 
         setAnswer(nextAnswer);
-        updateMockDiagnosisAnswer(currentQuestion.id, nextAnswer);
+        updateDiagnosisAnswer(currentQuestion.id, nextAnswer);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (isFinishedRef.current) {
             return;
         }
@@ -118,7 +140,7 @@ function DiagnosisTest() {
             return;
         }
 
-        const nextSession = submitMockDiagnosisAnswer(
+        const nextSession = await submitDiagnosisAnswer(
             currentQuestion.id,
             answer
         );
@@ -127,19 +149,19 @@ function DiagnosisTest() {
 
         if (nextSession.status === "COMPLETED") {
             isFinishedRef.current = true;
-            markMockDiagnosisCompleted();
+            await markDiagnosisCompleted();
             navigate("/onboarding/result", { replace: true });
             return;
         }
 
-        const nextQuestion = getCurrentDiagnosisQuestion();
+        const nextQuestion = await getCurrentDiagnosisQuestion();
 
         setCurrentQuestion(nextQuestion);
         setAnswer(nextQuestion?.answer || "");
     };
 
     const handleClose = () => {
-        updateMockDiagnosisAnswer(currentQuestion.id, answer);
+        updateDiagnosisAnswer(currentQuestion.id, answer);
         alert("현재까지 입력한 답변이 임시 저장되었습니다.");
     };
 

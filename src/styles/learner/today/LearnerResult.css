@@ -179,10 +179,14 @@
 
 .result-answer-compare {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 50px;
     padding: 48px 0 50px;
     border-bottom: 1px solid #dedad0;
+}
+
+.answer-column {
+    min-width: 0;
 }
 
 .answer-column-header {
@@ -219,6 +223,7 @@
 }
 
 .answer-card.common-card {
+    width: 100%;
     min-height: 250px;
     padding: 36px 38px;
     border: none;
@@ -232,7 +237,8 @@
     font-weight: 500;
     line-height: 1.9;
     letter-spacing: -0.05em;
-    word-break: keep-all;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .user-answer-card p {

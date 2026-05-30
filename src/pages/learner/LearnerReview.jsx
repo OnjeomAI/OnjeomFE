@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, Edit3, Sparkles } from "lucide-react";
 
 import PageHeader from "../../components/common/PageHeader";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
-import { getMockReviewData } from "../../data/mockReview";
+import { getReviewArchive } from "../../data/services/reviewService";
 
 function getLinePoints(scores) {
     const maxScore = 100;
@@ -31,7 +32,31 @@ function getLinePoints(scores) {
 
 function LearnerReview() {
     const navigate = useNavigate();
-    const reviewData = getMockReviewData();
+    const [reviewData, setReviewData] = useState(null);
+
+    useEffect(() => {
+        let ignore = false;
+
+        async function loadReview() {
+            const nextReviewData = await getReviewArchive();
+
+            if (ignore) {
+                return;
+            }
+
+            setReviewData(nextReviewData);
+        }
+
+        loadReview();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
+
+    if (!reviewData) {
+        return <div className="learner-review-page"></div>;
+    }
 
     const linePoints = getLinePoints(reviewData.achievement.scores);
 

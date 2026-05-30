@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageHeader from "../../components/common/PageHeader";
 import {
-    getMockUserByType,
-    updateMockProfile,
-    updateMockSettings,
-} from "../../data/mockData";
+    getUserByType,
+    updateProfile,
+    updateSettings,
+} from "../../data/services/learnerService";
 
 import { applyAppFontSize } from "../../utils/fontSize";
 
@@ -14,10 +14,30 @@ import ProfileSettings from "./profile_elements/profile_setting.jsx";
 import ProfileNotification from "./profile_elements/profile_notification.jsx";
 
 function Profile({ type = "learner" }) {
-    const [user, setUser] = useState(getMockUserByType(type));
+    const [user, setUser] = useState(null);
 
-    const handleUpdateProfile = (updatedProfile) => {
-        const updatedUser = updateMockProfile(type, updatedProfile);
+    useEffect(() => {
+        let ignore = false;
+
+        async function loadUser() {
+            const nextUser = await getUserByType(type);
+
+            if (ignore) {
+                return;
+            }
+
+            setUser(nextUser);
+        }
+
+        loadUser();
+
+        return () => {
+            ignore = true;
+        };
+    }, [type]);
+
+    const handleUpdateProfile = async (updatedProfile) => {
+        const updatedUser = await updateProfile(type, updatedProfile);
 
         setUser(updatedUser);
 
@@ -25,8 +45,8 @@ function Profile({ type = "learner" }) {
         alert("프로필 정보가 임시로 업데이트되었습니다.");
     };
 
-    const handleUpdateSettings = (updatedSettings) => {
-        const updatedUser = updateMockSettings(type, updatedSettings);
+    const handleUpdateSettings = async (updatedSettings) => {
+        const updatedUser = await updateSettings(type, updatedSettings);
 
         setUser(updatedUser);
 
@@ -36,6 +56,10 @@ function Profile({ type = "learner" }) {
 
         console.log("업데이트된 설정 정보:", updatedUser);
     };
+
+    if (!user) {
+        return <div className="profile-page"></div>;
+    }
 
     return (
         <div className="profile-page">
