@@ -5,22 +5,19 @@ import {
     setAuthTokens,
 } from "../utils/authStorage";
 
+const DEFAULT_API_BASE_URL = "http://3.37.114.1:8080";
 const RAW_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL =
-    typeof RAW_API_BASE_URL === "string"
+    typeof RAW_API_BASE_URL === "string" && RAW_API_BASE_URL.trim()
         ? RAW_API_BASE_URL.trim()
-        : RAW_API_BASE_URL;
+        : DEFAULT_API_BASE_URL;
 
 function getValidatedApiBaseUrl() {
-    if (!API_BASE_URL) {
-        throw new Error("VITE_API_BASE_URL 값이 없습니다.");
-    }
-
     try {
         new URL(API_BASE_URL);
     } catch {
         throw new Error(
-            `VITE_API_BASE_URL 값이 올바르지 않습니다: ${String(API_BASE_URL)}`
+            `API Base URL 값이 올바르지 않습니다: ${String(API_BASE_URL)}`
         );
     }
 
