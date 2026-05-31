@@ -29,10 +29,10 @@ function AdminLogin() {
             const userType = getUserTypeFromRole(loginResult.role);
 
             if (userType !== "admin") {
-                throw new Error("관리자 계정이 아닙니다.");
+                throw new Error("관리자 권한이 없는 계정입니다.");
             }
 
-            navigate(await getAfterLoginPath(userType));
+            navigate(await getAfterLoginPath(userType), { replace: true });
         } catch (error) {
             setErrorMessage(error.message || "관리자 로그인에 실패했습니다.");
         } finally {
@@ -48,13 +48,13 @@ function AdminLogin() {
                         <span className="admin-login-brand-mark" />
                         <strong>온점</strong>
                     </div>
-                    <h1>디지털 시대에 보존하는 지혜의 가치.</h1>
+                    <h1>학습자와 같은 인증 체계로 관리자 화면에 진입합니다.</h1>
                     <p>
-                        온점 콘텐츠 관리자 시스템(CMS)입니다.
+                        별도 관리자 인증 API 없이 동일한 로그인 API를 사용합니다.
                         <br />
-                        등록된 관리자 계정으로 로그인해 주세요.
+                        관리자 role을 가진 계정이면 자동으로 관리자 화면으로 이동합니다.
                     </p>
-                    <span className="admin-login-caption">디지털 기록가</span>
+                    <span className="admin-login-caption">Admin console</span>
                 </div>
             </section>
 
@@ -62,7 +62,7 @@ function AdminLogin() {
                 <div className="admin-login-form-container">
                     <div className="admin-login-title">
                         <h2>관리자 로그인</h2>
-                        <p>학문적 탐구를 관리하고 기록을 보존합니다.</p>
+                        <p>기존 계정 시스템을 그대로 사용합니다.</p>
                     </div>
 
                     <form className="admin-login-form" onSubmit={handleLogin} autoComplete="off">
@@ -87,8 +87,8 @@ function AdminLogin() {
                                 type="password"
                                 name="adminPassword"
                                 value={password}
-                                placeholder="비밀번호를 입력하세요"
-                                autoComplete="new-password"
+                                placeholder="비밀번호를 입력해주세요"
+                                autoComplete="current-password"
                                 variant="box"
                                 onChange={(event) => setPassword(event.target.value)}
                             />

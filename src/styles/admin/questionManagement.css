@@ -222,9 +222,213 @@
     font-weight: 800;
 }
 
+.admin-inline-button {
+    white-space: nowrap;
+}
+
+.admin-curriculum-selection-list,
+.admin-tag-problem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-curriculum-selection-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--color-line);
+    background-color: rgba(255, 255, 255, 0.55);
+    color: var(--color-text);
+    text-align: left;
+}
+
+.admin-curriculum-selection-item.active {
+    border-color: var(--color-gold);
+    background-color: #f7ead0;
+}
+
+.admin-curriculum-selection-item strong,
+.admin-curriculum-selection-item span {
+    display: block;
+}
+
+.admin-curriculum-selection-item strong {
+    font-size: calc(14px * var(--app-font-scale));
+}
+
+.admin-curriculum-selection-item span {
+    margin-top: 6px;
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+}
+
+.admin-curriculum-config {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.admin-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 220px;
+}
+
+.admin-form-field span {
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 700;
+}
+
+.admin-form-field input,
+.admin-tag-edit-row input {
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--color-line);
+    background-color: var(--color-white);
+    color: var(--color-text);
+    font-size: calc(14px * var(--app-font-scale));
+}
+
+.admin-curriculum-order-list,
+.admin-tag-edit-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-curriculum-order-item,
+.admin-tag-edit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    background-color: rgba(255, 255, 255, 0.55);
+}
+
+.admin-curriculum-order-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.admin-curriculum-order-main strong,
+.admin-curriculum-order-main p {
+    margin: 0;
+}
+
+.admin-curriculum-order-main p {
+    margin-top: 6px;
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+}
+
+.admin-curriculum-order-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 52px;
+    justify-content: center;
+    height: 34px;
+    background-color: #f7ead0;
+    color: var(--color-gold);
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.admin-curriculum-order-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.admin-curriculum-order-actions button,
+.admin-tag-edit-row button {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--color-line);
+    background-color: var(--color-white);
+    color: var(--color-text);
+}
+
+.admin-tag-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.admin-tag-editor-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.admin-tag-editor-header strong,
+.admin-tag-editor-header p {
+    margin: 0;
+}
+
+.admin-tag-editor-header p {
+    margin-top: 6px;
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+}
+
+.admin-tag-edit-row {
+    grid-template-columns: minmax(0, 1fr) 120px 44px;
+    display: grid;
+}
+
+.admin-tag-summary-grid,
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.admin-tag-summary-item {
+    padding: 16px;
+    background-color: rgba(255, 255, 255, 0.55);
+}
+
+.admin-tag-summary-item strong,
+.admin-tag-summary-item span,
+.admin-tag-summary-item em {
+    display: block;
+}
+
+.admin-tag-summary-item span {
+    margin-top: 8px;
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+}
+
+.admin-tag-summary-item em {
+    margin-top: 6px;
+    color: var(--color-gold);
+    font-size: calc(13px * var(--app-font-scale));
+    font-style: normal;
+    font-weight: 700;
+    word-break: break-word;
+}
+
 @media (max-width: 1280px) {
     .admin-problem-layout {
         grid-template-columns: 1fr;
+    }
+
+    .admin-tag-summary-grid,
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -238,6 +442,21 @@
     }
 
     .admin-problem-meta-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-curriculum-config,
+    .admin-tag-editor-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-tag-edit-row {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-tag-summary-grid,
+    .admin-stats-grid {
         grid-template-columns: 1fr;
     }
 }

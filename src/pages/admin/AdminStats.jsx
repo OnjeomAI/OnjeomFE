@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import PageHeader from "../../components/common/PageHeader";
+import { Download } from "lucide-react";
+import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import PageHeader from "../../components/common/PageHeader";
 import { getUserByType } from "../../data/services/learnerService";
-import { getAdminStats } from "../../api/adminApi";
+import { exportAdminStatsCsv, getAdminStats } from "../../api/adminApi";
 
 function AdminStats() {
     const [user, setUser] = useState(null);
     const [stats, setStats] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
         let ignore = false;
@@ -39,6 +42,28 @@ function AdminStats() {
         };
     }, []);
 
+    const handleDownloadCsv = async () => {
+        setIsDownloading(true);
+        setErrorMessage("");
+
+        try {
+            const blob = await exportAdminStatsCsv();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = "admin-dashboard-stats.csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            setErrorMessage(error.message || "CSV 다운로드에 실패했습니다.");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     if (errorMessage && !user) {
         return <div>{errorMessage}</div>;
     }
@@ -48,13 +73,32 @@ function AdminStats() {
     }
 
     return (
-        <div>
+        <div className="admin-problem-page">
             <PageHeader
                 title="통계 분석"
                 type="admin"
+                showBack={false}
                 userName={user.displayName}
                 userLevel={user.levelLabel}
             />
+
+            <div className="admin-problem-toolbar">
+                <div>
+                    <h2>관리자 통계</h2>
+                    <p>대시보드 통계를 조회하고 CSV로 내보낼 수 있습니다.</p>
+                </div>
+
+                <Button
+                    variant="outline"
+                    size="medium"
+                    className="admin-inline-button"
+                    onClick={handleDownloadCsv}
+                    disabled={isDownloading}
+                >
+                    <Download size={16} strokeWidth={2} />
+                    {isDownloading ? "다운로드 중..." : "CSV 내보내기"}
+                </Button>
+            </div>
 
             {errorMessage ? <p className="admin-problem-error">{errorMessage}</p> : null}
 
@@ -64,10 +108,22 @@ function AdminStats() {
                     title="관리자 통계"
                     subtitle="GET /api/admin/dashboard/stats"
                 >
-                    <div className="admin-problem-detail">
-                        <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
-                            {JSON.stringify(stats || {}, null, 2)}
-                        </pre>
+                    <div className="admin-stats-grid">
+                        {Object.entries(stats || {}).length === 0 ? (
+                            <p className="admin-problem-empty">표시할 통계가 없습니다.</p>
+                        ) : (
+                            Object.entries(stats || {}).map(([key, value]) => (
+                                <div className="admin-tag-summary-item" key={key}>
+                                    <strong>{key}</strong>
+                                    <span>{typeof value === "object" ? "객체" : "값"}</span>
+                                    <em>
+                                        {typeof value === "object"
+                                            ? JSON.stringify(value)
+                                            : String(value)}
+                                    </em>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </Card>
             </div>
