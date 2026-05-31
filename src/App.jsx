@@ -23,7 +23,7 @@ import AdminStats from "./pages/admin/AdminStats";
 import Profile from "./pages/profile/Profile";
 import { getAccessToken, getAuthUser } from "./utils/authStorage";
 
-function RequireAuth({ role }) {
+function RequireAuth({ role, enforceRole = true }) {
     const location = useLocation();
     const accessToken = getAccessToken();
     const user = getAuthUser();
@@ -32,7 +32,7 @@ function RequireAuth({ role }) {
         return <Navigate to={role === "admin" ? "/admin" : "/login"} replace state={{ from: location }} />;
     }
 
-    if (role && user?.role && role !== user.role) {
+    if (enforceRole && role && user?.role && role !== user.role) {
         return <Navigate to={user.role === "admin" ? "/admin/question" : "/dashboard"} replace />;
     }
 
@@ -108,7 +108,7 @@ function App() {
                     />
                 </Route>
 
-                <Route element={<RequireAuth role="admin" />}>
+                <Route element={<RequireAuth role="admin" enforceRole={false} />}>
                     <Route
                         path="/admin/question"
                         element={

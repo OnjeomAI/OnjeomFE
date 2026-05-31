@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LockKeyhole, Mail } from "lucide-react";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
-import { getAfterLoginPath } from "../../data/services/learnerService";
-import { getUserTypeFromRole, login } from "../../data/services/authService";
+import { login } from "../../data/services/authService";
 
 function AdminLogin() {
     const navigate = useNavigate();
@@ -25,14 +24,8 @@ function AdminLogin() {
         setErrorMessage("");
 
         try {
-            const loginResult = await login({ email, password });
-            const userType = getUserTypeFromRole(loginResult.role);
-
-            if (userType !== "admin") {
-                throw new Error("관리자 권한이 없는 계정입니다.");
-            }
-
-            navigate(await getAfterLoginPath(userType), { replace: true });
+            await login({ email, password });
+            navigate("/admin/question", { replace: true });
         } catch (error) {
             setErrorMessage(error.message || "관리자 로그인에 실패했습니다.");
         } finally {
