@@ -11,20 +11,24 @@ const API_BASE_URL =
         ? RAW_API_BASE_URL.trim()
         : RAW_API_BASE_URL;
 
-if (!API_BASE_URL) {
-    throw new Error("VITE_API_BASE_URL 값이 없습니다.");
-}
+function getValidatedApiBaseUrl() {
+    if (!API_BASE_URL) {
+        throw new Error("VITE_API_BASE_URL 값이 없습니다.");
+    }
 
-try {
-    new URL(API_BASE_URL);
-} catch {
-    throw new Error(
-        `VITE_API_BASE_URL 값이 올바르지 않습니다: ${String(API_BASE_URL)}`
-    );
+    try {
+        new URL(API_BASE_URL);
+    } catch {
+        throw new Error(
+            `VITE_API_BASE_URL 값이 올바르지 않습니다: ${String(API_BASE_URL)}`
+        );
+    }
+
+    return API_BASE_URL;
 }
 
 function buildUrl(path, query) {
-    const url = new URL(path, API_BASE_URL);
+    const url = new URL(path, getValidatedApiBaseUrl());
 
     if (query && typeof query === "object") {
         const searchParams = new URLSearchParams();
