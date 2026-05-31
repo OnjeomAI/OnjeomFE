@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { LockKeyhole, Mail, MessageSquare } from "lucide-react";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
@@ -8,12 +8,26 @@ import { getUserTypeFromRole, login } from "../../data/services/authService";
 
 function Login() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
     const [loginError, setLoginError] = useState("");
     const [infoMessage, setInfoMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        const savedEmail = localStorage.getItem("onjeom-remember-email");
+
+        if (savedEmail) {
+            setEmail(savedEmail);
+            setRememberMe(true);
+        }
+
+        if (location.state?.message) {
+            setInfoMessage(location.state.message);
+        }
+    }, [location.state]);
 
     const handleLoginClick = async () => {
         if (!email || !password) {
@@ -35,7 +49,7 @@ function Login() {
                 localStorage.removeItem("onjeom-remember-email");
             }
 
-            navigate(await getAfterLoginPath(userType));
+            navigate(await getAfterLoginPath(userType), { replace: true });
         } catch (error) {
             setLoginError(error.message || "로그인에 실패했습니다.");
         } finally {
@@ -58,17 +72,14 @@ function Login() {
                             <strong>온점</strong>
                         </div>
                         <h1>
-                            디지털 시대에 보존하는
+                            읽고 쓰는 힘을
                             <br />
-                            지혜의 가치.
+                            차곡차곡 기록합니다
                         </h1>
-                        <p>
-                            온점에 오신 것을 환영합니다. 당신의 지적 여정을 위해
-                            큐레이션된 개인 디지털 기록 보관소를 확인하세요.
-                        </p>
+                        <p>기존 화면 구조는 유지하고 실제 인증 API로 연결된 로그인 화면입니다.</p>
                         <div className="auth-visual-caption">
                             <span></span>
-                            디지털 기록가
+                            Personal learning archive
                         </div>
                     </div>
                 </div>
@@ -77,8 +88,8 @@ function Login() {
             <section className="auth-form-section">
                 <div className="auth-form-container">
                     <div className="auth-title-box">
-                        <h2>다시 오신 것을 환영합니다</h2>
-                        <p>학문적 탐구를 계속 이어가세요.</p>
+                        <h2>로그인</h2>
+                        <p>학습을 이어가려면 계정으로 로그인해주세요.</p>
                     </div>
 
                     <div className="auth-social-buttons">
@@ -133,8 +144,8 @@ function Login() {
                                 type="password"
                                 name="password"
                                 value={password}
-                                placeholder="비밀번호를 입력하세요"
-                                autoComplete="new-password"
+                                placeholder="비밀번호를 입력해주세요"
+                                autoComplete="current-password"
                                 variant="box"
                                 onChange={(event) => setPassword(event.target.value)}
                             />
@@ -154,7 +165,7 @@ function Login() {
                             checked={rememberMe}
                             onChange={(event) => setRememberMe(event.target.checked)}
                         />
-                        <span>로그인 상태 유지</span>
+                        <span>이메일 기억하기</span>
                     </label>
 
                     {infoMessage ? <p className="auth-success-message">{infoMessage}</p> : null}

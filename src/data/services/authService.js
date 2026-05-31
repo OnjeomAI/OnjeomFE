@@ -9,19 +9,16 @@ import {
     login as loginApi,
     logout as logoutApi,
     logoutAll as logoutAllApi,
-    requestPasswordReset as requestPasswordResetApi,
-    resetPassword as resetPasswordApi,
     reissueToken as reissueTokenApi,
     signup as signupApi,
-    verifyEmail as verifyEmailApi,
 } from "../../api/authApi";
 
 export async function signup({ email, password, nickname }) {
-    return signupApi(email, password, nickname);
+    return signupApi({ email, password, nickname });
 }
 
 export async function login({ email, password }) {
-    const result = await loginApi(email, password);
+    const result = await loginApi({ email, password });
     const userData = result.data || {};
     const normalizedUser = normalizeUserProfile(userData);
 
@@ -40,8 +37,11 @@ export async function login({ email, password }) {
     };
 }
 
-export async function verifyEmail({ email, otpCode }) {
-    return verifyEmailApi(email, otpCode);
+export async function verifyEmail() {
+    return {
+        success: false,
+        message: "아직 지원하지 않는 기능입니다.",
+    };
 }
 
 export async function reissueToken() {
@@ -77,15 +77,20 @@ export async function logoutAll() {
     }
 }
 
-export async function requestPasswordReset(email) {
-    return requestPasswordResetApi(email);
+export async function requestPasswordReset() {
+    return {
+        success: false,
+        message: "아직 지원하지 않는 기능입니다.",
+    };
 }
 
-export async function resetPassword({ token, newPassword }) {
-    return resetPasswordApi(token, newPassword);
+export async function resetPassword() {
+    return {
+        success: false,
+        message: "아직 지원하지 않는 기능입니다.",
+    };
 }
 
 export function getUserTypeFromRole(role) {
     return mapUserTypeFromRole(role);
 }
-

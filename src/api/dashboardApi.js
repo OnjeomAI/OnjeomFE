@@ -23,3 +23,13 @@ export async function getWeakPoints() {
     return apiGet("/api/dashboard/weak-points", { requireAuth: true });
 }
 
+export async function getAdminStats() {
+    return apiGet("/api/admin/dashboard/stats", { requireAuth: true });
+}
+
+export async function exportAdminStatsCsv() {
+    return apiGet("/api/admin/dashboard/stats/export", {
+        requireAuth: true,
+        responseType: "blob",
+    });
+}

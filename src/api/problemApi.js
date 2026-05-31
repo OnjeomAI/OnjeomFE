@@ -7,7 +7,7 @@ export async function getProblems(page = 0, size = 20) {
     });
 }
 
-export async function getProblem(problemId) {
+export async function getProblemDetail(problemId) {
     return apiGet(`/api/problems/${problemId}`, { requireAuth: true });
 }
 
@@ -15,3 +15,4 @@ export async function getProblemsByReadingType(readingType) {
     return apiGet(`/api/problems/type/${readingType}`, { requireAuth: true });
 }
 
+export const getProblem = getProblemDetail;

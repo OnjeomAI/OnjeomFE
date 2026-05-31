@@ -37,6 +37,32 @@ export function mapUserTypeFromRole(role) {
     return "learner";
 }
 
+export function mapFontSizeEnumToPercent(fontSize) {
+    if (fontSize === "SMALL") {
+        return 90;
+    }
+
+    if (fontSize === "LARGE") {
+        return 110;
+    }
+
+    return 100;
+}
+
+export function mapFontSizePercentToEnum(fontSize) {
+    const numeric = Number(fontSize);
+
+    if (numeric <= 95) {
+        return "SMALL";
+    }
+
+    if (numeric >= 105) {
+        return "LARGE";
+    }
+
+    return "MEDIUM";
+}
+
 export function normalizeUserProfile(data, fallbackType = "learner") {
     const storedUser = getAuthUser() || {};
     const merged = {
@@ -46,6 +72,10 @@ export function normalizeUserProfile(data, fallbackType = "learner") {
     const role = merged.role || fallbackType;
     const isAdmin = mapUserTypeFromRole(role) === "admin";
     const alarmEnabled = Boolean(merged.alarmEnabled);
+    const normalizedFontSize =
+        typeof merged.fontSize === "string"
+            ? mapFontSizeEnumToPercent(merged.fontSize)
+            : merged.fontSize ?? 100;
 
     return {
         userId: merged.userId ?? merged.id ?? null,
@@ -57,7 +87,11 @@ export function normalizeUserProfile(data, fallbackType = "learner") {
         dailyGoal: merged.dailyGoal ?? 10,
         alarmEnabled,
         emailVerified: Boolean(merged.emailVerified),
-        fontSize: merged.fontSize ?? 100,
+        fontSize: normalizedFontSize,
+        fontSizeMode:
+            typeof merged.fontSize === "string"
+                ? merged.fontSize
+                : mapFontSizePercentToEnum(normalizedFontSize),
         joinedAt: merged.joinedAt || "",
         levelLabel: isAdmin ? "관리자" : merged.levelLabel || "학습자",
         notificationSettings: {
@@ -73,4 +107,3 @@ export function normalizeUserProfile(data, fallbackType = "learner") {
             true,
     };
 }
-

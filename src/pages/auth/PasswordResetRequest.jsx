@@ -4,7 +4,6 @@ import { Mail, Send } from "lucide-react";
 
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
-import { requestPasswordReset } from "../../data/services/authService";
 
 function PasswordResetRequest() {
     const navigate = useNavigate();
@@ -18,19 +17,8 @@ function PasswordResetRequest() {
             return;
         }
 
-        try {
-            const result = await requestPasswordReset(email);
-            setErrorMessage("");
-            setMessage(
-                result.message ||
-                    "비밀번호 재설정 이메일을 발송했습니다. 메일의 토큰으로 다음 단계를 진행하세요."
-            );
-        } catch (error) {
-            setMessage("");
-            setErrorMessage(
-                error.message || "비밀번호 재설정 요청에 실패했습니다."
-            );
-        }
+        setErrorMessage("");
+        setMessage("아직 지원하지 않는 기능입니다.");
     };
 
     return (
@@ -44,19 +32,16 @@ function PasswordResetRequest() {
                         </div>
 
                         <h1>
-                            비밀번호를 잊었다면
+                            비밀번호 재설정은
                             <br />
-                            이메일로 다시 시작하세요
+                            아직 준비 중입니다
                         </h1>
 
-                        <p>
-                            가입한 이메일 주소로 비밀번호 재설정 링크와 토큰을
-                            보내드립니다.
-                        </p>
+                        <p>OpenAPI 명세 기준 인증 관련 재설정 엔드포인트가 없어 안내만 제공합니다.</p>
 
                         <div className="auth-visual-caption">
                             <span></span>
-                            재설정 메일 발송
+                            Password reset
                         </div>
                     </div>
                 </div>
@@ -66,7 +51,7 @@ function PasswordResetRequest() {
                 <div className="auth-form-container">
                     <div className="auth-title-box">
                         <h2>비밀번호 재설정 요청</h2>
-                        <p>가입한 이메일 주소를 입력해주세요.</p>
+                        <p>현재는 실제 메일 발송 없이 안내 메시지만 표시합니다.</p>
                     </div>
 
                     <div className="auth-input-list">
@@ -97,20 +82,10 @@ function PasswordResetRequest() {
                         onClick={handleSubmit}
                     >
                         <Send size={16} strokeWidth={2.2} />
-                        재설정 메일 보내기
+                        안내 확인
                     </Button>
 
                     <div className="auth-bottom-link">
-                        <button
-                            type="button"
-                            onClick={() =>
-                                navigate("/password/reset", {
-                                    state: { email },
-                                })
-                            }
-                        >
-                            이미 토큰이 있다면 재설정하기
-                        </button>
                         <button type="button" onClick={() => navigate("/login")}>
                             로그인으로 돌아가기
                         </button>

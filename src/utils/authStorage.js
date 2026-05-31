@@ -1,6 +1,6 @@
-const ACCESS_TOKEN_KEY = "onjeom-access-token";
-const REFRESH_TOKEN_KEY = "onjeom-refresh-token";
-const USER_KEY = "onjeom-user";
+const ACCESS_TOKEN_KEY = "accessToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
+const USER_KEY = "user";
 
 export function setAuthTokens({ accessToken, refreshToken }) {
     if (accessToken) {

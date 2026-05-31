@@ -4,7 +4,6 @@ import { KeyRound, LockKeyhole } from "lucide-react";
 
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
-import { resetPassword } from "../../data/services/authService";
 
 function PasswordReset() {
     const navigate = useNavigate();
@@ -29,17 +28,8 @@ function PasswordReset() {
             return;
         }
 
-        try {
-            const result = await resetPassword({ token, newPassword });
-            setErrorMessage("");
-            setMessage(result.message || "비밀번호가 재설정되었습니다.");
-            setTimeout(() => {
-                navigate("/login");
-            }, 1200);
-        } catch (error) {
-            setMessage("");
-            setErrorMessage(error.message || "비밀번호 재설정에 실패했습니다.");
-        }
+        setErrorMessage("");
+        setMessage("아직 지원하지 않는 기능입니다.");
     };
 
     return (
@@ -53,19 +43,16 @@ function PasswordReset() {
                         </div>
 
                         <h1>
-                            새 비밀번호로
+                            비밀번호 재설정은
                             <br />
-                            계정 접근을 복구하세요
+                            아직 준비 중입니다
                         </h1>
 
-                        <p>
-                            이메일로 받은 재설정 토큰과 새 비밀번호를 입력하면
-                            바로 로그인할 수 있습니다.
-                        </p>
+                        <p>명세에 없는 API는 호출하지 않고 기존 화면 흐름만 유지합니다.</p>
 
                         <div className="auth-visual-caption">
                             <span></span>
-                            최소 8자 비밀번호
+                            Password reset
                         </div>
                     </div>
                 </div>
@@ -77,8 +64,8 @@ function PasswordReset() {
                         <h2>비밀번호 재설정</h2>
                         <p>
                             {email
-                                ? `${email}로 받은 재설정 정보를 입력해주세요.`
-                                : "메일로 받은 토큰과 새 비밀번호를 입력해주세요."}
+                                ? `${email} 계정 기준 안내 화면입니다.`
+                                : "현재는 실제 재설정 API 없이 안내만 제공합니다."}
                         </p>
                     </div>
 
@@ -104,9 +91,7 @@ function PasswordReset() {
                                 value={newPassword}
                                 placeholder="newPassword123"
                                 variant="box"
-                                onChange={(event) =>
-                                    setNewPassword(event.target.value)
-                                }
+                                onChange={(event) => setNewPassword(event.target.value)}
                             />
                         </div>
                     </div>
@@ -123,16 +108,10 @@ function PasswordReset() {
                         className="auth-submit-button"
                         onClick={handleSubmit}
                     >
-                        비밀번호 변경 완료
+                        안내 확인
                     </Button>
 
                     <div className="auth-bottom-link">
-                        <button
-                            type="button"
-                            onClick={() => navigate("/password/reset-request")}
-                        >
-                            재설정 메일 다시 요청하기
-                        </button>
                         <button type="button" onClick={() => navigate("/login")}>
                             로그인으로 돌아가기
                         </button>

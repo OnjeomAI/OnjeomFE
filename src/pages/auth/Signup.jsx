@@ -38,7 +38,12 @@ function Signup() {
 
         try {
             await signup({ email, password, nickname });
-            navigate("/signup/verify", { state: { email } });
+            navigate("/login", {
+                replace: true,
+                state: {
+                    message: "회원가입이 완료되었습니다. 로그인해주세요.",
+                },
+            });
         } catch (error) {
             setErrorMessage(error.message || "회원가입에 실패했습니다.");
         } finally {
@@ -78,7 +83,7 @@ function Signup() {
                 <div className="auth-form-container">
                     <div className="auth-title-box">
                         <h2>회원가입</h2>
-                        <p>기존 UI를 유지한 채 실제 가입 API로 연결했습니다.</p>
+                        <p>이메일과 비밀번호로 계정을 생성합니다.</p>
                     </div>
 
                     <div className="auth-social-buttons">
@@ -118,7 +123,7 @@ function Signup() {
                                 label="닉네임"
                                 name="nickname"
                                 value={nickname}
-                                placeholder="사용할 이름을 입력하세요"
+                                placeholder="사용할 이름을 입력해주세요"
                                 variant="box"
                                 onChange={(event) => setNickname(event.target.value)}
                             />
@@ -144,7 +149,7 @@ function Signup() {
                                 type="password"
                                 name="password"
                                 value={password}
-                                placeholder="8자 이상 입력하세요"
+                                placeholder="비밀번호를 입력해주세요"
                                 variant="box"
                                 onChange={(event) => setPassword(event.target.value)}
                             />
@@ -157,7 +162,7 @@ function Signup() {
                                 type="password"
                                 name="passwordConfirm"
                                 value={passwordConfirm}
-                                placeholder="비밀번호를 다시 입력하세요"
+                                placeholder="비밀번호를 다시 입력해주세요"
                                 variant="box"
                                 onChange={(event) => setPasswordConfirm(event.target.value)}
                             />

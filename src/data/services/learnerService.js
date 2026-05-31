@@ -1,5 +1,9 @@
 import { getAuthUser, setAuthUser } from "../../utils/authStorage";
-import { mapUserTypeFromRole, normalizeUserProfile } from "../../utils/mappers";
+import {
+    mapFontSizePercentToEnum,
+    mapUserTypeFromRole,
+    normalizeUserProfile,
+} from "../../utils/mappers";
 import { getMyProfile, updateMyProfile } from "./userService";
 
 export async function getUserByType(type) {
@@ -75,6 +79,12 @@ export async function updateSettings(type, updatedSettings) {
             (updatedSettings.notificationSettings
                 ? Object.values(updatedSettings.notificationSettings).some(Boolean)
                 : currentUser.alarmEnabled),
+        fontSize: updatedSettings.fontSize ?? currentUser.fontSize,
+        fontSizeMode:
+            updatedSettings.fontSizeMode ??
+            mapFontSizePercentToEnum(
+                updatedSettings.fontSize ?? currentUser.fontSize
+            ),
     }).then((updatedUser) => {
         const nextUser = {
             ...updatedUser,
@@ -105,4 +115,3 @@ export async function markDiagnosisCompleted() {
 export function getUserTypeFromRole(role) {
     return mapUserTypeFromRole(role);
 }
-

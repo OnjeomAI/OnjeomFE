@@ -10,18 +10,43 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 function buildUrl(path, query) {
     const url = new URL(path, API_BASE_URL);
 
-    if (query) {
+    if (query && typeof query === "object") {
+        const searchParams = new URLSearchParams();
+
         Object.entries(query).forEach(([key, value]) => {
-            if (value !== undefined && value !== null && value !== "") {
-                url.searchParams.set(key, String(value));
+            if (value === undefined || value === null || value === "") {
+                return;
             }
+
+            if (Array.isArray(value)) {
+                value.forEach((item) => searchParams.append(key, String(item)));
+                return;
+            }
+
+            searchParams.set(key, String(value));
         });
+
+        url.search = searchParams.toString();
     }
 
     return url.toString();
 }
 
-async function parseResponse(response) {
+function redirectToLogin() {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    const nextPath = window.location.pathname.startsWith("/admin")
+        ? "/admin"
+        : "/login";
+
+    if (window.location.pathname !== nextPath) {
+        window.location.assign(nextPath);
+    }
+}
+
+async function parseJsonSafely(response) {
     const contentType = response.headers.get("content-type") || "";
 
     if (!contentType.includes("application/json")) {
@@ -35,14 +60,24 @@ async function parseResponse(response) {
     }
 }
 
-async function reissueAccessToken() {
-    const refreshToken = getRefreshToken();
-
-    if (!refreshToken) {
-        clearAuthSession();
-        return null;
+async function parseResponseByType(response, responseType) {
+    if (responseType === "blob") {
+        return response.blob();
     }
 
+    if (responseType === "text") {
+        return response.text();
+    }
+
+    return parseJsonSafely(response);
+}
+
+async function handleAuthFailure() {
+    clearAuthSession();
+    redirectToLogin();
+}
+
+async function requestTokenReissue(refreshToken) {
     const response = await fetch(buildUrl("/api/auth/token/reissue"), {
         method: "POST",
         headers: {
@@ -52,19 +87,36 @@ async function reissueAccessToken() {
         body: JSON.stringify({ refreshToken }),
     });
 
-    const result = await parseResponse(response);
+    const result = await parseJsonSafely(response);
 
     if (!response.ok || !result?.success || !result?.data?.accessToken) {
-        clearAuthSession();
+        return null;
+    }
+
+    return result.data;
+}
+
+async function reissueAccessToken() {
+    const refreshToken = getRefreshToken();
+
+    if (!refreshToken) {
+        await handleAuthFailure();
+        return null;
+    }
+
+    const tokenData = await requestTokenReissue(refreshToken);
+
+    if (!tokenData) {
+        await handleAuthFailure();
         return null;
     }
 
     setAuthTokens({
-        accessToken: result.data.accessToken,
-        refreshToken: result.data.refreshToken,
+        accessToken: tokenData.accessToken,
+        refreshToken: tokenData.refreshToken,
     });
 
-    return result.data.accessToken;
+    return tokenData.accessToken;
 }
 
 export async function apiRequest(path, options = {}, retryOnUnauthorized = true) {
@@ -74,7 +126,9 @@ export async function apiRequest(path, options = {}, retryOnUnauthorized = true)
         body,
         query,
         requireAuth = false,
+        responseType = "json",
     } = options;
+    const normalizedMethod = method.toUpperCase();
     const accessToken = getAccessToken();
     const requestHeaders = {
         "Content-Type": "application/json",
@@ -85,14 +139,14 @@ export async function apiRequest(path, options = {}, retryOnUnauthorized = true)
         requestHeaders.Authorization = `Bearer ${accessToken}`;
     }
 
-    if (body === undefined || body === null || method.toUpperCase() === "GET") {
+    if (normalizedMethod === "GET" || body === undefined || body === null) {
         delete requestHeaders["Content-Type"];
     }
 
     const response = await fetch(buildUrl(path, query), {
-        method,
+        method: normalizedMethod,
         headers: requestHeaders,
-        ...(body !== undefined && body !== null && method.toUpperCase() !== "GET"
+        ...(normalizedMethod !== "GET" && body !== undefined && body !== null
             ? { body: JSON.stringify(body) }
             : {}),
     });
@@ -105,50 +159,43 @@ export async function apiRequest(path, options = {}, retryOnUnauthorized = true)
         }
     }
 
-    const result = await parseResponse(response);
+    const parsed = await parseResponseByType(response, responseType);
 
-    if (!response.ok || !result?.success) {
-        throw new Error(result?.message || "API request failed.");
+    if (responseType !== "json") {
+        if (!response.ok) {
+            throw new Error("API request failed.");
+        }
+
+        return parsed;
     }
 
-    return result;
+    if (!response.ok || !parsed?.success) {
+        if (response.status === 401 && requireAuth) {
+            await handleAuthFailure();
+        }
+
+        throw new Error(parsed?.message || "API request failed.");
+    }
+
+    return parsed;
 }
 
 export async function apiGet(path, options = {}) {
-    return apiRequest(path, {
-        ...options,
-        method: "GET",
-    });
+    return apiRequest(path, { ...options, method: "GET" });
 }
 
 export async function apiPost(path, body, options = {}) {
-    return apiRequest(path, {
-        ...options,
-        method: "POST",
-        body,
-    });
+    return apiRequest(path, { ...options, method: "POST", body });
 }
 
 export async function apiPut(path, body, options = {}) {
-    return apiRequest(path, {
-        ...options,
-        method: "PUT",
-        body,
-    });
+    return apiRequest(path, { ...options, method: "PUT", body });
 }
 
 export async function apiPatch(path, body, options = {}) {
-    return apiRequest(path, {
-        ...options,
-        method: "PATCH",
-        body,
-    });
+    return apiRequest(path, { ...options, method: "PATCH", body });
 }
 
 export async function apiDelete(path, options = {}) {
-    return apiRequest(path, {
-        ...options,
-        method: "DELETE",
-    });
+    return apiRequest(path, { ...options, method: "DELETE" });
 }
-
