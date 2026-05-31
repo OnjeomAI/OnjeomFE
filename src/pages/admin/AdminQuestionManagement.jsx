@@ -3,10 +3,8 @@ import { useEffect, useState } from "react";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader";
 import { getUserByType } from "../../data/services/learnerService";
-import {
-    getProblemDetail,
-    getProblems,
-} from "../../data/services/problemService";
+import { getProblemDetail } from "../../data/services/problemService";
+import { getAdminProblems } from "../../api/adminApi";
 
 const readingTypeOptions = [
     { label: "전체", value: "ALL" },
@@ -41,6 +39,22 @@ function renderKeywords(keywords = []) {
     );
 }
 
+function normalizeAdminProblemList(data) {
+    if (Array.isArray(data)) {
+        return data;
+    }
+
+    if (Array.isArray(data?.content)) {
+        return data.content;
+    }
+
+    if (Array.isArray(data?.problems)) {
+        return data.problems;
+    }
+
+    return [];
+}
+
 function AdminQuestionManagement() {
     const [user, setUser] = useState(null);
     const [readingType, setReadingType] = useState("ALL");
@@ -64,11 +78,14 @@ function AdminQuestionManagement() {
             setErrorMessage("");
 
             try {
-                const nextProblems = await getProblems({
-                    page,
-                    size: 20,
-                    readingType,
-                });
+                const result = await getAdminProblems(page, 20);
+                const loadedProblems = normalizeAdminProblemList(result.data);
+                const nextProblems =
+                    readingType === "ALL"
+                        ? loadedProblems
+                        : loadedProblems.filter(
+                              (problem) => problem.readingType === readingType
+                          );
 
                 if (ignore) {
                     return;

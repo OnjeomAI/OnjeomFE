@@ -1,41 +1,13 @@
-import { getAccessToken } from "../../utils/authStorage";
+import {
+    getRadar,
+    getRecentResponses,
+} from "../../api/dashboardApi";
+import {
+    adjustCurriculum,
+    compareWriting,
+    createWeaknessReport,
+} from "../../api/writingApi";
 import { getResponsesByProblemId } from "./responseService";
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
-function getAuthHeaders() {
-    const accessToken = getAccessToken();
-
-    if (!accessToken) {
-        return {};
-    }
-
-    return {
-        Authorization: `Bearer ${accessToken}`,
-    };
-}
-
-async function requestJson(path, options = {}) {
-    const response = await fetch(`${apiBaseUrl}${path}`, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeaders(),
-            ...options.headers,
-        },
-    });
-
-    const contentType = response.headers.get("content-type") || "";
-    const result = contentType.includes("application/json")
-        ? await response.json()
-        : null;
-
-    if (!response.ok || !result?.success) {
-        throw new Error(result?.message || "학습 분석 정보를 불러오지 못했습니다.");
-    }
-
-    return result.data;
-}
 
 function buildCompetencyHistory(responses) {
     const grouped = responses.reduce((acc, response) => {
@@ -72,9 +44,9 @@ async function getComparisonSource(recentResponses) {
 
     for (const problemId of uniqueProblemIds) {
         const responses = await getResponsesByProblemId(problemId);
-        const sorted = [...responses].sort((left, right) => {
-            return new Date(right.createdAt) - new Date(left.createdAt);
-        });
+        const sorted = [...responses].sort(
+            (left, right) => new Date(right.createdAt) - new Date(left.createdAt)
+        );
 
         if (sorted.length >= 2) {
             return {
@@ -89,53 +61,39 @@ async function getComparisonSource(recentResponses) {
 }
 
 export async function getLearningAnalytics() {
-    const [radarData, recentResponseData] = await Promise.all([
-        requestJson("/api/dashboard/radar"),
-        requestJson("/api/dashboard/recent-responses?page=0&size=10"),
+    const [radarResult, recentResponseResult] = await Promise.all([
+        getRadar(),
+        getRecentResponses(0, 10),
     ]);
-
-    const recentResponses = recentResponseData?.responses || [];
+    const radarData = radarResult.data;
+    const recentResponses = recentResponseResult.data?.responses || [];
     const competencyHistory = buildCompetencyHistory(recentResponses);
     const competencyScores = buildCompetencyScores(radarData);
     const comparisonSource = await getComparisonSource(recentResponses);
 
-    const [adjustmentResult, weaknessReportResult, compareResult] =
-        await Promise.all([
-            competencyHistory.length > 0
-                ? requestJson("/api/writing/curriculum/adjust", {
-                      method: "POST",
-                      body: JSON.stringify({
-                          competencyHistory,
-                      }),
-                  })
-                : null,
-            competencyScores.length > 0
-                ? requestJson("/api/writing/weakness-report", {
-                      method: "POST",
-                      body: JSON.stringify({
-                          competencyScores,
-                      }),
-                  })
-                : null,
-            comparisonSource
-                ? requestJson("/api/writing/compare", {
-                      method: "POST",
-                      body: JSON.stringify({
-                          problemId: comparisonSource.problemId,
-                          previousAnswer: comparisonSource.previous.answerText,
-                          previousScore:
-                              comparisonSource.previous.finalScore ??
-                              comparisonSource.previous.rawScore ??
-                              0,
-                          currentAnswer: comparisonSource.current.answerText,
-                          currentScore:
-                              comparisonSource.current.finalScore ??
-                              comparisonSource.current.rawScore ??
-                              0,
-                      }),
-                  })
-                : null,
-        ]);
+    const [adjustmentResult, weaknessReportResult, compareResult] = await Promise.all([
+        competencyHistory.length > 0
+            ? adjustCurriculum({ competencyHistory }).then((result) => result.data)
+            : null,
+        competencyScores.length > 0
+            ? createWeaknessReport({ competencyScores }).then((result) => result.data)
+            : null,
+        comparisonSource
+            ? compareWriting({
+                  problemId: comparisonSource.problemId,
+                  previousAnswer: comparisonSource.previous.answerText,
+                  previousScore:
+                      comparisonSource.previous.finalScore ??
+                      comparisonSource.previous.rawScore ??
+                      0,
+                  currentAnswer: comparisonSource.current.answerText,
+                  currentScore:
+                      comparisonSource.current.finalScore ??
+                      comparisonSource.current.rawScore ??
+                      0,
+              }).then((result) => result.data)
+            : null,
+    ]);
 
     return {
         radarData,
@@ -146,3 +104,4 @@ export async function getLearningAnalytics() {
         comparisonSource,
     };
 }
+

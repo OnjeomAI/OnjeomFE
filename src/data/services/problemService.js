@@ -1,45 +1,37 @@
-import { getAccessToken } from "../../utils/authStorage";
+import {
+    getProblem as getProblemApi,
+    getProblems as getProblemsApi,
+    getProblemsByReadingType as getProblemsByReadingTypeApi,
+} from "../../api/problemApi";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
-async function requestProblem(path) {
-    const accessToken = getAccessToken();
-
-    const response = await fetch(`${apiBaseUrl}${path}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            ...(accessToken
-                ? { Authorization: `Bearer ${accessToken}` }
-                : {}),
-        },
-    });
-
-    const contentType = response.headers.get("content-type") || "";
-    const result = contentType.includes("application/json")
-        ? await response.json()
-        : null;
-
-    if (!response.ok || !result?.success) {
-        throw new Error(result?.message || "문제 정보를 불러오지 못했습니다.");
+function normalizeProblemList(data) {
+    if (Array.isArray(data)) {
+        return data;
     }
 
-    return result.data;
+    if (Array.isArray(data?.content)) {
+        return data.content;
+    }
+
+    if (Array.isArray(data?.problems)) {
+        return data.problems;
+    }
+
+    return [];
 }
 
 export async function getProblems({ page = 0, size = 20, readingType } = {}) {
-    const query = new URLSearchParams({
-        page: String(page),
-        size: String(size),
-    });
+    const result =
+        readingType && readingType !== "ALL"
+            ? await getProblemsByReadingTypeApi(readingType)
+            : await getProblemsApi(page, size);
 
-    if (readingType && readingType !== "ALL") {
-        return requestProblem(`/api/problems/type/${readingType}`);
-    }
-
-    return requestProblem(`/api/problems?${query.toString()}`);
+    return normalizeProblemList(result.data);
 }
 
 export async function getProblemDetail(problemId) {
-    return requestProblem(`/api/problems/${problemId}`);
+    const result = await getProblemApi(problemId);
+
+    return result.data || null;
 }
+

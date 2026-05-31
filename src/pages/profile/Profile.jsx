@@ -1,17 +1,8 @@
 import { useEffect, useState } from "react";
 import PageHeader from "../../components/common/PageHeader";
-import {
-    getUserByType,
-    updateProfile,
-    updateSettings,
-} from "../../data/services/learnerService";
-import {
-    getMyProfile,
-    updateMyProfile,
-} from "../../data/services/userService";
-
+import { getUserByType, updateProfile, updateSettings } from "../../data/services/learnerService";
+import { getMyProfile, updateMyProfile } from "../../data/services/userService";
 import { applyAppFontSize } from "../../utils/fontSize";
-
 import ProfileUser from "./profile_elements/profile_user.jsx";
 import ProfileSecurity from "./profile_elements/profile_security.jsx";
 import ProfileSettings from "./profile_elements/profile_setting.jsx";
@@ -19,21 +10,35 @@ import ProfileNotification from "./profile_elements/profile_notification.jsx";
 
 function Profile({ type = "learner" }) {
     const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         let ignore = false;
 
         async function loadUser() {
-            const nextUser =
-                type === "learner"
-                    ? await getMyProfile(type)
-                    : await getUserByType(type);
+            setIsLoading(true);
+            setErrorMessage("");
 
-            if (ignore) {
-                return;
+            try {
+                const nextUser =
+                    type === "learner"
+                        ? await getMyProfile(type)
+                        : await getUserByType(type);
+
+                if (!ignore) {
+                    setUser(nextUser);
+                }
+            } catch (error) {
+                if (!ignore) {
+                    setErrorMessage(error.message || "프로필 정보를 불러오지 못했습니다.");
+                }
+            } finally {
+                if (!ignore) {
+                    setIsLoading(false);
+                }
             }
-
-            setUser(nextUser);
         }
 
         loadUser();
@@ -44,49 +49,71 @@ function Profile({ type = "learner" }) {
     }, [type]);
 
     const handleUpdateProfile = async (updatedProfile) => {
-        const updatedUser =
-            type === "learner"
-                ? await updateMyProfile(type, {
-                      nickname: updatedProfile.nickname ?? user.nickname,
-                      dailyGoal: user.dailyGoal,
-                      alarmEnabled: user.alarmEnabled,
-                  })
-                : await updateProfile(type, updatedProfile);
+        setErrorMessage("");
+        setSuccessMessage("");
 
-        setUser(updatedUser);
+        try {
+            const updatedUser =
+                type === "learner"
+                    ? await updateMyProfile(type, {
+                          nickname: updatedProfile.nickname ?? user.nickname,
+                          dailyGoal: user.dailyGoal,
+                          alarmEnabled: user.alarmEnabled,
+                      })
+                    : await updateProfile(type, updatedProfile);
 
-        console.log("업데이트된 프로필 Mock 데이터:", updatedUser);
-        alert("프로필 정보가 임시로 업데이트되었습니다.");
+            setUser(updatedUser);
+            setSuccessMessage("프로필 정보를 저장했습니다.");
+        } catch (error) {
+            setErrorMessage(error.message || "프로필 저장에 실패했습니다.");
+        }
     };
 
     const handleUpdateSettings = async (updatedSettings) => {
-        const updatedUser =
-            type === "learner"
-                ? await updateMyProfile(type, {
-                      nickname: user.nickname,
-                      dailyGoal:
-                          updatedSettings.dailyGoal ?? user.dailyGoal ?? 10,
-                      alarmEnabled:
-                          updatedSettings.alarmEnabled ??
-                          (updatedSettings.notificationSettings
-                              ? Object.values(
-                                    updatedSettings.notificationSettings
-                                ).some(Boolean)
-                              : user.alarmEnabled),
-                  })
-                : await updateSettings(type, updatedSettings);
+        setErrorMessage("");
+        setSuccessMessage("");
 
-        setUser(updatedUser);
+        try {
+            const updatedUser =
+                type === "learner"
+                    ? await updateMyProfile(type, {
+                          nickname: user.nickname,
+                          dailyGoal: updatedSettings.dailyGoal ?? user.dailyGoal ?? 10,
+                          alarmEnabled:
+                              updatedSettings.alarmEnabled ??
+                              (updatedSettings.notificationSettings
+                                  ? Object.values(updatedSettings.notificationSettings).some(Boolean)
+                                  : user.alarmEnabled),
+                      })
+                    : await updateSettings(type, updatedSettings);
 
-        if (updatedUser.fontSize) {
-            applyAppFontSize(updatedUser.fontSize);
+            const nextUser = {
+                ...updatedUser,
+                fontSize: updatedSettings.fontSize ?? updatedUser.fontSize,
+            };
+
+            setUser(nextUser);
+
+            if (nextUser.fontSize) {
+                applyAppFontSize(nextUser.fontSize);
+            }
+
+            setSuccessMessage("설정을 저장했습니다.");
+        } catch (error) {
+            setErrorMessage(error.message || "설정 저장에 실패했습니다.");
         }
-
-        console.log("업데이트된 설정 정보:", updatedUser);
     };
 
+    if (isLoading) {
+        return <div className="profile-page">프로필 정보를 불러오는 중입니다.</div>;
+    }
+
+    if (errorMessage && !user) {
+        return <div className="profile-page">{errorMessage}</div>;
+    }
+
     if (!user) {
-        return <div className="profile-page"></div>;
+        return <div className="profile-page">프로필 정보를 찾을 수 없습니다.</div>;
     }
 
     return (
@@ -98,15 +125,13 @@ function Profile({ type = "learner" }) {
                 userLevel={user.levelLabel}
             />
 
+            {successMessage ? <p className="auth-success-message">{successMessage}</p> : null}
+            {errorMessage ? <p className="auth-login-error">{errorMessage}</p> : null}
+
             <div className="profile-layout">
                 <section className="profile-left-section">
-                    <p className="profile-section-title">신원 및 인증 정보</p>
-
-                    <ProfileUser
-                        user={user}
-                        onUpdateProfile={handleUpdateProfile}
-                    />
-
+                    <p className="profile-section-title">회원 및 인증 정보</p>
+                    <ProfileUser user={user} onUpdateProfile={handleUpdateProfile} />
                     <ProfileSecurity type={type} />
                 </section>
 
@@ -114,19 +139,14 @@ function Profile({ type = "learner" }) {
                     <p className="profile-section-title">
                         {type === "admin" ? "관리자 설정" : "학습 설정"}
                     </p>
-
                     <ProfileSettings
                         type={type}
                         user={user}
                         onUpdateSettings={handleUpdateSettings}
                     />
-
-                    {type === "learner" && (
-                        <ProfileNotification
-                            user={user}
-                            onUpdateSettings={handleUpdateSettings}
-                        />
-                    )}
+                    {type === "learner" ? (
+                        <ProfileNotification user={user} onUpdateSettings={handleUpdateSettings} />
+                    ) : null}
                 </section>
             </div>
         </div>

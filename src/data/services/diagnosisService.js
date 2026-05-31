@@ -1,43 +1,10 @@
-import { getAccessToken } from "../../utils/authStorage";
+import {
+    getDiagnosticResult,
+    startDiagnostic,
+    submitDiagnosticAnswer as submitDiagnosticAnswerApi,
+} from "../../api/diagnosticApi";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const DIAGNOSIS_SESSION_KEY = "onjeom-diagnosis-session";
-
-function getAuthHeaders() {
-    const accessToken = getAccessToken();
-
-    if (!accessToken) {
-        return {};
-    }
-
-    return {
-        Authorization: `Bearer ${accessToken}`,
-    };
-}
-
-async function requestDiagnosis(path, options = {}) {
-    const response = await fetch(`${apiBaseUrl}${path}`, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeaders(),
-            ...options.headers,
-        },
-    });
-
-    const contentType = response.headers.get("content-type") || "";
-    const result = contentType.includes("application/json")
-        ? await response.json()
-        : null;
-
-    if (!response.ok || !result?.success) {
-        throw new Error(
-            result?.message || "진단 요청을 처리하지 못했습니다."
-        );
-    }
-
-    return result;
-}
 
 function readDiagnosisSession() {
     const rawValue = localStorage.getItem(DIAGNOSIS_SESSION_KEY);
@@ -76,17 +43,13 @@ function toDiagnosisQuestion(data, questionIndex) {
 
 export async function startDiagnosisSession() {
     const previousSession = readDiagnosisSession();
-    const result = await requestDiagnosis("/api/diagnostic/start", {
-        method: "POST",
-    });
+    const result = await startDiagnostic();
     const data = result.data || {};
     const isSameDiagnosis =
         previousSession &&
         previousSession.diagnosisId === data.diagnosisId &&
         previousSession.currentProblemId !== data.problemId;
-    const questionIndex = isSameDiagnosis
-        ? (previousSession.questionIndex || 0) + 1
-        : 1;
+    const questionIndex = isSameDiagnosis ? (previousSession.questionIndex || 0) + 1 : 1;
 
     writeDiagnosisSession({
         diagnosisId: data.diagnosisId,
@@ -107,19 +70,14 @@ export async function submitDiagnosisAnswer({
     responseTimeSec,
 }) {
     const session = readDiagnosisSession();
-    const result = await requestDiagnosis("/api/diagnostic/submit", {
-        method: "POST",
-        body: JSON.stringify({
-            problemId,
-            answerText,
-            responseTimeSec,
-        }),
+    const result = await submitDiagnosticAnswerApi({
+        problemId,
+        answerText,
+        responseTimeSec,
     });
 
     if (!result.data) {
-        return {
-            completed: true,
-        };
+        return { completed: true };
     }
 
     const nextQuestionIndex = (session?.questionIndex || 1) + 1;
@@ -139,9 +97,10 @@ export async function submitDiagnosisAnswer({
 }
 
 export async function getLatestDiagnosisResult() {
-    const result = await requestDiagnosis("/api/diagnostic/result");
+    const result = await getDiagnosticResult();
 
     clearDiagnosisSession();
 
     return result.data || null;
 }
+

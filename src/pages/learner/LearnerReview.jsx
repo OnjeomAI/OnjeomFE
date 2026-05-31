@@ -41,18 +41,35 @@ function getLinePoints(scores) {
 function LearnerReview() {
     const navigate = useNavigate();
     const [reviewData, setReviewData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         let ignore = false;
 
         async function loadReview() {
-            const nextReviewData = await getReviewArchive();
+            setIsLoading(true);
+            setErrorMessage("");
 
-            if (ignore) {
-                return;
+            try {
+                const nextReviewData = await getReviewArchive();
+
+                if (ignore) {
+                    return;
+                }
+
+                setReviewData(nextReviewData);
+            } catch (error) {
+                if (!ignore) {
+                    setErrorMessage(
+                        error.message || "복습 데이터를 불러오지 못했습니다."
+                    );
+                }
+            } finally {
+                if (!ignore) {
+                    setIsLoading(false);
+                }
             }
-
-            setReviewData(nextReviewData);
         }
 
         loadReview();
@@ -62,8 +79,16 @@ function LearnerReview() {
         };
     }, []);
 
+    if (isLoading) {
+        return <div className="learner-review-page">복습 데이터를 불러오는 중입니다.</div>;
+    }
+
+    if (errorMessage) {
+        return <div className="learner-review-page">{errorMessage}</div>;
+    }
+
     if (!reviewData) {
-        return <div className="learner-review-page"></div>;
+        return <div className="learner-review-page">복습 데이터를 찾을 수 없습니다.</div>;
     }
 
     const linePoints = getLinePoints(reviewData.achievement.scores);

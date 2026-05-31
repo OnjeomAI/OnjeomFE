@@ -1,12 +1,10 @@
-// 복습 아카이브, 제출 이력, 채점 결과를 복습 화면 모델로 가공합니다.
-import { getScoreType } from "../mockFormatters.js";
+import { getScoreType } from "../../utils/mappers.js";
 import { formatKoreanDateTime } from "./dateSelectors.js";
 
 export function toReviewViewModel({ archive, submissions, gradingResults }) {
     const sortedSubmissions = [...submissions].sort(
         (a, b) => b.attemptNumber - a.attemptNumber
     );
-
     const latestSubmission = sortedSubmissions[0];
 
     return {
@@ -18,45 +16,45 @@ export function toReviewViewModel({ archive, submissions, gradingResults }) {
             title: archive.title,
         },
         achievement: {
-            title: "성취도 변화 곡선",
-            scores: [...submissions]
-                .sort((a, b) => a.attemptNumber - b.attemptNumber)
-                .map((submission) => {
-                    const gradingResult = gradingResults.find(
-                        (result) => result.submissionId === submission.id
-                    );
-
-                    return {
-                        id: submission.id,
-                        label:
-                            submission.id === latestSubmission.id
-                                ? "최근"
-                                : `${submission.attemptNumber}회차`,
-                        score: gradingResult?.score || 0,
-                    };
-                }),
+            title: "응답 점수 추이",
+            scores: sortedSubmissions
+                .slice()
+                .reverse()
+                .map((submission, index, items) => ({
+                    id: submission.id,
+                    label:
+                        index === items.length - 1
+                            ? "최신"
+                            : `${submission.attemptNumber}회차`,
+                    score: submission.finalScore ?? submission.rawScore ?? 0,
+                })),
         },
-        insight: archive.insight,
-        submissions: sortedSubmissions.map((submission) => {
-            const gradingResult = gradingResults.find(
-                (result) => result.submissionId === submission.id
-            );
-            const isLatest = submission.id === latestSubmission.id;
-
-            return {
-                id: submission.id,
-                attemptNumber: submission.attemptNumber,
-                score: gradingResult?.score || 0,
-                submittedAt: submission.submittedAt,
-                text: submission.answerText,
-                isLatest,
-                title: isLatest
-                    ? "현재 제출분"
-                    : `${submission.attemptNumber}회차 제출`,
-                date: formatKoreanDateTime(submission.submittedAt),
-                current: isLatest,
-                scoreType: getScoreType(gradingResult?.score || 0),
-            };
-        }),
+        insight: {
+            title: latestSubmission?.feedbackText
+                ? "최근 피드백"
+                : "응답 이력 없음",
+            description:
+                latestSubmission?.feedbackText ||
+                "아직 조회 가능한 응답 기록이 없습니다.",
+            detail: latestSubmission?.scoringBasis
+                ? `채점 기준: ${latestSubmission.scoringBasis}`
+                : "제출 후 피드백이 여기에 표시됩니다.",
+        },
+        submissions: sortedSubmissions.map((submission) => ({
+            id: submission.id,
+            attemptNumber: submission.attemptNumber,
+            score: submission.finalScore ?? submission.rawScore ?? 0,
+            text: submission.answerText,
+            title:
+                latestSubmission && latestSubmission.id === submission.id
+                    ? "현재 응답"
+                    : `${submission.attemptNumber}회차 응답`,
+            date: formatKoreanDateTime(submission.createdAt),
+            current: latestSubmission && latestSubmission.id === submission.id,
+            scoreType: getScoreType(
+                submission.finalScore ?? submission.rawScore ?? 0
+            ),
+            gradingResults,
+        })),
     };
 }

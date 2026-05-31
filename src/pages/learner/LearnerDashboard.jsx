@@ -70,25 +70,42 @@ function LearnerDashboard() {
     const [learner, setLearner] = useState(null);
     const [todayStudyStatus, setTodayStudyStatus] = useState("NOT_STARTED");
     const [dashboard, setDashboard] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         let ignore = false;
 
         async function loadDashboard() {
-            const [nextLearner, nextTodayStudyStatus, nextDashboard] =
-                await Promise.all([
-                    getUserByType("learner"),
-                    getTodayStudyStatus(),
-                    getLearnerDashboard(),
-                ]);
+            setIsLoading(true);
+            setErrorMessage("");
 
-            if (ignore) {
-                return;
+            try {
+                const [nextLearner, nextTodayStudyStatus, nextDashboard] =
+                    await Promise.all([
+                        getUserByType("learner"),
+                        getTodayStudyStatus(),
+                        getLearnerDashboard(),
+                    ]);
+
+                if (ignore) {
+                    return;
+                }
+
+                setLearner(nextLearner);
+                setTodayStudyStatus(nextTodayStudyStatus);
+                setDashboard(nextDashboard);
+            } catch (error) {
+                if (!ignore) {
+                    setErrorMessage(
+                        error.message || "대시보드 정보를 불러오지 못했습니다."
+                    );
+                }
+            } finally {
+                if (!ignore) {
+                    setIsLoading(false);
+                }
             }
-
-            setLearner(nextLearner);
-            setTodayStudyStatus(nextTodayStudyStatus);
-            setDashboard(nextDashboard);
         }
 
         loadDashboard();
@@ -98,8 +115,16 @@ function LearnerDashboard() {
         };
     }, []);
 
+    if (isLoading) {
+        return <div className="learner-dashboard-page">대시보드 정보를 불러오는 중입니다.</div>;
+    }
+
+    if (errorMessage) {
+        return <div className="learner-dashboard-page">{errorMessage}</div>;
+    }
+
     if (!learner || !dashboard) {
-        return <div className="learner-dashboard-page"></div>;
+        return <div className="learner-dashboard-page">대시보드 정보를 찾을 수 없습니다.</div>;
     }
 
     const todaySummary = dashboard.todaySummary;

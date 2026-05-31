@@ -1,62 +1,54 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    LockKeyhole,
-    Mail,
-    MessageSquare,
-    UserRound,
-} from "lucide-react";
-
+import { LockKeyhole, Mail, MessageSquare, UserRound } from "lucide-react";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
 import { signup } from "../../data/services/authService";
 
 function Signup() {
     const navigate = useNavigate();
-
     const [nickname, setNickname] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [agreeTerms, setAgreeTerms] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [infoMessage, setInfoMessage] = useState("");
 
     const handleSignupClick = async () => {
         if (!nickname || !email || !password || !passwordConfirm) {
-            alert("모든 항목을 입력해주세요.");
+            setErrorMessage("모든 항목을 입력해주세요.");
             return;
         }
 
         if (password !== passwordConfirm) {
-            alert("비밀번호가 일치하지 않습니다.");
+            setErrorMessage("비밀번호가 일치하지 않습니다.");
             return;
         }
 
         if (!agreeTerms) {
-            alert("약관 동의가 필요합니다.");
+            setErrorMessage("이용 약관 동의가 필요합니다.");
             return;
         }
 
+        setIsSubmitting(true);
+        setErrorMessage("");
+        setInfoMessage("");
+
         try {
-            await signup({
-                email,
-                password,
-                nickname,
-            });
-            navigate("/signup/verify", {
-                state: { email },
-            });
+            await signup({ email, password, nickname });
+            navigate("/signup/verify", { state: { email } });
         } catch (error) {
-            console.error(error);
-            alert(error.message || "서버 요청 중 오류가 발생했습니다.");
+            setErrorMessage(error.message || "회원가입에 실패했습니다.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleSocialSignup = () => {
-        navigate("/onboarding/diagnosis");
-    };
-
-    const handleLoginClick = () => {
-        navigate("/login");
+        setInfoMessage("아직 지원하지 않는 기능입니다.");
+        setErrorMessage("");
     };
 
     return (
@@ -68,21 +60,15 @@ function Signup() {
                             <span className="auth-brand-mark"></span>
                             <strong>온점</strong>
                         </div>
-
                         <h1>
-                            당신만의 지식 아카이브를
+                            개인 학습 기록을
                             <br />
-                            시작하세요.
+                            지금 시작하세요
                         </h1>
-
-                        <p>
-                            온점은 학습자의 답변과 사고 과정을 기록하고, 더 나은
-                            독해와 글쓰기 성장을 위한 맞춤형 경로를 제안합니다.
-                        </p>
-
+                        <p>회원가입 후 이메일 인증을 거쳐 로그인할 수 있습니다.</p>
                         <div className="auth-visual-caption">
                             <span></span>
-                            개인 학습 큐레이션
+                            Personal learning archive
                         </div>
                     </div>
                 </div>
@@ -91,8 +77,8 @@ function Signup() {
             <section className="auth-form-section">
                 <div className="auth-form-container">
                     <div className="auth-title-box">
-                        <h2>새 기록 보관소 만들기</h2>
-                        <p>온점과 함께 첫 진단을 시작해보세요.</p>
+                        <h2>회원가입</h2>
+                        <p>기존 UI를 유지한 채 실제 가입 API로 연결했습니다.</p>
                     </div>
 
                     <div className="auth-social-buttons">
@@ -104,7 +90,7 @@ function Signup() {
                             onClick={handleSocialSignup}
                         >
                             <span className="auth-social-icon google-icon"></span>
-                            Google 계정으로 가입하기
+                            Google로 가입하기
                         </Button>
 
                         <Button
@@ -115,7 +101,7 @@ function Signup() {
                             onClick={handleSocialSignup}
                         >
                             <MessageSquare size={18} strokeWidth={2.4} />
-                            카카오톡으로 가입하기
+                            Kakao로 가입하기
                         </Button>
                     </div>
 
@@ -128,24 +114,20 @@ function Signup() {
                     <div className="auth-input-list">
                         <div className="auth-input-with-icon">
                             <UserRound size={18} strokeWidth={2} />
-
                             <Input
                                 label="닉네임"
                                 name="nickname"
                                 value={nickname}
                                 placeholder="사용할 이름을 입력하세요"
                                 variant="box"
-                                onChange={(event) =>
-                                    setNickname(event.target.value)
-                                }
+                                onChange={(event) => setNickname(event.target.value)}
                             />
                         </div>
 
                         <div className="auth-input-with-icon">
                             <Mail size={18} strokeWidth={2} />
-
                             <Input
-                                label="이메일 주소"
+                                label="이메일"
                                 type="email"
                                 name="email"
                                 value={email}
@@ -157,7 +139,6 @@ function Signup() {
 
                         <div className="auth-input-with-icon">
                             <LockKeyhole size={18} strokeWidth={2} />
-
                             <Input
                                 label="비밀번호"
                                 type="password"
@@ -165,15 +146,12 @@ function Signup() {
                                 value={password}
                                 placeholder="8자 이상 입력하세요"
                                 variant="box"
-                                onChange={(event) =>
-                                    setPassword(event.target.value)
-                                }
+                                onChange={(event) => setPassword(event.target.value)}
                             />
                         </div>
 
                         <div className="auth-input-with-icon">
                             <LockKeyhole size={18} strokeWidth={2} />
-
                             <Input
                                 label="비밀번호 확인"
                                 type="password"
@@ -181,9 +159,7 @@ function Signup() {
                                 value={passwordConfirm}
                                 placeholder="비밀번호를 다시 입력하세요"
                                 variant="box"
-                                onChange={(event) =>
-                                    setPasswordConfirm(event.target.value)
-                                }
+                                onChange={(event) => setPasswordConfirm(event.target.value)}
                             />
                         </div>
                     </div>
@@ -192,13 +168,13 @@ function Signup() {
                         <input
                             type="checkbox"
                             checked={agreeTerms}
-                            onChange={(event) =>
-                                setAgreeTerms(event.target.checked)
-                            }
+                            onChange={(event) => setAgreeTerms(event.target.checked)}
                         />
-
-                        <span>이용약관과 개인정보 처리방침에 동의합니다</span>
+                        <span>이용 약관 및 개인정보 처리방침에 동의합니다.</span>
                     </label>
+
+                    {infoMessage ? <p className="auth-success-message">{infoMessage}</p> : null}
+                    {errorMessage ? <p className="auth-login-error">{errorMessage}</p> : null}
 
                     <Button
                         variant="primary"
@@ -206,15 +182,15 @@ function Signup() {
                         fullWidth
                         className="auth-submit-button"
                         onClick={handleSignupClick}
+                        disabled={isSubmitting}
                     >
-                        새 계정 생성하기
+                        {isSubmitting ? "가입 중..." : "계정 만들기"}
                     </Button>
 
                     <div className="auth-bottom-link">
-                        <span>이미 계정이 있으신가요?</span>
-
-                        <button type="button" onClick={handleLoginClick}>
-                            로그인하기
+                        <span>이미 계정이 있나요?</span>
+                        <button type="button" onClick={() => navigate("/login")}>
+                            로그인
                         </button>
                     </div>
                 </div>

@@ -20,11 +20,13 @@ function LearningAnalytics() {
     const [user, setUser] = useState(null);
     const [analyticsData, setAnalyticsData] = useState(null);
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         let ignore = false;
 
         async function loadAnalytics() {
+            setIsLoading(true);
             try {
                 const [nextUser, nextAnalyticsData] = await Promise.all([
                     getUserByType("learner"),
@@ -40,6 +42,10 @@ function LearningAnalytics() {
             } catch (loadError) {
                 if (!ignore) {
                     setError(loadError.message);
+                }
+            } finally {
+                if (!ignore) {
+                    setIsLoading(false);
                 }
             }
         }
@@ -103,8 +109,12 @@ function LearningAnalytics() {
         return <div className="learning-analytics-page">{error}</div>;
     }
 
+    if (isLoading) {
+        return <div className="learning-analytics-page">학습 분석 정보를 불러오는 중입니다.</div>;
+    }
+
     if (!user || !analyticsData) {
-        return <div className="learning-analytics-page"></div>;
+        return <div className="learning-analytics-page">학습 분석 정보를 찾을 수 없습니다.</div>;
     }
 
     return (

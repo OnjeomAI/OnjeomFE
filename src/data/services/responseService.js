@@ -1,41 +1,11 @@
-import { getAccessToken } from "../../utils/authStorage";
+import {
+    compareResponse as compareResponseApi,
+    getResponse as getResponseApi,
+    getResponsesByProblem as getResponsesByProblemApi,
+    submitResponse as submitResponseApi,
+} from "../../api/responseApi";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const LATEST_RESPONSE_KEY = "onjeom-latest-response";
-
-function getAuthHeaders() {
-    const accessToken = getAccessToken();
-
-    if (!accessToken) {
-        return {};
-    }
-
-    return {
-        Authorization: `Bearer ${accessToken}`,
-    };
-}
-
-async function requestResponse(path, options = {}) {
-    const response = await fetch(`${apiBaseUrl}${path}`, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeaders(),
-            ...options.headers,
-        },
-    });
-
-    const contentType = response.headers.get("content-type") || "";
-    const result = contentType.includes("application/json")
-        ? await response.json()
-        : null;
-
-    if (!response.ok || !result?.success) {
-        throw new Error(result?.message || "응답 API 요청을 처리하지 못했습니다.");
-    }
-
-    return result;
-}
 
 export function saveLatestResponseContext(context) {
     localStorage.setItem(LATEST_RESPONSE_KEY, JSON.stringify(context));
@@ -71,24 +41,26 @@ export async function submitResponse({
         payload.curriculumItemId = curriculumItemId;
     }
 
-    const result = await requestResponse("/api/responses", {
-        method: "POST",
-        body: JSON.stringify(payload),
-    });
+    const result = await submitResponseApi(payload);
 
     return result.data || null;
 }
 
 export async function getResponseById(responseId) {
-    const result = await requestResponse(`/api/responses/${responseId}`);
+    const result = await getResponseApi(responseId);
 
     return result.data || null;
 }
 
 export async function getResponsesByProblemId(problemId) {
-    const result = await requestResponse(
-        `/api/responses/problem/${problemId}`
-    );
+    const result = await getResponsesByProblemApi(problemId);
 
-    return Array.isArray(result.data) ? result.data : [];
+    return Array.isArray(result.data) ? result.data : result.data?.responses || [];
 }
+
+export async function compareResponse(responseId) {
+    const result = await compareResponseApi(responseId);
+
+    return result.data || null;
+}
+

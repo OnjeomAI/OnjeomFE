@@ -1,16 +1,5 @@
-import { getScoreType } from "../mockFormatters.js";
+import { getScoreType, mapReadingTypeLabel } from "../../utils/mappers.js";
 import { formatDotDate } from "./dateSelectors.js";
-
-function mapReadingTypeLabel(readingType) {
-    const labels = {
-        FACTUAL: "사실 이해",
-        INFERENTIAL: "추론 이해",
-        CRITICAL: "비판 이해",
-        CREATIVE: "창의 이해",
-    };
-
-    return labels[readingType] || readingType || "기타";
-}
 
 function mapLevelLabel(level) {
     const labels = {
@@ -32,7 +21,7 @@ export function toDashboardViewModel({
     const competencies = radar?.competencies || [];
     const weakCompetencies = weakPoints?.weakCompetencies || [];
     const dueReviews = today?.dueReviews || [];
-    const responses = recentResponses?.responses || [];
+    const responses = recentResponses?.responses || recentResponses?.content || [];
     const topWeakness = weakCompetencies[0] || null;
     const primaryReview = dueReviews[0] || null;
 
@@ -76,11 +65,11 @@ export function toDashboardViewModel({
         aiRecommendation: topWeakness
             ? {
                   title: `${mapReadingTypeLabel(topWeakness.type)} 보완 권장`,
-                  description: `현재 ${mapReadingTypeLabel(topWeakness.type)} 점수는 ${topWeakness.score}점이며, 복습 대기 ${weakPoints?.reviewDueCount || 0}건이 잡혀 있습니다.`,
+                  description: `현재 ${mapReadingTypeLabel(topWeakness.type)} 점수는 ${topWeakness.score}점이며 복습 대기 ${weakPoints?.reviewDueCount || 0}건이 있습니다.`,
               }
             : {
                   title: "균형 잡힌 학습 상태",
-                  description: "현재 별도로 강조된 약점 영역이 없습니다.",
+                  description: "현재 별도로 강조할 취약 영역이 없습니다.",
               },
         reviewSummary: primaryReview
             ? {
@@ -89,16 +78,17 @@ export function toDashboardViewModel({
               }
             : {
                   title: "오늘 예정된 복습이 없습니다",
-                  description: "새 학습을 시작하거나 최근 응답 이력을 확인해 보세요.",
+                  description: "오늘 학습을 시작하거나 최근 응답 이력을 확인해보세요.",
               },
         recentRecords: responses.map((response) => ({
-            id: response.responseId,
+            id: response.responseId ?? response.id,
             title: response.questionText,
             completedAt: formatDotDate(response.createdAt),
-            score: response.finalScore,
-            scoreType: getScoreType(response.finalScore || 0),
+            score: response.finalScore ?? response.rawScore ?? 0,
+            scoreType: getScoreType(response.finalScore ?? response.rawScore ?? 0),
             problemId: response.problemId,
             readingType: mapReadingTypeLabel(response.readingType),
         })),
     };
 }
+

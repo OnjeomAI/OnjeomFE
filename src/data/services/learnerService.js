@@ -1,35 +1,41 @@
-// 사용자 조회, 로그인 검증, 프로필/설정 변경을 담당하는 mock API 서비스입니다.
-import { credentials, users } from "../mockDb/users.js";
-
-function findUserByRole(role) {
-    return users.find((user) => user.role === role);
-}
+import { getAuthUser, setAuthUser } from "../../utils/authStorage";
+import { mapUserTypeFromRole, normalizeUserProfile } from "../../utils/mappers";
+import { getMyProfile, updateMyProfile } from "./userService";
 
 export async function getUserByType(type) {
-    return findUserByRole(type === "admin" ? "admin" : "learner");
-}
+    const storedUser = getAuthUser();
 
-export async function getUserById(userId) {
-    return users.find((user) => user.id === userId) || null;
-}
-
-export async function verifyLogin(email, password) {
-    const credential = credentials.find(
-        (item) =>
-            item.email.toLowerCase() === email.trim().toLowerCase() &&
-            item.password === password
-    );
-
-    if (!credential) {
+    if (!storedUser) {
         return null;
     }
 
-    const user = await getUserById(credential.userId);
+    const normalizedUser = normalizeUserProfile(storedUser, type);
 
-    return {
-        userType: user.role,
-        user,
-    };
+    if (normalizedUser.role === "learner" || type === "learner") {
+        try {
+            return await getMyProfile(type);
+        } catch {
+            return normalizedUser;
+        }
+    }
+
+    return normalizedUser;
+}
+
+export async function getUserById(userId) {
+    const storedUser = getAuthUser();
+
+    if (!storedUser) {
+        return null;
+    }
+
+    const normalizedUser = normalizeUserProfile(storedUser);
+
+    return normalizedUser.id === userId ? normalizedUser : null;
+}
+
+export async function verifyLogin() {
+    return null;
 }
 
 export async function getAfterLoginPath(type) {
@@ -37,50 +43,66 @@ export async function getAfterLoginPath(type) {
         return "/admin/question";
     }
 
-    const learner = findUserByRole("learner");
+    const learner = normalizeUserProfile(getAuthUser(), "learner");
 
-    return learner.learningState.hasCompletedDiagnosis
-        ? "/dashboard"
-        : "/onboarding/diagnosis";
+    return learner.hasCompletedDiagnosis ? "/dashboard" : "/onboarding/diagnosis";
 }
 
 export async function updateProfile(type, updatedProfile) {
-    const user = findUserByRole(type === "admin" ? "admin" : "learner");
-
-    Object.assign(user, {
+    return updateMyProfile(type, {
         nickname: updatedProfile.nickname,
-        displayName: updatedProfile.nickname,
-        email: updatedProfile.email,
     });
-
-    return user;
 }
 
 export async function updateSettings(type, updatedSettings) {
-    const user = findUserByRole(type === "admin" ? "admin" : "learner");
+    const currentUser = normalizeUserProfile(getAuthUser(), type);
 
-    if (updatedSettings.fontSize !== undefined) {
-        user.fontSize = updatedSettings.fontSize;
+    if (type === "admin") {
+        const nextUser = {
+            ...currentUser,
+            fontSize: updatedSettings.fontSize ?? currentUser.fontSize,
+        };
+
+        setAuthUser(nextUser);
+        return nextUser;
     }
 
-    if (user.role === "learner" && updatedSettings.dailyGoal !== undefined) {
-        user.dailyGoal = updatedSettings.dailyGoal;
-    }
+    return updateMyProfile(type, {
+        nickname: currentUser.nickname,
+        dailyGoal: updatedSettings.dailyGoal ?? currentUser.dailyGoal,
+        alarmEnabled:
+            updatedSettings.alarmEnabled ??
+            (updatedSettings.notificationSettings
+                ? Object.values(updatedSettings.notificationSettings).some(Boolean)
+                : currentUser.alarmEnabled),
+    }).then((updatedUser) => {
+        const nextUser = {
+            ...updatedUser,
+            fontSize: updatedSettings.fontSize ?? currentUser.fontSize,
+        };
 
-    if (
-        user.role === "learner" &&
-        updatedSettings.notificationSettings !== undefined
-    ) {
-        user.notificationSettings = updatedSettings.notificationSettings;
-    }
-
-    return user;
+        setAuthUser(nextUser);
+        return nextUser;
+    });
 }
 
 export async function markDiagnosisCompleted() {
-    const learner = findUserByRole("learner");
+    const currentUser = normalizeUserProfile(getAuthUser(), "learner");
+    const nextUser = {
+        ...currentUser,
+        hasCompletedDiagnosis: true,
+        learningState: {
+            ...(currentUser.learningState || {}),
+            hasCompletedDiagnosis: true,
+        },
+    };
 
-    learner.learningState.hasCompletedDiagnosis = true;
+    setAuthUser(nextUser);
 
-    return learner.learningState;
+    return nextUser.learningState;
 }
+
+export function getUserTypeFromRole(role) {
+    return mapUserTypeFromRole(role);
+}
+

@@ -1,88 +1,57 @@
 import {
     clearAuthSession,
-    getAccessToken,
     getRefreshToken,
     setAuthTokens,
     setAuthUser,
 } from "../../utils/authStorage";
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
-async function requestAuth(path, options = {}) {
-    const response = await fetch(`${apiBaseUrl}${path}`, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...options.headers,
-        },
-    });
-
-    const contentType = response.headers.get("content-type") || "";
-    const result = contentType.includes("application/json")
-        ? await response.json()
-        : null;
-
-    if (!response.ok || !result?.success) {
-        throw new Error(result?.message || "인증 요청에 실패했습니다.");
-    }
-
-    return result;
-}
+import { mapUserTypeFromRole, normalizeUserProfile } from "../../utils/mappers";
+import {
+    login as loginApi,
+    logout as logoutApi,
+    logoutAll as logoutAllApi,
+    requestPasswordReset as requestPasswordResetApi,
+    resetPassword as resetPasswordApi,
+    reissueToken as reissueTokenApi,
+    signup as signupApi,
+    verifyEmail as verifyEmailApi,
+} from "../../api/authApi";
 
 export async function signup({ email, password, nickname }) {
-    return requestAuth("/api/auth/signup", {
-        method: "POST",
-        body: JSON.stringify({
-            email,
-            password,
-            nickname,
-        }),
-    });
+    return signupApi(email, password, nickname);
 }
 
 export async function login({ email, password }) {
-    const result = await requestAuth("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({
-            email,
-            password,
-        }),
-    });
-
+    const result = await loginApi(email, password);
     const userData = result.data || {};
+    const normalizedUser = normalizeUserProfile(userData);
 
     setAuthTokens({
         accessToken: userData.accessToken,
         refreshToken: userData.refreshToken,
     });
-    setAuthUser(userData);
+    setAuthUser({
+        ...userData,
+        ...normalizedUser,
+    });
 
-    return userData;
+    return {
+        ...userData,
+        ...normalizedUser,
+    };
 }
 
 export async function verifyEmail({ email, otpCode }) {
-    return requestAuth("/api/auth/email/verify", {
-        method: "POST",
-        body: JSON.stringify({
-            email,
-            otpCode,
-        }),
-    });
+    return verifyEmailApi(email, otpCode);
 }
 
 export async function reissueToken() {
     const refreshToken = getRefreshToken();
 
     if (!refreshToken) {
-        throw new Error("refresh token이 없습니다.");
+        throw new Error("Refresh token is missing.");
     }
 
-    const result = await requestAuth("/api/auth/token/reissue", {
-        method: "POST",
-        headers: {
-            Authorization: `Bearer ${refreshToken}`,
-        },
-    });
+    const result = await reissueTokenApi(refreshToken);
 
     setAuthTokens({
         accessToken: result.data?.accessToken,
@@ -93,68 +62,30 @@ export async function reissueToken() {
 }
 
 export async function logout() {
-    const accessToken = getAccessToken();
-
-    if (!accessToken) {
-        clearAuthSession();
-        return;
-    }
-
     try {
-        await requestAuth("/api/auth/logout", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
+        await logoutApi();
     } finally {
         clearAuthSession();
     }
 }
 
 export async function logoutAll() {
-    const accessToken = getAccessToken();
-
-    if (!accessToken) {
-        clearAuthSession();
-        return;
-    }
-
     try {
-        await requestAuth("/api/auth/logout/all", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
+        await logoutAllApi();
     } finally {
         clearAuthSession();
     }
 }
 
 export async function requestPasswordReset(email) {
-    return requestAuth("/api/auth/password/reset-request", {
-        method: "POST",
-        body: JSON.stringify({
-            email,
-        }),
-    });
+    return requestPasswordResetApi(email);
 }
 
 export async function resetPassword({ token, newPassword }) {
-    return requestAuth("/api/auth/password/reset", {
-        method: "POST",
-        body: JSON.stringify({
-            token,
-            newPassword,
-        }),
-    });
+    return resetPasswordApi(token, newPassword);
 }
 
 export function getUserTypeFromRole(role) {
-    if (role === "ROLE_ADMIN" || role === "admin") {
-        return "admin";
-    }
-
-    return "learner";
+    return mapUserTypeFromRole(role);
 }
+
