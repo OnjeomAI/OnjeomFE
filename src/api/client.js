@@ -5,14 +5,19 @@ import {
     setAuthTokens,
 } from "../utils/authStorage";
 
-const DEFAULT_API_BASE_URL = "http://3.37.114.1:8080";
 const RAW_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL =
-    typeof RAW_API_BASE_URL === "string" && RAW_API_BASE_URL.trim()
-        ? RAW_API_BASE_URL.trim()
-        : DEFAULT_API_BASE_URL;
+    typeof RAW_API_BASE_URL === "string" ? RAW_API_BASE_URL.trim() : "";
+
+function hasAbsoluteApiBaseUrl() {
+    return Boolean(API_BASE_URL);
+}
 
 function getValidatedApiBaseUrl() {
+    if (!hasAbsoluteApiBaseUrl()) {
+        return "";
+    }
+
     try {
         new URL(API_BASE_URL);
     } catch {
@@ -25,7 +30,11 @@ function getValidatedApiBaseUrl() {
 }
 
 function buildUrl(path, query) {
-    const url = new URL(path, getValidatedApiBaseUrl());
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    const baseUrl = getValidatedApiBaseUrl();
+    const url = baseUrl
+        ? new URL(normalizedPath, baseUrl)
+        : new URL(normalizedPath, window.location.origin);
 
     if (query && typeof query === "object") {
         const searchParams = new URLSearchParams();
@@ -44,6 +53,10 @@ function buildUrl(path, query) {
         });
 
         url.search = searchParams.toString();
+    }
+
+    if (!baseUrl) {
+        return `${url.pathname}${url.search}`;
     }
 
     return url.toString();
