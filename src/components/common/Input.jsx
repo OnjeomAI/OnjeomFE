@@ -5,14 +5,14 @@ function Input({
     value,
     placeholder,
     onChange,
+    autoComplete,
     disabled = false,
     error,
     variant = "box",
     className = "",
     multiline = false,
     rows = 4,
-})
-{
+}) {
     const inputClassName = [
         "common-input",
         `common-input-${variant}`,
@@ -20,8 +20,8 @@ function Input({
         error ? "common-input-error" : "",
         className,
     ]
-    .filter(Boolean)
-    .join(" ");
+        .filter(Boolean)
+        .join(" ");
 
     return (
         <div className="common-input-group">
@@ -34,6 +34,7 @@ function Input({
                     value={value}
                     placeholder={placeholder}
                     onChange={onChange}
+                    autoComplete={autoComplete}
                     disabled={disabled}
                     rows={rows}
                 />
@@ -45,6 +46,7 @@ function Input({
                     value={value}
                     placeholder={placeholder}
                     onChange={onChange}
+                    autoComplete={autoComplete}
                     disabled={disabled}
                 />
             )}

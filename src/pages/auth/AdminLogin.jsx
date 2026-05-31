@@ -8,7 +8,7 @@ import { getUserTypeFromRole, login } from "../../data/services/authService";
 
 function AdminLogin() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("admin@onjeom.ai");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,7 +61,7 @@ function AdminLogin() {
                         <p>등록된 관리자 계정으로 로그인하세요.</p>
                     </div>
 
-                    <form className="admin-login-form" onSubmit={handleLogin}>
+                    <form className="admin-login-form" onSubmit={handleLogin} autoComplete="off">
                         <div className="admin-login-input">
                             <Mail size={18} strokeWidth={2} />
                             <Input
@@ -70,6 +70,7 @@ function AdminLogin() {
                                 name="adminEmail"
                                 value={email}
                                 placeholder="admin@onjeom.ai"
+                                autoComplete="off"
                                 variant="box"
                                 onChange={(event) => setEmail(event.target.value)}
                             />
@@ -83,6 +84,7 @@ function AdminLogin() {
                                 name="adminPassword"
                                 value={password}
                                 placeholder="비밀번호를 입력하세요"
+                                autoComplete="new-password"
                                 variant="box"
                                 onChange={(event) => setPassword(event.target.value)}
                             />

@@ -62,7 +62,7 @@ function Login() {
                             <br />
                             학습을 계속합니다
                         </h1>
-                        <p>기존 화면 구조는 유지하고 실제 API 로그인으로 연결했습니다.</p>
+                        <p>기존 화면 구조를 유지하고 실제 API 로그인으로 연결했습니다.</p>
                         <div className="auth-visual-caption">
                             <span></span>
                             Learning archive
@@ -117,6 +117,7 @@ function Login() {
                                 name="email"
                                 value={email}
                                 placeholder="user@example.com"
+                                autoComplete="off"
                                 variant="box"
                                 onChange={(event) => setEmail(event.target.value)}
                             />
@@ -130,6 +131,7 @@ function Login() {
                                 name="password"
                                 value={password}
                                 placeholder="비밀번호를 입력하세요"
+                                autoComplete="new-password"
                                 variant="box"
                                 onChange={(event) => setPassword(event.target.value)}
                             />
