@@ -48,9 +48,13 @@ function AdminLogin() {
                         <span className="admin-login-brand-mark" />
                         <strong>온점</strong>
                     </div>
-                    <h1>관리자 CMS 로그인</h1>
-                    <p>백엔드 인증 API를 사용하도록 연결했습니다.</p>
-                    <span className="admin-login-caption">Admin CMS</span>
+                    <h1>디지털 시대에 보존하는 지혜의 가치.</h1>
+                    <p>
+                        온점 콘텐츠 관리자 시스템(CMS)입니다.
+                        <br />
+                        등록된 관리자 계정으로 로그인해 주세요.
+                    </p>
+                    <span className="admin-login-caption">디지털 기록가</span>
                 </div>
             </section>
 
@@ -58,7 +62,7 @@ function AdminLogin() {
                 <div className="admin-login-form-container">
                     <div className="admin-login-title">
                         <h2>관리자 로그인</h2>
-                        <p>등록된 관리자 계정으로 로그인하세요.</p>
+                        <p>학문적 탐구를 관리하고 기록을 보존합니다.</p>
                     </div>
 
                     <form className="admin-login-form" onSubmit={handleLogin} autoComplete="off">

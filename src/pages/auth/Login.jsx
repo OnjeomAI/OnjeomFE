@@ -58,14 +58,17 @@ function Login() {
                             <strong>온점</strong>
                         </div>
                         <h1>
-                            기록을 이어가며
+                            디지털 시대에 보존하는
                             <br />
-                            학습을 계속합니다
+                            지혜의 가치.
                         </h1>
-                        <p>기존 화면 구조를 유지하고 실제 API 로그인으로 연결했습니다.</p>
+                        <p>
+                            온점에 오신 것을 환영합니다. 당신의 지적 여정을 위해
+                            큐레이션된 개인 디지털 기록 보관소를 확인하세요.
+                        </p>
                         <div className="auth-visual-caption">
                             <span></span>
-                            Learning archive
+                            디지털 기록가
                         </div>
                     </div>
                 </div>
@@ -74,8 +77,8 @@ function Login() {
             <section className="auth-form-section">
                 <div className="auth-form-container">
                     <div className="auth-title-box">
-                        <h2>로그인</h2>
-                        <p>계정을 입력하고 학습을 이어가세요.</p>
+                        <h2>다시 오신 것을 환영합니다</h2>
+                        <p>학문적 탐구를 계속 이어가세요.</p>
                     </div>
 
                     <div className="auth-social-buttons">
