@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LockKeyhole, Mail, MessageSquare } from "lucide-react";
 import Button from "../../components/common/Button";
@@ -9,25 +9,12 @@ import { getUserTypeFromRole, login } from "../../data/services/authService";
 function Login() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(() => localStorage.getItem("onjeom-remember-email") || "");
     const [password, setPassword] = useState("");
-    const [rememberMe, setRememberMe] = useState(false);
+    const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem("onjeom-remember-email"));
     const [loginError, setLoginError] = useState("");
-    const [infoMessage, setInfoMessage] = useState("");
+    const [infoMessage, setInfoMessage] = useState(location.state?.message || "");
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    useEffect(() => {
-        const savedEmail = localStorage.getItem("onjeom-remember-email");
-
-        if (savedEmail) {
-            setEmail(savedEmail);
-            setRememberMe(true);
-        }
-
-        if (location.state?.message) {
-            setInfoMessage(location.state.message);
-        }
-    }, [location.state]);
 
     const handleLoginClick = async () => {
         if (!email || !password) {
