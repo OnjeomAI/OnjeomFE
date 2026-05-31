@@ -26,7 +26,7 @@ function EmailVerification() {
     const [email, setEmail] = useState(initialEmail);
     const [otpCode, setOtpCode] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const [infoMessage, setInfoMessage] = useState(
+    const [infoMessage, _setInfoMessage] = useState(
         initialEmail
             ? "인증 메일을 발송했습니다. 받은 메일의 6자리 코드를 입력해주세요."
             : "가입에 사용한 이메일과 6자리 코드를 입력해주세요."
