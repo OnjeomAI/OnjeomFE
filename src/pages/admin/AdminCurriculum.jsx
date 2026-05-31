@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, CheckSquare, ListOrdered, Save } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -7,18 +7,9 @@ import { getUserByType } from "../../data/services/learnerService";
 import { getAdminProblems, updateCurriculumOrder } from "../../api/adminApi";
 
 function normalizeAdminProblemList(data) {
-    if (Array.isArray(data)) {
-        return data;
-    }
-
-    if (Array.isArray(data?.content)) {
-        return data.content;
-    }
-
-    if (Array.isArray(data?.problems)) {
-        return data.problems;
-    }
-
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.content)) return data.content;
+    if (Array.isArray(data?.problems)) return data.problems;
     return [];
 }
 
@@ -45,17 +36,13 @@ function AdminCurriculum() {
                     getAdminProblems(0, 100),
                 ]);
 
-                if (ignore) {
-                    return;
+                if (!ignore) {
+                    setUser(nextUser);
+                    setProblems(normalizeAdminProblemList(result.data));
                 }
-
-                setUser(nextUser);
-                setProblems(normalizeAdminProblemList(result.data));
             } catch (error) {
                 if (!ignore) {
-                    setErrorMessage(
-                        error.message || "커리큘럼 관리 화면을 불러오지 못했습니다."
-                    );
+                    setErrorMessage(error.message || "Failed to load curriculum page.");
                 }
             } finally {
                 if (!ignore) {
@@ -65,7 +52,6 @@ function AdminCurriculum() {
         }
 
         loadPage();
-
         return () => {
             ignore = true;
         };
@@ -89,16 +75,10 @@ function AdminCurriculum() {
     const moveSelectedProblem = (problemId, direction) => {
         setSelectedProblemIds((current) => {
             const index = current.indexOf(problemId);
-
-            if (index < 0) {
-                return current;
-            }
+            if (index < 0) return current;
 
             const targetIndex = direction === "up" ? index - 1 : index + 1;
-
-            if (targetIndex < 0 || targetIndex >= current.length) {
-                return current;
-            }
+            if (targetIndex < 0 || targetIndex >= current.length) return current;
 
             const next = [...current];
             [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
@@ -108,12 +88,12 @@ function AdminCurriculum() {
 
     const handleSave = async () => {
         if (!curriculumId.trim()) {
-            setErrorMessage("커리큘럼 ID를 입력해주세요.");
+            setErrorMessage("Enter a curriculum ID.");
             return;
         }
 
         if (selectedProblemIds.length === 0) {
-            setErrorMessage("순서를 저장할 문제를 하나 이상 선택해주세요.");
+            setErrorMessage("Select at least one problem.");
             return;
         }
 
@@ -123,38 +103,26 @@ function AdminCurriculum() {
 
         try {
             await updateCurriculumOrder(curriculumId.trim(), selectedProblemIds);
-            setSuccessMessage("커리큘럼 순서를 저장했습니다.");
+            setSuccessMessage("Curriculum order saved.");
         } catch (error) {
-            setErrorMessage(error.message || "커리큘럼 순서 저장에 실패했습니다.");
+            setErrorMessage(error.message || "Failed to save curriculum order.");
         } finally {
             setIsSaving(false);
         }
     };
 
-    if (errorMessage && !user && !isLoading) {
-        return <div>{errorMessage}</div>;
-    }
-
-    if (!user) {
-        return <div>관리자 정보를 불러오는 중입니다.</div>;
-    }
+    if (errorMessage && !user && !isLoading) return <div>{errorMessage}</div>;
+    if (!user) return <div>Loading admin profile...</div>;
 
     return (
         <div className="admin-problem-page">
             <PageHeader
-                title="커리큘럼"
+                title="Curriculum"
                 type="admin"
                 showBack={false}
                 userName={user.displayName}
                 userLevel={user.levelLabel}
             />
-
-            <div className="admin-problem-toolbar">
-                <div>
-                    <h2>커리큘럼 순서 관리</h2>
-                    <p>문제를 선택한 뒤 순서를 바꾸고 기존 reorder API로 저장합니다.</p>
-                </div>
-            </div>
 
             {errorMessage ? <p className="admin-problem-error">{errorMessage}</p> : null}
             {successMessage ? <p className="auth-success-message">{successMessage}</p> : null}
@@ -162,13 +130,13 @@ function AdminCurriculum() {
             <div className="admin-problem-layout">
                 <Card
                     className="admin-problem-list-card"
-                    title="문제 선택"
+                    title="Problem Selection"
                     subtitle="GET /api/admin/cms/problems"
                 >
                     {isLoading ? (
-                        <p className="admin-problem-empty">문제 목록을 불러오는 중입니다.</p>
+                        <p className="admin-problem-empty">Loading problems...</p>
                     ) : problems.length === 0 ? (
-                        <p className="admin-problem-empty">선택 가능한 문제가 없습니다.</p>
+                        <p className="admin-problem-empty">No problems found.</p>
                     ) : (
                         <div className="admin-curriculum-selection-list">
                             {problems.map((problem) => {
@@ -178,16 +146,13 @@ function AdminCurriculum() {
                                     <button
                                         key={problem.id}
                                         type="button"
-                                        className={`admin-curriculum-selection-item ${
-                                            selected ? "active" : ""
-                                        }`}
+                                        className={`admin-curriculum-selection-item ${selected ? "active" : ""}`}
                                         onClick={() => toggleProblem(problem.id)}
                                     >
                                         <div>
                                             <strong>{problem.questionText}</strong>
                                             <span>
-                                                ID {problem.id} · {problem.readingType} · 난이도{" "}
-                                                {problem.difficulty}
+                                                ID {problem.id} / {problem.readingType} / Difficulty {problem.difficulty}
                                             </span>
                                         </div>
                                         <CheckSquare size={18} strokeWidth={2} />
@@ -200,16 +165,16 @@ function AdminCurriculum() {
 
                 <Card
                     className="admin-problem-detail-card"
-                    title="선택 순서"
+                    title="Order Editor"
                     subtitle="PUT /api/admin/cms/curriculum/{curriculumId}/order"
                 >
                     <div className="admin-curriculum-config">
                         <label className="admin-form-field">
-                            <span>커리큘럼 ID</span>
+                            <span>Curriculum ID</span>
                             <input
                                 value={curriculumId}
                                 onChange={(event) => setCurriculumId(event.target.value)}
-                                placeholder="예: 1"
+                                placeholder="e.g. 1"
                             />
                         </label>
 
@@ -221,14 +186,12 @@ function AdminCurriculum() {
                             disabled={isSaving}
                         >
                             <Save size={16} strokeWidth={2} />
-                            {isSaving ? "저장 중..." : "순서 저장"}
+                            {isSaving ? "Saving..." : "Save Order"}
                         </Button>
                     </div>
 
                     {selectedProblems.length === 0 ? (
-                        <p className="admin-problem-empty">
-                            왼쪽 목록에서 문제를 선택하면 커리큘럼 순서를 편집할 수 있습니다.
-                        </p>
+                        <p className="admin-problem-empty">Select problems from the left list.</p>
                     ) : (
                         <div className="admin-curriculum-order-list">
                             {selectedProblems.map((problem, index) => (
@@ -238,12 +201,9 @@ function AdminCurriculum() {
                                             <ListOrdered size={14} strokeWidth={2} />
                                             {index + 1}
                                         </span>
-
                                         <div>
                                             <strong>{problem.questionText}</strong>
-                                            <p>
-                                                문제 ID {problem.id} · {problem.readingType}
-                                            </p>
+                                            <p>ID {problem.id} / {problem.readingType}</p>
                                         </div>
                                     </div>
 

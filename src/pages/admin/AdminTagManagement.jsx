@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -7,18 +7,9 @@ import { getUserByType } from "../../data/services/learnerService";
 import { getAdminProblems, updateKeywords } from "../../api/adminApi";
 
 function normalizeAdminProblemList(data) {
-    if (Array.isArray(data)) {
-        return data;
-    }
-
-    if (Array.isArray(data?.content)) {
-        return data.content;
-    }
-
-    if (Array.isArray(data?.problems)) {
-        return data.problems;
-    }
-
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.content)) return data.content;
+    if (Array.isArray(data?.problems)) return data.problems;
     return [];
 }
 
@@ -33,11 +24,7 @@ function toEditableKeywords(problem) {
 
 function clampKeywordWeight(value) {
     const numeric = Number(value);
-
-    if (!Number.isFinite(numeric)) {
-        return 1;
-    }
-
+    if (!Number.isFinite(numeric)) return 1;
     return Math.max(1, Math.min(100, numeric));
 }
 
@@ -65,19 +52,15 @@ function AdminTagManagement() {
                 ]);
                 const nextProblems = normalizeAdminProblemList(result.data);
 
-                if (ignore) {
-                    return;
+                if (!ignore) {
+                    setUser(nextUser);
+                    setProblems(nextProblems);
+                    setSelectedProblemId(nextProblems[0]?.id ?? null);
+                    setEditableKeywords(toEditableKeywords(nextProblems[0]));
                 }
-
-                setUser(nextUser);
-                setProblems(nextProblems);
-                setSelectedProblemId(nextProblems[0]?.id ?? null);
-                setEditableKeywords(toEditableKeywords(nextProblems[0]));
             } catch (error) {
                 if (!ignore) {
-                    setErrorMessage(
-                        error.message || "태그 관리 화면을 불러오지 못했습니다."
-                    );
+                    setErrorMessage(error.message || "Failed to load tag management.");
                 }
             } finally {
                 if (!ignore) {
@@ -87,7 +70,6 @@ function AdminTagManagement() {
         }
 
         loadPage();
-
         return () => {
             ignore = true;
         };
@@ -107,7 +89,6 @@ function AdminTagManagement() {
                     count: 0,
                     totalWeight: 0,
                 };
-
                 current.count += 1;
                 current.totalWeight += item.weight || 0;
                 stats.set(item.keyword, current);
@@ -115,10 +96,7 @@ function AdminTagManagement() {
         });
 
         return [...stats.values()].sort((left, right) => {
-            if (right.count !== left.count) {
-                return right.count - left.count;
-            }
-
+            if (right.count !== left.count) return right.count - left.count;
             return right.totalWeight - left.totalWeight;
         });
     }, [problems]);
@@ -136,10 +114,7 @@ function AdminTagManagement() {
                 itemIndex === index
                     ? {
                           ...item,
-                          [field]:
-                              field === "weight"
-                                  ? clampKeywordWeight(value)
-                                  : value,
+                          [field]: field === "weight" ? clampKeywordWeight(value) : value,
                       }
                     : item
             )
@@ -147,7 +122,9 @@ function AdminTagManagement() {
     };
 
     const handleAddKeyword = () => {
-        setEditableKeywords((current) => [...current, { keyword: "", weight: 1 }]);
+        setEditableKeywords((current) =>
+            current.length >= 10 ? current : [...current, { keyword: "", weight: 1 }]
+        );
     };
 
     const handleRemoveKeyword = (index) => {
@@ -156,7 +133,7 @@ function AdminTagManagement() {
 
     const handleSave = async () => {
         if (!selectedProblem) {
-            setErrorMessage("문제를 먼저 선택해주세요.");
+            setErrorMessage("Select a problem first.");
             return;
         }
 
@@ -168,7 +145,7 @@ function AdminTagManagement() {
             .filter((item) => item.keyword);
 
         if (normalizedKeywords.length === 0) {
-            setErrorMessage("최소 한 개 이상의 키워드를 입력해주세요.");
+            setErrorMessage("Enter at least one keyword.");
             return;
         }
 
@@ -178,7 +155,6 @@ function AdminTagManagement() {
 
         try {
             await updateKeywords(selectedProblem.id, { keywords: normalizedKeywords });
-
             setProblems((current) =>
                 current.map((problem) =>
                     problem.id === selectedProblem.id
@@ -186,38 +162,26 @@ function AdminTagManagement() {
                         : problem
                 )
             );
-            setSuccessMessage("키워드 정보를 저장했습니다.");
+            setSuccessMessage("Keywords saved.");
         } catch (error) {
-            setErrorMessage(error.message || "키워드 저장에 실패했습니다.");
+            setErrorMessage(error.message || "Failed to save keywords.");
         } finally {
             setIsSaving(false);
         }
     };
 
-    if (errorMessage && !user && !isLoading) {
-        return <div>{errorMessage}</div>;
-    }
-
-    if (!user) {
-        return <div>관리자 정보를 불러오는 중입니다.</div>;
-    }
+    if (errorMessage && !user && !isLoading) return <div>{errorMessage}</div>;
+    if (!user) return <div>Loading admin profile...</div>;
 
     return (
         <div className="admin-problem-page">
             <PageHeader
-                title="태그 관리"
+                title="Tag Management"
                 type="admin"
                 showBack={false}
                 userName={user.displayName}
                 userLevel={user.levelLabel}
             />
-
-            <div className="admin-problem-toolbar">
-                <div>
-                    <h2>문제별 키워드 관리</h2>
-                    <p>문제를 선택하고 키워드와 가중치를 수정한 뒤 바로 저장할 수 있습니다.</p>
-                </div>
-            </div>
 
             {errorMessage ? <p className="admin-problem-error">{errorMessage}</p> : null}
             {successMessage ? <p className="auth-success-message">{successMessage}</p> : null}
@@ -225,27 +189,23 @@ function AdminTagManagement() {
             <div className="admin-problem-layout">
                 <Card
                     className="admin-problem-list-card"
-                    title="문제 목록"
+                    title="Problem List"
                     subtitle="GET /api/admin/cms/problems"
                 >
                     {isLoading ? (
-                        <p className="admin-problem-empty">문제 목록을 불러오는 중입니다.</p>
+                        <p className="admin-problem-empty">Loading problems...</p>
                     ) : (
                         <div className="admin-tag-problem-list">
                             {problems.map((problem) => (
                                 <button
                                     key={problem.id}
                                     type="button"
-                                    className={`admin-curriculum-selection-item ${
-                                        selectedProblemId === problem.id ? "active" : ""
-                                    }`}
+                                    className={`admin-curriculum-selection-item ${selectedProblemId === problem.id ? "active" : ""}`}
                                     onClick={() => handleSelectProblem(problem)}
                                 >
                                     <div>
                                         <strong>{problem.questionText}</strong>
-                                        <span>
-                                            ID {problem.id} · 키워드 {(problem.keywords || []).length}개
-                                        </span>
+                                        <span>ID {problem.id} / Keywords {(problem.keywords || []).length}</span>
                                     </div>
                                 </button>
                             ))}
@@ -255,44 +215,27 @@ function AdminTagManagement() {
 
                 <Card
                     className="admin-problem-detail-card"
-                    title="키워드 편집"
+                    title="Keyword Editor"
                     subtitle="PUT /api/admin/cms/problems/{problemId}/keywords"
                 >
                     {!selectedProblem ? (
-                        <p className="admin-problem-empty">편집할 문제를 선택해주세요.</p>
+                        <p className="admin-problem-empty">Select a problem to edit keywords.</p>
                     ) : (
-                        <div className="admin-tag-editor">
-                            <div className="admin-tag-editor-header">
-                                <div>
-                                    <strong>{selectedProblem.questionText}</strong>
-                                    <p>문제 ID {selectedProblem.id}</p>
-                                </div>
-
-                                <Button
-                                    variant="primary"
-                                    size="medium"
-                                    className="admin-inline-button"
-                                    onClick={handleSave}
-                                    disabled={isSaving}
-                                >
-                                    <Save size={16} strokeWidth={2} />
-                                    {isSaving ? "저장 중..." : "키워드 저장"}
-                                </Button>
+                        <>
+                            <div className="admin-problem-section">
+                                <h3>{selectedProblem.questionText}</h3>
+                                <p>{selectedProblem.passageText || "No passage text."}</p>
                             </div>
 
                             <div className="admin-tag-edit-list">
                                 {editableKeywords.map((item, index) => (
-                                    <div className="admin-tag-edit-row" key={`${index}-${item.keyword}`}>
+                                    <div className="admin-tag-edit-row" key={`${selectedProblem.id}-${index}`}>
                                         <input
                                             value={item.keyword}
                                             onChange={(event) =>
-                                                handleKeywordChange(
-                                                    index,
-                                                    "keyword",
-                                                    event.target.value
-                                                )
+                                                handleKeywordChange(index, "keyword", event.target.value)
                                             }
-                                            placeholder="키워드"
+                                            placeholder="Keyword"
                                         />
                                         <input
                                             type="number"
@@ -300,51 +243,42 @@ function AdminTagManagement() {
                                             max="100"
                                             value={item.weight}
                                             onChange={(event) =>
-                                                handleKeywordChange(
-                                                    index,
-                                                    "weight",
-                                                    event.target.value
-                                                )
+                                                handleKeywordChange(index, "weight", event.target.value)
                                             }
+                                            placeholder="Weight"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveKeyword(index)}
-                                        >
+                                        <button type="button" onClick={() => handleRemoveKeyword(index)}>
                                             <Trash2 size={16} strokeWidth={2} />
                                         </button>
                                     </div>
                                 ))}
                             </div>
 
-                            <Button
-                                variant="outline"
-                                size="medium"
-                                className="admin-inline-button"
-                                onClick={handleAddKeyword}
-                            >
-                                <Plus size={16} strokeWidth={2} />
-                                키워드 추가
-                            </Button>
-                        </div>
+                            <div className="admin-problem-action-row">
+                                <Button variant="outline" size="medium" onClick={handleAddKeyword}>
+                                    <Plus size={16} strokeWidth={2} />
+                                    Add Keyword
+                                </Button>
+                                <Button variant="primary" size="medium" onClick={handleSave} disabled={isSaving}>
+                                    <Save size={16} strokeWidth={2} />
+                                    {isSaving ? "Saving..." : "Save"}
+                                </Button>
+                            </div>
+                        </>
                     )}
                 </Card>
             </div>
 
-            <Card
-                className="admin-problem-detail-card"
-                title="전체 키워드 요약"
-                subtitle="현재 불러온 문제 목록 기준 집계"
-            >
+            <Card title="Keyword Summary" subtitle="Aggregated from loaded problems">
                 {keywordSummary.length === 0 ? (
-                    <p className="admin-problem-empty">집계할 키워드가 없습니다.</p>
+                    <p className="admin-problem-empty">No keywords found.</p>
                 ) : (
-                    <div className="admin-tag-summary-grid">
+                    <div className="admin-stats-grid">
                         {keywordSummary.map((item) => (
                             <div className="admin-tag-summary-item" key={item.keyword}>
                                 <strong>{item.keyword}</strong>
-                                <span>등장 {item.count}회</span>
-                                <em>가중치 합 {item.totalWeight}</em>
+                                <span>Used {item.count} times</span>
+                                <em>Total weight {item.totalWeight}</em>
                             </div>
                         ))}
                     </div>

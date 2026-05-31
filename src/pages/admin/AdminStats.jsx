@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -28,9 +28,7 @@ function AdminStats() {
                 }
             } catch (error) {
                 if (!ignore) {
-                    setErrorMessage(
-                        error.message || "관리자 통계 정보를 불러오지 못했습니다."
-                    );
+                    setErrorMessage(error.message || "Failed to load admin stats.");
                 }
             }
         }
@@ -58,7 +56,7 @@ function AdminStats() {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         } catch (error) {
-            setErrorMessage(error.message || "CSV 다운로드에 실패했습니다.");
+            setErrorMessage(error.message || "CSV export failed.");
         } finally {
             setIsDownloading(false);
         }
@@ -69,25 +67,20 @@ function AdminStats() {
     }
 
     if (!user) {
-        return <div>관리자 정보를 불러오는 중입니다.</div>;
+        return <div>Loading admin profile...</div>;
     }
 
     return (
         <div className="admin-problem-page">
             <PageHeader
-                title="통계 분석"
+                title="Statistics"
                 type="admin"
                 showBack={false}
                 userName={user.displayName}
                 userLevel={user.levelLabel}
             />
 
-            <div className="admin-problem-toolbar">
-                <div>
-                    <h2>관리자 통계</h2>
-                    <p>대시보드 통계를 조회하고 CSV로 내보낼 수 있습니다.</p>
-                </div>
-
+            <div className="admin-problem-toolbar admin-problem-toolbar-end">
                 <Button
                     variant="outline"
                     size="medium"
@@ -96,7 +89,7 @@ function AdminStats() {
                     disabled={isDownloading}
                 >
                     <Download size={16} strokeWidth={2} />
-                    {isDownloading ? "다운로드 중..." : "CSV 내보내기"}
+                    {isDownloading ? "Downloading..." : "Export CSV"}
                 </Button>
             </div>
 
@@ -105,17 +98,17 @@ function AdminStats() {
             <div className="admin-problem-layout">
                 <Card
                     className="admin-problem-detail-card"
-                    title="관리자 통계"
+                    title="Admin Statistics"
                     subtitle="GET /api/admin/dashboard/stats"
                 >
                     <div className="admin-stats-grid">
                         {Object.entries(stats || {}).length === 0 ? (
-                            <p className="admin-problem-empty">표시할 통계가 없습니다.</p>
+                            <p className="admin-problem-empty">No statistics available.</p>
                         ) : (
                             Object.entries(stats || {}).map(([key, value]) => (
                                 <div className="admin-tag-summary-item" key={key}>
                                     <strong>{key}</strong>
-                                    <span>{typeof value === "object" ? "객체" : "값"}</span>
+                                    <span>{typeof value === "object" ? "Object" : "Value"}</span>
                                     <em>
                                         {typeof value === "object"
                                             ? JSON.stringify(value)
