@@ -20,6 +20,9 @@ export async function signup({ email, password, nickname }) {
 export async function login({ email, password }) {
     const result = await loginApi({ email, password });
     const userData = result.data || {};
+
+    clearAuthSession();
+
     const normalizedUser = normalizeUserProfile(userData);
 
     setAuthTokens({
