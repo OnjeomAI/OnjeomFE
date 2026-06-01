@@ -9,6 +9,8 @@ import {
 } from "../../data/services/diagnosisService";
 import { markDiagnosisCompleted } from "../../data/services/learnerService";
 
+const TOTAL_DIAGNOSIS_QUESTION_COUNT = 3;
+
 function formatElapsedTime(seconds) {
     const minute = Math.floor(seconds / 60);
     const second = seconds % 60;
@@ -92,10 +94,11 @@ function DiagnosisTest() {
     const minLength = useMemo(() => {
         return currentQuestion?.questionText?.length > 80 ? 50 : 20;
     }, [currentQuestion]);
-    const totalQuestionCount = 3;
+    const totalQuestionCount = TOTAL_DIAGNOSIS_QUESTION_COUNT;
+    const displayQuestionIndex = Math.min(questionIndex, totalQuestionCount);
     const progressPercent = Math.min(
         100,
-        Math.max(0, (questionIndex / totalQuestionCount) * 100)
+        Math.max(0, (displayQuestionIndex / totalQuestionCount) * 100)
     );
 
     const handleAnswerChange = (event) => {
@@ -122,7 +125,7 @@ function DiagnosisTest() {
                 responseTimeSec: Math.max(1, elapsedSeconds),
             });
 
-            if (result.completed) {
+            if (result.completed || questionIndex >= totalQuestionCount) {
                 await markDiagnosisCompleted();
                 navigate("/onboarding/result", { replace: true });
                 return;
@@ -188,7 +191,7 @@ function DiagnosisTest() {
                         </div>
 
                         <span className="diagnosis-progress-text">
-                            현재 문항 {questionIndex} / {totalQuestionCount}
+                            현재 문항 {displayQuestionIndex} / {totalQuestionCount}
                         </span>
                     </div>
                 </div>
@@ -226,7 +229,7 @@ function DiagnosisTest() {
                 <section className="diagnosis-question-section">
                     <div className="diagnosis-question-inner">
                         <div className="diagnosis-question-label">
-                            질문 {String(questionIndex).padStart(2, "0")}
+                            질문 {String(displayQuestionIndex).padStart(2, "0")}
                         </div>
 
                         <h2>{currentQuestion.questionText}</h2>

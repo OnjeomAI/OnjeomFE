@@ -116,6 +116,19 @@
     color: var(--color-gold);
 }
 
+.admin-problem-list-filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.admin-problem-list-filter-row > span {
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+}
+
 .admin-problem-error {
     margin: 0;
     color: var(--color-danger);

@@ -354,21 +354,6 @@ function AdminQuestionManagement() {
                 userLevel={user.levelLabel}
             />
 
-            <div className="admin-problem-toolbar">
-                <div className="admin-problem-filters">
-                    {readingTypeOptions.map((option) => (
-                        <button
-                            key={option.value}
-                            type="button"
-                            className={readingType === option.value ? "active" : ""}
-                            onClick={() => setReadingType(option.value)}
-                        >
-                            {option.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
             {errorMessage ? <p className="admin-problem-error">{errorMessage}</p> : null}
             {successMessage ? <p className="auth-success-message">{successMessage}</p> : null}
 
@@ -455,6 +440,22 @@ function AdminQuestionManagement() {
 
             <div className="admin-problem-layout">
                 <Card className="admin-problem-list-card" title="문제 목록">
+                    <div className="admin-problem-list-filter-row">
+                        <span>독해 유형</span>
+                        <div className="admin-problem-filters">
+                            {readingTypeOptions.map((option) => (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    className={readingType === option.value ? "active" : ""}
+                                    onClick={() => setReadingType(option.value)}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className="admin-problem-list-head">
                         <span>ID</span><span>문항</span><span>유형</span><span>난이도</span><span>독해</span>
                     </div>
