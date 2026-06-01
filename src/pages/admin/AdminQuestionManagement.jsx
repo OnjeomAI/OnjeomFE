@@ -73,6 +73,29 @@ function normalizeKeywords(keywords = []) {
     }));
 }
 
+function normalizeGeneratedProblemPayload(payload) {
+    const source =
+        payload?.data && typeof payload.data === "object" ? payload.data : payload;
+
+    if (!source || typeof source !== "object") {
+        return {};
+    }
+
+    return {
+        passageText: source.passageText ?? source.passage ?? "",
+        questionText: source.questionText ?? source.question ?? "",
+        problemType: source.problemType,
+        readingType: source.readingType,
+        difficulty: source.difficulty,
+        modelAnswer:
+            source.modelAnswer ??
+            source.answer ??
+            source.explanation ??
+            "",
+        keywords: Array.isArray(source.keywords) ? source.keywords : [],
+    };
+}
+
 function toUpdateForm(problem) {
     return {
         passageText: problem?.passageText || "",
@@ -333,24 +356,22 @@ function AdminQuestionManagement() {
                 difficulty: requestedDifficulty,
                 topic: generateForm.topic,
             });
-            const detail = result || {};
+            const detail = normalizeGeneratedProblemPayload(result);
             await loadCurrentPageProblems();
 
-            if (detail.passageText || detail.questionText) {
-                setCreateForm((current) => ({
-                    ...current,
-                    passageText: detail.passageText || current.passageText,
-                    questionText: detail.questionText || current.questionText,
-                    problemType: detail.problemType || current.problemType,
-                    readingType: detail.readingType || requestedReadingType,
-                    difficulty: detail.difficulty || requestedDifficulty,
-                    modelAnswer: detail.modelAnswer || current.modelAnswer,
-                    keywords:
-                        detail.keywords?.length > 0
-                            ? normalizeKeywords(detail.keywords)
-                            : current.keywords,
-                }));
-            }
+            setCreateForm((current) => ({
+                ...current,
+                passageText: detail.passageText ?? "",
+                questionText: detail.questionText ?? "",
+                problemType: detail.problemType || current.problemType,
+                readingType: detail.readingType || requestedReadingType,
+                difficulty: detail.difficulty || requestedDifficulty,
+                modelAnswer: detail.modelAnswer ?? "",
+                keywords:
+                    detail.keywords.length > 0
+                        ? normalizeKeywords(detail.keywords)
+                        : [],
+            }));
 
             setSuccessMessage("AI 생성 요청을 완료했습니다.");
         } catch (error) {
