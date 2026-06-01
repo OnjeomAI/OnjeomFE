@@ -4,6 +4,7 @@ import { LockKeyhole, Mail } from "lucide-react";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
 import { login } from "../../data/services/authService";
+import { clearAuthSession } from "../../utils/authStorage";
 
 function AdminLogin() {
     const navigate = useNavigate();
@@ -24,7 +25,14 @@ function AdminLogin() {
         setErrorMessage("");
 
         try {
-            await login({ email, password });
+            const loginResult = await login({ email, password });
+
+            if (loginResult.role !== "admin") {
+                clearAuthSession();
+                setErrorMessage("관리자 권한이 있는 계정으로 로그인해 주세요.");
+                return;
+            }
+
             navigate("/admin/question", { replace: true });
         } catch (error) {
             setErrorMessage(error.message || "관리자 로그인에 실패했습니다.");

@@ -32,7 +32,7 @@ function RequireAuth({ role, enforceRole = true }) {
         return <Navigate to={role === "admin" ? "/admin" : "/login"} replace state={{ from: location }} />;
     }
 
-    if (enforceRole && role && user?.role && role !== user.role) {
+    if (enforceRole && role && user?.role !== role) {
         return <Navigate to={user.role === "admin" ? "/admin/question" : "/dashboard"} replace />;
     }
 
@@ -108,7 +108,7 @@ function App() {
                     />
                 </Route>
 
-                <Route element={<RequireAuth role="admin" enforceRole={false} />}>
+                <Route element={<RequireAuth role="admin" />}>
                     <Route
                         path="/admin/question"
                         element={
