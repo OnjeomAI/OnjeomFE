@@ -42,7 +42,7 @@ function AdminCurriculum() {
                 }
             } catch (error) {
                 if (!ignore) {
-                    setErrorMessage(error.message || "Failed to load curriculum page.");
+                    setErrorMessage(error.message || "커리큘럼 관리 화면을 불러오지 못했습니다.");
                 }
             } finally {
                 if (!ignore) {
@@ -88,12 +88,12 @@ function AdminCurriculum() {
 
     const handleSave = async () => {
         if (!curriculumId.trim()) {
-            setErrorMessage("Enter a curriculum ID.");
+            setErrorMessage("커리큘럼 ID를 입력해 주세요.");
             return;
         }
 
         if (selectedProblemIds.length === 0) {
-            setErrorMessage("Select at least one problem.");
+            setErrorMessage("문제를 하나 이상 선택해 주세요.");
             return;
         }
 
@@ -103,21 +103,21 @@ function AdminCurriculum() {
 
         try {
             await updateCurriculumOrder(curriculumId.trim(), selectedProblemIds);
-            setSuccessMessage("Curriculum order saved.");
+            setSuccessMessage("커리큘럼 순서를 저장했습니다.");
         } catch (error) {
-            setErrorMessage(error.message || "Failed to save curriculum order.");
+            setErrorMessage(error.message || "커리큘럼 순서 저장에 실패했습니다.");
         } finally {
             setIsSaving(false);
         }
     };
 
     if (errorMessage && !user && !isLoading) return <div>{errorMessage}</div>;
-    if (!user) return <div>Loading admin profile...</div>;
+    if (!user) return <div>관리자 정보를 불러오는 중입니다.</div>;
 
     return (
         <div className="admin-problem-page">
             <PageHeader
-                title="Curriculum"
+                title="커리큘럼"
                 type="admin"
                 showBack={false}
                 userName={user.displayName}
@@ -130,13 +130,12 @@ function AdminCurriculum() {
             <div className="admin-problem-layout">
                 <Card
                     className="admin-problem-list-card"
-                    title="Problem Selection"
-                    subtitle="GET /api/admin/cms/problems"
+                    title="문제 선택"
                 >
                     {isLoading ? (
-                        <p className="admin-problem-empty">Loading problems...</p>
+                        <p className="admin-problem-empty">문제 목록을 불러오는 중입니다.</p>
                     ) : problems.length === 0 ? (
-                        <p className="admin-problem-empty">No problems found.</p>
+                        <p className="admin-problem-empty">등록된 문제가 없습니다.</p>
                     ) : (
                         <div className="admin-curriculum-selection-list">
                             {problems.map((problem) => {
@@ -152,7 +151,7 @@ function AdminCurriculum() {
                                         <div>
                                             <strong>{problem.questionText}</strong>
                                             <span>
-                                                ID {problem.id} / {problem.readingType} / Difficulty {problem.difficulty}
+                                                ID {problem.id} / {problem.readingType} / 난이도 {problem.difficulty}
                                             </span>
                                         </div>
                                         <CheckSquare size={18} strokeWidth={2} />
@@ -165,16 +164,15 @@ function AdminCurriculum() {
 
                 <Card
                     className="admin-problem-detail-card"
-                    title="Order Editor"
-                    subtitle="PUT /api/admin/cms/curriculum/{curriculumId}/order"
+                    title="순서 편집"
                 >
                     <div className="admin-curriculum-config">
                         <label className="admin-form-field">
-                            <span>Curriculum ID</span>
+                            <span>커리큘럼 ID</span>
                             <input
                                 value={curriculumId}
                                 onChange={(event) => setCurriculumId(event.target.value)}
-                                placeholder="e.g. 1"
+                                placeholder="예: 1"
                             />
                         </label>
 
@@ -186,12 +184,12 @@ function AdminCurriculum() {
                             disabled={isSaving}
                         >
                             <Save size={16} strokeWidth={2} />
-                            {isSaving ? "Saving..." : "Save Order"}
+                            {isSaving ? "저장 중..." : "순서 저장"}
                         </Button>
                     </div>
 
                     {selectedProblems.length === 0 ? (
-                        <p className="admin-problem-empty">Select problems from the left list.</p>
+                        <p className="admin-problem-empty">왼쪽 목록에서 문제를 선택해 주세요.</p>
                     ) : (
                         <div className="admin-curriculum-order-list">
                             {selectedProblems.map((problem, index) => (

@@ -28,7 +28,7 @@ function AdminStats() {
                 }
             } catch (error) {
                 if (!ignore) {
-                    setErrorMessage(error.message || "Failed to load admin stats.");
+                    setErrorMessage(error.message || "관리자 통계를 불러오지 못했습니다.");
                 }
             }
         }
@@ -56,7 +56,7 @@ function AdminStats() {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         } catch (error) {
-            setErrorMessage(error.message || "CSV export failed.");
+            setErrorMessage(error.message || "통계 파일 내보내기에 실패했습니다.");
         } finally {
             setIsDownloading(false);
         }
@@ -67,13 +67,13 @@ function AdminStats() {
     }
 
     if (!user) {
-        return <div>Loading admin profile...</div>;
+        return <div>관리자 정보를 불러오는 중입니다.</div>;
     }
 
     return (
         <div className="admin-problem-page">
             <PageHeader
-                title="Statistics"
+                title="통계"
                 type="admin"
                 showBack={false}
                 userName={user.displayName}
@@ -89,7 +89,7 @@ function AdminStats() {
                     disabled={isDownloading}
                 >
                     <Download size={16} strokeWidth={2} />
-                    {isDownloading ? "Downloading..." : "Export CSV"}
+                    {isDownloading ? "다운로드 중..." : "통계 파일 내보내기"}
                 </Button>
             </div>
 
@@ -98,17 +98,16 @@ function AdminStats() {
             <div className="admin-problem-layout">
                 <Card
                     className="admin-problem-detail-card"
-                    title="Admin Statistics"
-                    subtitle="GET /api/admin/dashboard/stats"
+                    title="관리자 통계"
                 >
                     <div className="admin-stats-grid">
                         {Object.entries(stats || {}).length === 0 ? (
-                            <p className="admin-problem-empty">No statistics available.</p>
+                            <p className="admin-problem-empty">표시할 통계가 없습니다.</p>
                         ) : (
                             Object.entries(stats || {}).map(([key, value]) => (
                                 <div className="admin-tag-summary-item" key={key}>
                                     <strong>{key}</strong>
-                                    <span>{typeof value === "object" ? "Object" : "Value"}</span>
+                                    <span>{typeof value === "object" ? "객체" : "값"}</span>
                                     <em>
                                         {typeof value === "object"
                                             ? JSON.stringify(value)
