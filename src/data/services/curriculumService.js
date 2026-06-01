@@ -6,6 +6,16 @@ import {
     startCurriculumItem as startCurriculumItemApi,
 } from "../../api/curriculumApi";
 
+export function isMissingCurriculumError(error) {
+    const message = String(error?.message || "").toLowerCase();
+
+    return (
+        message.includes("curriculum") ||
+        message.includes("커리큘럼") ||
+        message.includes("존재하지")
+    );
+}
+
 export async function getMyCurriculum() {
     const result = await getMyCurriculumApi();
 

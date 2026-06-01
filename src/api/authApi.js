@@ -9,7 +9,7 @@ export async function login(payload) {
 }
 
 export async function reissueToken(refreshToken) {
-    return apiPost("/api/auth/token/reissue", { refreshToken }, {
+    return apiPost("/api/auth/token/reissue", undefined, {
         headers: {
             Authorization: `Bearer ${refreshToken}`,
         },

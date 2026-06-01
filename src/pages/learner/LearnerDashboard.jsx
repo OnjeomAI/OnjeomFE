@@ -53,6 +53,10 @@ function getRadarGridPointString(itemCount, radius) {
 }
 
 function getStudyButtonLabel(status) {
+    if (status === "NO_CURRICULUM") {
+        return "진단 시작";
+    }
+
     if (status === "IN_PROGRESS") {
         return "이어 하기";
     }
@@ -150,6 +154,11 @@ function LearnerDashboard() {
     const previousRadarPoints = getRadarPointString(abilityItems, "previous");
 
     const handleStartStudy = async () => {
+        if (todayStudyStatus === "NO_CURRICULUM") {
+            navigate("/onboarding/diagnosis");
+            return;
+        }
+
         navigate(await getTodayStudyPath());
     };
 

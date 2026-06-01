@@ -104,6 +104,6 @@ export function normalizeUserProfile(data, fallbackType = "learner") {
             merged.hasCompletedDiagnosis ??
             merged.learningState?.hasCompletedDiagnosis ??
             merged.diagnosisCompleted ??
-            true,
+            false,
     };
 }

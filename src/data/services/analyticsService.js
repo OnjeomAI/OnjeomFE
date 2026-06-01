@@ -26,16 +26,16 @@ function buildCompetencyHistory(responses) {
         return acc;
     }, {});
 
-    return Object.entries(grouped).map(([competencyType, scores]) => ({
-        competencyType,
+    return Object.entries(grouped).map(([competency, scores]) => ({
+        competency,
         scores,
     }));
 }
 
 function buildCompetencyScores(radarData) {
     return (radarData?.competencies || []).map((item) => ({
-        competencyType: item.type,
-        averageScore: item.score,
+        competency: item.type,
+        score: item.score,
     }));
 }
 

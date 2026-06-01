@@ -111,10 +111,8 @@ async function requestTokenReissue(refreshToken) {
     const response = await fetch(buildUrl("/api/auth/token/reissue"), {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${refreshToken}`,
         },
-        body: JSON.stringify({ refreshToken }),
     });
 
     const result = await parseJsonSafely(response);

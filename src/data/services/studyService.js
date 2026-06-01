@@ -2,6 +2,7 @@ import {
     completeCurriculumItem,
     getCurriculumProgress,
     getMyCurriculum,
+    isMissingCurriculumError,
     skipCurriculumItem,
     startCurriculumItem,
 } from "./curriculumService";
@@ -88,10 +89,27 @@ function buildStudyViewModel({
 }
 
 export async function getTodayStudySession() {
-    const [curriculum, progress] = await Promise.all([
-        getMyCurriculum(),
-        getCurriculumProgress(),
-    ]);
+    let curriculum;
+    let progress = null;
+
+    try {
+        curriculum = await getMyCurriculum();
+    } catch (error) {
+        if (isMissingCurriculumError(error)) {
+            return null;
+        }
+
+        throw error;
+    }
+
+    try {
+        progress = await getCurriculumProgress();
+    } catch (error) {
+        if (!isMissingCurriculumError(error)) {
+            throw error;
+        }
+    }
+
     const currentItem = getActiveTodayItem(curriculum);
 
     if (!currentItem) {
@@ -109,7 +127,18 @@ export async function getTodayStudySession() {
 }
 
 export async function getTodayStudyStatus() {
-    const curriculum = await getMyCurriculum();
+    let curriculum;
+
+    try {
+        curriculum = await getMyCurriculum();
+    } catch (error) {
+        if (isMissingCurriculumError(error)) {
+            return "NO_CURRICULUM";
+        }
+
+        throw error;
+    }
+
     const currentItem = getActiveTodayItem(curriculum);
 
     if (!currentItem) {
