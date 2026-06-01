@@ -9,7 +9,7 @@ import {
 } from "../../data/services/diagnosisService";
 import { markDiagnosisCompleted } from "../../data/services/learnerService";
 
-const TOTAL_DIAGNOSIS_QUESTION_COUNT = 3;
+const TOTAL_DIAGNOSIS_QUESTION_COUNT = 10;
 
 function formatElapsedTime(seconds) {
     const minute = Math.floor(seconds / 60);
@@ -94,7 +94,8 @@ function DiagnosisTest() {
     const minLength = useMemo(() => {
         return currentQuestion?.questionText?.length > 80 ? 50 : 20;
     }, [currentQuestion]);
-    const totalQuestionCount = TOTAL_DIAGNOSIS_QUESTION_COUNT;
+    const totalQuestionCount =
+        currentQuestion?.totalQuestions || TOTAL_DIAGNOSIS_QUESTION_COUNT;
     const displayQuestionIndex = Math.min(questionIndex, totalQuestionCount);
     const progressPercent = Math.min(
         100,
@@ -125,9 +126,12 @@ function DiagnosisTest() {
                 responseTimeSec: Math.max(1, elapsedSeconds),
             });
 
-            if (result.completed || questionIndex >= totalQuestionCount) {
+            if (result.completed) {
                 await markDiagnosisCompleted();
-                navigate("/onboarding/result", { replace: true });
+                navigate("/onboarding/result", {
+                    replace: true,
+                    state: { diagnosisResult: result.result },
+                });
                 return;
             }
 

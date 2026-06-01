@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
     CheckCircle2,
     CircleAlert,
@@ -124,15 +124,22 @@ function buildRadarPoints(scores) {
 
 function DiagnosisResult() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const stateResult = location.state?.diagnosisResult || null;
 
-    const [result, setResult] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [result, setResult] = useState(stateResult);
+    const [isLoading, setIsLoading] = useState(!stateResult);
     const [error, setError] = useState("");
 
     useEffect(() => {
         let ignore = false;
 
         async function loadResult() {
+            if (stateResult) {
+                await markDiagnosisCompleted();
+                return;
+            }
+
             setIsLoading(true);
             setError("");
 
@@ -161,7 +168,7 @@ function DiagnosisResult() {
         return () => {
             ignore = true;
         };
-    }, []);
+    }, [stateResult]);
 
     const scores = useMemo(() => {
         if (!result) {
