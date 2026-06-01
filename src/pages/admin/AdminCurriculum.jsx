@@ -1,79 +1,207 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, CheckSquare, ListOrdered, Save } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+    ArrowDown,
+    ArrowUp,
+    CheckCircle2,
+    ListOrdered,
+    Save,
+    Search,
+} from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader";
 import { getUserByType } from "../../data/services/learnerService";
-import { getAdminProblems, updateCurriculumOrder } from "../../api/adminApi";
+import {
+    getCurriculumItems,
+    getUserCurricula,
+    searchCurriculumUsers,
+    updateCurriculumOrder,
+} from "../../api/adminApi";
 
-function normalizeAdminProblemList(data) {
+function normalizeList(data) {
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.content)) return data.content;
-    if (Array.isArray(data?.problems)) return data.problems;
+    if (Array.isArray(data?.items)) return data.items;
     return [];
+}
+
+function formatDate(value) {
+    if (!value) return "-";
+    return value.replace("T", " ").slice(0, 16);
+}
+
+function getStatusLabel(status) {
+    const labels = {
+        ACTIVE: "진행 중",
+        PAUSED: "중지됨",
+        COMPLETED: "완료",
+        PENDING: "대기",
+        IN_PROGRESS: "진행",
+        SKIPPED: "건너뜀",
+    };
+
+    return labels[status] || status || "-";
 }
 
 function AdminCurriculum() {
     const [user, setUser] = useState(null);
-    const [problems, setProblems] = useState([]);
-    const [selectedProblemIds, setSelectedProblemIds] = useState([]);
-    const [curriculumId, setCurriculumId] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
+    const [userQuery, setUserQuery] = useState("");
+    const [users, setUsers] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [curricula, setCurricula] = useState([]);
+    const [selectedCurriculum, setSelectedCurriculum] = useState(null);
+    const [curriculumItems, setCurriculumItems] = useState([]);
+    const [orderedProblemIds, setOrderedProblemIds] = useState([]);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+    const [isLoadingCurricula, setIsLoadingCurricula] = useState(false);
+    const [isLoadingItems, setIsLoadingItems] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
+        getUserByType("admin").then(setUser);
+    }, []);
+
+    useEffect(() => {
         let ignore = false;
 
-        async function loadPage() {
-            setIsLoading(true);
+        async function loadUsers() {
+            setIsLoadingUsers(true);
             setErrorMessage("");
 
             try {
-                const [nextUser, result] = await Promise.all([
-                    getUserByType("admin"),
-                    getAdminProblems(0, 100),
-                ]);
+                const result = await searchCurriculumUsers(userQuery, 20);
+                if (ignore) return;
 
-                if (!ignore) {
-                    setUser(nextUser);
-                    setProblems(normalizeAdminProblemList(result.data));
-                }
+                const nextUsers = normalizeList(result.data);
+                setUsers(nextUsers);
+                setSelectedUser((current) => {
+                    if (current && nextUsers.some((item) => item.id === current.id)) {
+                        return current;
+                    }
+
+                    return nextUsers[0] || null;
+                });
             } catch (error) {
                 if (!ignore) {
-                    setErrorMessage(error.message || "커리큘럼 관리 화면을 불러오지 못했습니다.");
+                    setUsers([]);
+                    setSelectedUser(null);
+                    setErrorMessage(error.message || "사용자 목록을 불러오지 못했습니다.");
                 }
             } finally {
-                if (!ignore) {
-                    setIsLoading(false);
-                }
+                if (!ignore) setIsLoadingUsers(false);
             }
         }
 
-        loadPage();
+        const timeoutId = window.setTimeout(loadUsers, 250);
+
+        return () => {
+            ignore = true;
+            window.clearTimeout(timeoutId);
+        };
+    }, [userQuery]);
+
+    useEffect(() => {
+        let ignore = false;
+
+        async function loadCurricula() {
+            if (!selectedUser) {
+                setCurricula([]);
+                setSelectedCurriculum(null);
+                return;
+            }
+
+            setIsLoadingCurricula(true);
+            setErrorMessage("");
+
+            try {
+                const result = await getUserCurricula(selectedUser.id);
+                if (ignore) return;
+
+                const nextCurricula = normalizeList(result.data);
+                setCurricula(nextCurricula);
+                setSelectedCurriculum((current) => {
+                    if (
+                        current &&
+                        nextCurricula.some(
+                            (item) => item.curriculumId === current.curriculumId
+                        )
+                    ) {
+                        return current;
+                    }
+
+                    return nextCurricula[0] || null;
+                });
+            } catch (error) {
+                if (!ignore) {
+                    setCurricula([]);
+                    setSelectedCurriculum(null);
+                    setErrorMessage(error.message || "커리큘럼 이력을 불러오지 못했습니다.");
+                }
+            } finally {
+                if (!ignore) setIsLoadingCurricula(false);
+            }
+        }
+
+        loadCurricula();
         return () => {
             ignore = true;
         };
-    }, []);
+    }, [selectedUser]);
 
-    const selectedProblems = useMemo(() => {
-        return selectedProblemIds
-            .map((id) => problems.find((problem) => problem.id === id))
-            .filter(Boolean);
-    }, [problems, selectedProblemIds]);
+    useEffect(() => {
+        let ignore = false;
 
-    const toggleProblem = (problemId) => {
-        setSuccessMessage("");
-        setSelectedProblemIds((current) =>
-            current.includes(problemId)
-                ? current.filter((id) => id !== problemId)
-                : [...current, problemId]
+        async function loadItems() {
+            if (!selectedCurriculum) {
+                setCurriculumItems([]);
+                setOrderedProblemIds([]);
+                return;
+            }
+
+            setIsLoadingItems(true);
+            setErrorMessage("");
+
+            try {
+                const result = await getCurriculumItems(
+                    selectedCurriculum.curriculumId
+                );
+                if (ignore) return;
+
+                const nextItems = normalizeList(result.data);
+                setCurriculumItems(nextItems);
+                setOrderedProblemIds(nextItems.map((item) => item.problemId));
+            } catch (error) {
+                if (!ignore) {
+                    setCurriculumItems([]);
+                    setOrderedProblemIds([]);
+                    setErrorMessage(error.message || "커리큘럼 문제를 불러오지 못했습니다.");
+                }
+            } finally {
+                if (!ignore) setIsLoadingItems(false);
+            }
+        }
+
+        loadItems();
+        return () => {
+            ignore = true;
+        };
+    }, [selectedCurriculum]);
+
+    const orderedItems = useMemo(() => {
+        const itemByProblemId = new Map(
+            curriculumItems.map((item) => [item.problemId, item])
         );
-    };
 
-    const moveSelectedProblem = (problemId, direction) => {
-        setSelectedProblemIds((current) => {
+        return orderedProblemIds
+            .map((problemId) => itemByProblemId.get(problemId))
+            .filter(Boolean);
+    }, [curriculumItems, orderedProblemIds]);
+
+    const moveItem = (problemId, direction) => {
+        setSuccessMessage("");
+        setOrderedProblemIds((current) => {
             const index = current.indexOf(problemId);
             if (index < 0) return current;
 
@@ -87,13 +215,13 @@ function AdminCurriculum() {
     };
 
     const handleSave = async () => {
-        if (!curriculumId.trim()) {
-            setErrorMessage("커리큘럼 ID를 입력해 주세요.");
+        if (!selectedCurriculum) {
+            setErrorMessage("순서를 저장할 커리큘럼을 선택해 주세요.");
             return;
         }
 
-        if (selectedProblemIds.length === 0) {
-            setErrorMessage("문제를 하나 이상 선택해 주세요.");
+        if (orderedProblemIds.length === 0) {
+            setErrorMessage("커리큘럼에 포함된 문제가 없습니다.");
             return;
         }
 
@@ -102,7 +230,15 @@ function AdminCurriculum() {
         setSuccessMessage("");
 
         try {
-            await updateCurriculumOrder(curriculumId.trim(), selectedProblemIds);
+            const result = await updateCurriculumOrder(
+                selectedCurriculum.curriculumId,
+                orderedProblemIds
+            );
+            const nextItems = normalizeList(result.data);
+            if (nextItems.length > 0) {
+                setCurriculumItems(nextItems);
+                setOrderedProblemIds(nextItems.map((item) => item.problemId));
+            }
             setSuccessMessage("커리큘럼 순서를 저장했습니다.");
         } catch (error) {
             setErrorMessage(error.message || "커리큘럼 순서 저장에 실패했습니다.");
@@ -111,7 +247,7 @@ function AdminCurriculum() {
         }
     };
 
-    if (errorMessage && !user && !isLoading) return <div>{errorMessage}</div>;
+    if (errorMessage && !user) return <div>{errorMessage}</div>;
     if (!user) return <div>관리자 정보를 불러오는 중입니다.</div>;
 
     return (
@@ -127,106 +263,164 @@ function AdminCurriculum() {
             {errorMessage ? <p className="admin-problem-error">{errorMessage}</p> : null}
             {successMessage ? <p className="auth-success-message">{successMessage}</p> : null}
 
-            <div className="admin-problem-layout">
-                <Card
-                    className="admin-problem-list-card"
-                    title="문제 선택"
-                >
-                    {isLoading ? (
-                        <p className="admin-problem-empty">문제 목록을 불러오는 중입니다.</p>
-                    ) : problems.length === 0 ? (
-                        <p className="admin-problem-empty">등록된 문제가 없습니다.</p>
-                    ) : (
-                        <div className="admin-curriculum-selection-list">
-                            {problems.map((problem) => {
-                                const selected = selectedProblemIds.includes(problem.id);
+            <div className="admin-curriculum-history-layout">
+                <Card className="admin-curriculum-user-card" title="사용자 선택">
+                    <label className="admin-curriculum-search">
+                        <Search size={16} />
+                        <input
+                            value={userQuery}
+                            onChange={(event) => setUserQuery(event.target.value)}
+                            placeholder="이메일 또는 닉네임 검색"
+                        />
+                    </label>
 
-                                return (
-                                    <button
-                                        key={problem.id}
-                                        type="button"
-                                        className={`admin-curriculum-selection-item ${selected ? "active" : ""}`}
-                                        onClick={() => toggleProblem(problem.id)}
-                                    >
-                                        <div>
-                                            <strong>{problem.questionText}</strong>
-                                            <span>
-                                                ID {problem.id} / {problem.readingType} / 난이도 {problem.difficulty}
-                                            </span>
-                                        </div>
-                                        <CheckSquare size={18} strokeWidth={2} />
-                                    </button>
-                                );
-                            })}
+                    {isLoadingUsers ? (
+                        <p className="admin-problem-empty">사용자를 불러오는 중입니다.</p>
+                    ) : users.length === 0 ? (
+                        <p className="admin-problem-empty">검색된 사용자가 없습니다.</p>
+                    ) : (
+                        <div className="admin-curriculum-user-list">
+                            {users.map((item) => (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    className={
+                                        selectedUser?.id === item.id ? "active" : ""
+                                    }
+                                    onClick={() => {
+                                        setSuccessMessage("");
+                                        setSelectedUser(item);
+                                    }}
+                                >
+                                    <strong>{item.nickname || item.email}</strong>
+                                    <span>{item.email}</span>
+                                </button>
+                            ))}
                         </div>
                     )}
                 </Card>
 
-                <Card
-                    className="admin-problem-detail-card"
-                    title="순서 편집"
-                >
-                    <div className="admin-curriculum-config">
-                        <label className="admin-form-field">
-                            <span>커리큘럼 ID</span>
-                            <input
-                                value={curriculumId}
-                                onChange={(event) => setCurriculumId(event.target.value)}
-                                placeholder="예: 1"
-                            />
-                        </label>
-
-                        <Button
-                            variant="primary"
-                            size="medium"
-                            className="admin-inline-button"
-                            onClick={handleSave}
-                            disabled={isSaving}
-                        >
-                            <Save size={16} strokeWidth={2} />
-                            {isSaving ? "저장 중..." : "순서 저장"}
-                        </Button>
-                    </div>
-
-                    {selectedProblems.length === 0 ? (
-                        <p className="admin-problem-empty">왼쪽 목록에서 문제를 선택해 주세요.</p>
+                <Card className="admin-curriculum-list-card" title="커리큘럼 이력">
+                    {isLoadingCurricula ? (
+                        <p className="admin-problem-empty">커리큘럼 이력을 불러오는 중입니다.</p>
+                    ) : curricula.length === 0 ? (
+                        <p className="admin-problem-empty">선택한 사용자의 커리큘럼이 없습니다.</p>
                     ) : (
-                        <div className="admin-curriculum-order-list">
-                            {selectedProblems.map((problem, index) => (
-                                <div className="admin-curriculum-order-item" key={problem.id}>
-                                    <div className="admin-curriculum-order-main">
-                                        <span className="admin-curriculum-order-badge">
-                                            <ListOrdered size={14} strokeWidth={2} />
-                                            {index + 1}
+                        <div className="admin-curriculum-history-list">
+                            {curricula.map((curriculum) => (
+                                <button
+                                    key={curriculum.curriculumId}
+                                    type="button"
+                                    className={
+                                        selectedCurriculum?.curriculumId ===
+                                        curriculum.curriculumId
+                                            ? "active"
+                                            : ""
+                                    }
+                                    onClick={() => {
+                                        setSuccessMessage("");
+                                        setSelectedCurriculum(curriculum);
+                                    }}
+                                >
+                                    <div>
+                                        <strong>
+                                            커리큘럼 #{curriculum.curriculumId}
+                                        </strong>
+                                        <span>
+                                            진단 #{curriculum.diagnosticId} / 생성{" "}
+                                            {formatDate(curriculum.createdAt)}
                                         </span>
-                                        <div>
-                                            <strong>{problem.questionText}</strong>
-                                            <p>ID {problem.id} / {problem.readingType}</p>
-                                        </div>
                                     </div>
-
-                                    <div className="admin-curriculum-order-actions">
-                                        <button
-                                            type="button"
-                                            onClick={() => moveSelectedProblem(problem.id, "up")}
-                                            disabled={index === 0}
-                                        >
-                                            <ArrowUp size={16} strokeWidth={2} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => moveSelectedProblem(problem.id, "down")}
-                                            disabled={index === selectedProblems.length - 1}
-                                        >
-                                            <ArrowDown size={16} strokeWidth={2} />
-                                        </button>
-                                    </div>
-                                </div>
+                                    <em className={`status-${curriculum.status}`}>
+                                        {getStatusLabel(curriculum.status)}
+                                    </em>
+                                    <p>
+                                        Stage {curriculum.currentStage} / 완료{" "}
+                                        {curriculum.completedItems} / 전체{" "}
+                                        {curriculum.totalItems} / Theta{" "}
+                                        {Number(curriculum.theta || 0).toFixed(2)}
+                                    </p>
+                                </button>
                             ))}
                         </div>
                     )}
                 </Card>
             </div>
+
+            <Card className="admin-curriculum-order-card" title="순서 편집">
+                <div className="admin-curriculum-order-toolbar">
+                    <div>
+                        <span>선택 커리큘럼</span>
+                        <strong>
+                            {selectedCurriculum
+                                ? `#${selectedCurriculum.curriculumId}`
+                                : "커리큘럼을 선택해 주세요"}
+                        </strong>
+                    </div>
+                    <Button
+                        variant="primary"
+                        size="medium"
+                        className="admin-inline-button"
+                        onClick={handleSave}
+                        disabled={isSaving || !selectedCurriculum}
+                    >
+                        <Save size={16} strokeWidth={2} />
+                        {isSaving ? "저장 중..." : "순서 저장"}
+                    </Button>
+                </div>
+
+                {isLoadingItems ? (
+                    <p className="admin-problem-empty">커리큘럼 문제를 불러오는 중입니다.</p>
+                ) : orderedItems.length === 0 ? (
+                    <p className="admin-problem-empty">편집할 커리큘럼 문제를 선택해 주세요.</p>
+                ) : (
+                    <div className="admin-curriculum-order-list">
+                        {orderedItems.map((item, index) => (
+                            <div className="admin-curriculum-order-item" key={item.itemId}>
+                                <div className="admin-curriculum-order-main">
+                                    <span className="admin-curriculum-order-badge">
+                                        <ListOrdered size={14} strokeWidth={2} />
+                                        {index + 1}
+                                    </span>
+                                    <div>
+                                        <strong>{item.questionText}</strong>
+                                        <p>
+                                            문제 ID {item.problemId} / Stage {item.stage} /
+                                            난이도 {item.difficulty} /{" "}
+                                            {getStatusLabel(item.status)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="admin-curriculum-order-actions">
+                                    {item.status === "COMPLETED" ? (
+                                        <span className="admin-curriculum-completed-badge">
+                                            <CheckCircle2 size={14} />
+                                            완료
+                                        </span>
+                                    ) : null}
+                                    <button
+                                        type="button"
+                                        onClick={() => moveItem(item.problemId, "up")}
+                                        disabled={index === 0}
+                                        aria-label="위로 이동"
+                                    >
+                                        <ArrowUp size={16} strokeWidth={2} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => moveItem(item.problemId, "down")}
+                                        disabled={index === orderedItems.length - 1}
+                                        aria-label="아래로 이동"
+                                    >
+                                        <ArrowDown size={16} strokeWidth={2} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </Card>
         </div>
     );
 }

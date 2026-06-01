@@ -3,8 +3,6 @@ import {
     Bot,
     Check,
     FileText,
-    ListChecks,
-    Pencil,
     Plus,
     RefreshCw,
     Save,
@@ -450,18 +448,6 @@ function AdminQuestionManagement() {
                             <div>
                                 <span>지문 본문 에디터</span>
                                 <strong>직접 문항 제작</strong>
-                            </div>
-                            <div className="admin-question-tool-icons">
-                                <button type="button" aria-label="굵게">B</button>
-                                <button type="button" aria-label="기울임">I</button>
-                                <button type="button" aria-label="밑줄">U</button>
-                                <button type="button" aria-label="목록">
-                                    <ListChecks size={15} />
-                                </button>
-                                <button type="button" aria-label="인용">99</button>
-                                <button type="button" aria-label="편집">
-                                    <Pencil size={15} />
-                                </button>
                             </div>
                         </div>
 

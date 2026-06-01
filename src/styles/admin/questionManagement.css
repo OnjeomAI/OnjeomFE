@@ -715,6 +715,161 @@
     flex-wrap: wrap;
 }
 
+.admin-curriculum-history-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+    gap: 24px;
+}
+
+.admin-curriculum-user-card.common-card,
+.admin-curriculum-list-card.common-card,
+.admin-curriculum-order-card.common-card {
+    min-height: auto;
+}
+
+.admin-curriculum-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--color-line);
+    background-color: var(--color-white);
+    color: var(--color-muted);
+}
+
+.admin-curriculum-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-size: calc(14px * var(--app-font-scale));
+}
+
+.admin-curriculum-user-list,
+.admin-curriculum-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.admin-curriculum-user-list button,
+.admin-curriculum-history-list button {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    background-color: rgba(255, 255, 255, 0.58);
+    color: var(--color-text);
+    text-align: left;
+}
+
+.admin-curriculum-user-list button {
+    padding: 14px 16px;
+}
+
+.admin-curriculum-history-list button {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 16px;
+    padding: 16px;
+}
+
+.admin-curriculum-user-list button.active,
+.admin-curriculum-history-list button.active {
+    border-color: var(--color-gold);
+    background-color: #f7ead0;
+}
+
+.admin-curriculum-user-list strong,
+.admin-curriculum-user-list span,
+.admin-curriculum-history-list strong,
+.admin-curriculum-history-list span,
+.admin-curriculum-history-list p {
+    display: block;
+}
+
+.admin-curriculum-user-list strong,
+.admin-curriculum-history-list strong {
+    font-size: calc(14px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.admin-curriculum-user-list span,
+.admin-curriculum-history-list span,
+.admin-curriculum-history-list p {
+    margin: 6px 0 0;
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.admin-curriculum-history-list p {
+    grid-column: 1 / -1;
+}
+
+.admin-curriculum-history-list em {
+    align-self: start;
+    padding: 5px 8px;
+    background-color: rgba(139, 100, 0, 0.12);
+    color: var(--color-gold);
+    font-size: calc(11px * var(--app-font-scale));
+    font-style: normal;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.admin-curriculum-history-list em.status-ACTIVE {
+    background-color: #e8f4e7;
+    color: #2f7d32;
+}
+
+.admin-curriculum-history-list em.status-PAUSED {
+    background-color: #f2eee6;
+    color: var(--color-muted);
+}
+
+.admin-curriculum-order-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--color-line);
+}
+
+.admin-curriculum-order-toolbar span,
+.admin-curriculum-order-toolbar strong {
+    display: block;
+}
+
+.admin-curriculum-order-toolbar span {
+    color: var(--color-muted);
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 800;
+}
+
+.admin-curriculum-order-toolbar strong {
+    margin-top: 8px;
+    color: var(--color-text);
+    font-size: calc(18px * var(--app-font-scale));
+    font-weight: 900;
+}
+
+.admin-curriculum-completed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 8px;
+    height: 34px;
+    background-color: #e8f4e7;
+    color: #2f7d32;
+    font-size: calc(12px * var(--app-font-scale));
+    font-weight: 900;
+}
+
 .admin-form-field {
     display: flex;
     flex-direction: column;
@@ -977,6 +1132,7 @@
 
 @media (max-width: 1280px) {
     .admin-question-studio,
+    .admin-curriculum-history-layout,
     .admin-question-grid,
     .admin-problem-layout {
         grid-template-columns: 1fr;
@@ -1029,6 +1185,7 @@
     }
 
     .admin-curriculum-config,
+    .admin-curriculum-order-toolbar,
     .admin-tag-editor-header,
     .admin-question-keyword-header {
         flex-direction: column;

@@ -43,6 +43,25 @@ export async function reorderCurriculum(curriculumId, problemIds) {
     );
 }
 
+export async function searchCurriculumUsers(query = "", size = 20) {
+    return apiGet("/api/admin/cms/users", {
+        requireAuth: true,
+        query: { query, size },
+    });
+}
+
+export async function getUserCurricula(userId) {
+    return apiGet(`/api/admin/cms/users/${userId}/curricula`, {
+        requireAuth: true,
+    });
+}
+
+export async function getCurriculumItems(curriculumId) {
+    return apiGet(`/api/admin/cms/curriculum/${curriculumId}/items`, {
+        requireAuth: true,
+    });
+}
+
 export async function reindexProblem(problemId) {
     return apiPost(`/api/admin/cms/problems/${problemId}/reindex`, undefined, {
         requireAuth: true,
