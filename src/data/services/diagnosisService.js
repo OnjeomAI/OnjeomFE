@@ -41,10 +41,30 @@ function toDiagnosisQuestion(data, questionIndex) {
     };
 }
 
+function isNextDiagnosisQuestion(data) {
+    return Boolean(data?.problemId && data?.questionText);
+}
+
+function isCompletedDiagnosisResult(data) {
+    return Boolean(
+        data?.completed ||
+            data?.diagnosisCompleted ||
+            data?.result ||
+            data?.theta !== undefined ||
+            data?.factualScore !== undefined ||
+            data?.curriculumId !== undefined
+    );
+}
+
 export async function startDiagnosisSession() {
     const previousSession = readDiagnosisSession();
     const result = await startDiagnostic();
     const data = result.data || {};
+
+    if (!isNextDiagnosisQuestion(data)) {
+        throw new Error(result.message || "진단 문제를 불러오지 못했습니다.");
+    }
+
     const isSameDiagnosis =
         previousSession &&
         previousSession.diagnosisId === data.diagnosisId &&
@@ -76,7 +96,13 @@ export async function submitDiagnosisAnswer({
         responseTimeSec,
     });
 
-    if (!result.data) {
+    if (!result.data || isCompletedDiagnosisResult(result.data)) {
+        clearDiagnosisSession();
+        return { completed: true };
+    }
+
+    if (!isNextDiagnosisQuestion(result.data)) {
+        clearDiagnosisSession();
         return { completed: true };
     }
 
