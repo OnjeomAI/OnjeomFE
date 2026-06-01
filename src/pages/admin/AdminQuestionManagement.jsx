@@ -34,6 +34,11 @@ const readingTypeOptions = [
     { label: "창의 이해", value: "CREATIVE" },
 ];
 
+const problemTypeOptions = [
+    { label: "주관식", value: "SHORT_ANSWER" },
+    { label: "객관식", value: "MULTIPLE_CHOICE" },
+];
+
 function createKeywordItem() {
     return { keyword: "", weight: 10 };
 }
@@ -42,6 +47,7 @@ function createProblemForm() {
     return {
         passageText: "",
         questionText: "",
+        problemType: "SHORT_ANSWER",
         readingType: "FACTUAL",
         difficulty: 3,
         modelAnswer: "",
@@ -335,6 +341,7 @@ function AdminQuestionManagement() {
                     ...current,
                     passageText: detail.passageText || current.passageText,
                     questionText: detail.questionText || current.questionText,
+                    problemType: detail.problemType || current.problemType,
                     readingType: detail.readingType || requestedReadingType,
                     difficulty: detail.difficulty || requestedDifficulty,
                     modelAnswer: detail.modelAnswer || current.modelAnswer,
@@ -542,6 +549,31 @@ function AdminQuestionManagement() {
                         </div>
 
                         <div className="admin-question-setting-block">
+                            <span>문제 유형</span>
+                            <div className="admin-question-segmented">
+                                {problemTypeOptions.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        className={
+                                            createForm.problemType === option.value
+                                                ? "active"
+                                                : ""
+                                        }
+                                        onClick={() =>
+                                            handleCreateFieldChange(
+                                                "problemType",
+                                                option.value
+                                            )
+                                        }
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="admin-question-setting-block">
                             <span>난이도 설정</span>
                             <div className="admin-question-stars">
                                 {[1, 2, 3, 4, 5].map((value) => (
@@ -725,6 +757,7 @@ function AdminQuestionManagement() {
 
                     <div className="admin-problem-list-head">
                         <span>ID</span>
+                        <span>유형</span>
                         <span>문항</span>
                         <span>난이도</span>
                         <span>독해</span>
@@ -751,6 +784,7 @@ function AdminQuestionManagement() {
                                     onClick={() => setSelectedProblemId(problem.id)}
                                 >
                                     <span>{problem.id}</span>
+                                    <span>{problem.problemType || "-"}</span>
                                     <span>{problem.questionText}</span>
                                     <span>{problem.difficulty}</span>
                                     <span>{getReadingTypeLabel(problem.readingType)}</span>

@@ -500,7 +500,7 @@
 .admin-problem-list-head,
 .admin-problem-row {
     display: grid;
-    grid-template-columns: 70px minmax(0, 1.6fr) 80px 110px;
+    grid-template-columns: 70px 100px minmax(0, 1.6fr) 80px 110px;
     gap: 12px;
     align-items: center;
 }
