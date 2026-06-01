@@ -6,6 +6,7 @@ import {
     skipCurriculumItem,
     startCurriculumItem,
 } from "./curriculumService";
+import { getToday } from "../../api/dashboardApi";
 import { getLatestDiagnosisResult } from "./diagnosisService";
 import { getProblems } from "./problemService";
 import { getProblemDetail } from "./problemService";
@@ -53,6 +54,23 @@ function getActiveTodayItem(curriculum) {
 
 function isEmptyCurriculum(curriculum) {
     return curriculum && Number(curriculum.totalItems || 0) === 0;
+}
+
+async function getTodayGoalStatus() {
+    try {
+        const result = await getToday();
+        const data = result.data || {};
+        const dailyGoal = Number(data.dailyGoal || 0);
+        const completedToday = Number(data.completedToday || 0);
+
+        return {
+            dailyGoal,
+            completedToday,
+            isGoalReached: dailyGoal > 0 && completedToday >= dailyGoal,
+        };
+    } catch {
+        return null;
+    }
 }
 
 function getWeakestReadingType(diagnosisResult) {
@@ -211,6 +229,11 @@ function buildStudyViewModel({
 export async function getTodayStudySession() {
     let curriculum;
     let progress = null;
+    const todayGoalStatus = await getTodayGoalStatus();
+
+    if (todayGoalStatus?.isGoalReached) {
+        return null;
+    }
 
     try {
         curriculum = await getMyCurriculum();
@@ -252,6 +275,11 @@ export async function getTodayStudySession() {
 
 export async function getTodayStudyStatus() {
     let curriculum;
+    const todayGoalStatus = await getTodayGoalStatus();
+
+    if (todayGoalStatus?.isGoalReached) {
+        return "COMPLETED";
+    }
 
     try {
         curriculum = await getMyCurriculum();
