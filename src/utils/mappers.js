@@ -30,7 +30,7 @@ export function mapReadingTypeLabel(readingType) {
 }
 
 export function mapUserTypeFromRole(role) {
-    if (role === "ROLE_ADMIN" || role === "admin") {
+    if (role === "ROLE_ADMIN" || role === "ADMIN" || role === "admin") {
         return "admin";
     }
 
