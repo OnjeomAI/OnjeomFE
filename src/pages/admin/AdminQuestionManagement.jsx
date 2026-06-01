@@ -34,11 +34,6 @@ const readingTypeOptions = [
     { label: "창의 이해", value: "CREATIVE" },
 ];
 
-const problemTypeOptions = [
-    { label: "주관식", value: "SHORT_ANSWER" },
-    { label: "객관식", value: "MULTIPLE_CHOICE" },
-];
-
 function createKeywordItem() {
     return { keyword: "", weight: 10 };
 }
@@ -47,7 +42,6 @@ function createProblemForm() {
     return {
         passageText: "",
         questionText: "",
-        problemType: "SHORT_ANSWER",
         readingType: "FACTUAL",
         difficulty: 3,
         modelAnswer: "",
@@ -56,7 +50,7 @@ function createProblemForm() {
 }
 
 function createGenerateForm() {
-    return { readingType: "FACTUAL", difficulty: 3, topic: "" };
+    return { topic: "" };
 }
 
 function normalizeAdminProblemList(data) {
@@ -326,9 +320,12 @@ function AdminQuestionManagement() {
         setSuccessMessage("");
 
         try {
+            const requestedReadingType = createForm.readingType;
+            const requestedDifficulty = clampDifficulty(createForm.difficulty);
             const result = await generateProblem({
-                ...generateForm,
-                difficulty: clampDifficulty(generateForm.difficulty),
+                readingType: requestedReadingType,
+                difficulty: requestedDifficulty,
+                topic: generateForm.topic,
             });
             const detail = result || {};
             await loadCurrentPageProblems();
@@ -338,9 +335,8 @@ function AdminQuestionManagement() {
                     ...current,
                     passageText: detail.passageText || current.passageText,
                     questionText: detail.questionText || current.questionText,
-                    problemType: detail.problemType || current.problemType,
-                    readingType: detail.readingType || generateForm.readingType,
-                    difficulty: detail.difficulty || generateForm.difficulty,
+                    readingType: detail.readingType || requestedReadingType,
+                    difficulty: detail.difficulty || requestedDifficulty,
                     modelAnswer: detail.modelAnswer || current.modelAnswer,
                     keywords:
                         detail.keywords?.length > 0
@@ -546,31 +542,6 @@ function AdminQuestionManagement() {
                         </div>
 
                         <div className="admin-question-setting-block">
-                            <span>문제 유형</span>
-                            <div className="admin-question-segmented">
-                                {problemTypeOptions.map((option) => (
-                                    <button
-                                        key={option.value}
-                                        type="button"
-                                        className={
-                                            createForm.problemType === option.value
-                                                ? "active"
-                                                : ""
-                                        }
-                                        onClick={() =>
-                                            handleCreateFieldChange(
-                                                "problemType",
-                                                option.value
-                                            )
-                                        }
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="admin-question-setting-block">
                             <span>난이도 설정</span>
                             <div className="admin-question-stars">
                                 {[1, 2, 3, 4, 5].map((value) => (
@@ -668,9 +639,9 @@ function AdminQuestionManagement() {
                             <label>
                                 <span>생성 영역</span>
                                 <select
-                                    value={generateForm.readingType}
+                                    value={createForm.readingType}
                                     onChange={(event) =>
-                                        handleGenerateFieldChange(
+                                        handleCreateFieldChange(
                                             "readingType",
                                             event.target.value
                                         )
@@ -694,9 +665,9 @@ function AdminQuestionManagement() {
                                     type="number"
                                     min="1"
                                     max="5"
-                                    value={generateForm.difficulty}
+                                    value={createForm.difficulty}
                                     onChange={(event) =>
-                                        handleGenerateFieldChange(
+                                        handleCreateFieldChange(
                                             "difficulty",
                                             event.target.value
                                         )
@@ -755,7 +726,6 @@ function AdminQuestionManagement() {
                     <div className="admin-problem-list-head">
                         <span>ID</span>
                         <span>문항</span>
-                        <span>유형</span>
                         <span>난이도</span>
                         <span>독해</span>
                     </div>
@@ -782,7 +752,6 @@ function AdminQuestionManagement() {
                                 >
                                     <span>{problem.id}</span>
                                     <span>{problem.questionText}</span>
-                                    <span>{problem.problemType || "-"}</span>
                                     <span>{problem.difficulty}</span>
                                     <span>{getReadingTypeLabel(problem.readingType)}</span>
                                 </button>
