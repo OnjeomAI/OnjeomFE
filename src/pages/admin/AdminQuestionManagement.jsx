@@ -88,6 +88,12 @@ function formatDate(value) {
     return value.replace("T", " ").slice(0, 16);
 }
 
+function getPassageTextareaRows(value) {
+    const lineCount = String(value || "").split(/\r\n|\r|\n/).length;
+
+    return Math.min(10, Math.max(1, lineCount));
+}
+
 function clampDifficulty(value) {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) return 1;
@@ -848,7 +854,8 @@ function AdminQuestionManagement() {
                                     )
                                 }
                                 multiline
-                                rows={6}
+                                rows={getPassageTextareaRows(updateForm.passageText)}
+                                className="admin-problem-passage-input"
                             />
                             <Input
                                 label="문항"

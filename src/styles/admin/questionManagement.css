@@ -585,6 +585,16 @@
     gap: 24px;
 }
 
+.admin-problem-passage-input.common-input-textarea {
+    height: auto;
+    min-height: calc((18px * var(--app-font-scale) * 1.7) + 20px);
+    max-height: calc((18px * var(--app-font-scale) * 1.7 * 10) + 28px);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow-y: auto;
+    field-sizing: content;
+}
+
 .admin-problem-meta-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
