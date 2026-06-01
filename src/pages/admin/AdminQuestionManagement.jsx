@@ -51,11 +51,7 @@ function createProblemForm() {
         readingType: "FACTUAL",
         difficulty: 3,
         modelAnswer: "",
-        keywords: [
-            { keyword: "핵심 근거", weight: 40 },
-            { keyword: "추론 과정", weight: 30 },
-            { keyword: "표현 정확성", weight: 30 },
-        ],
+        keywords: [],
     };
 }
 
@@ -727,19 +723,6 @@ function AdminQuestionManagement() {
                         </div>
                     </div>
 
-                    <div className="admin-question-status-card">
-                        <div>
-                            <span>입력 상태</span>
-                            <strong>
-                                {createForm.passageText &&
-                                createForm.questionText &&
-                                createForm.modelAnswer
-                                    ? "저장 준비 완료"
-                                    : "작성 중"}
-                            </strong>
-                        </div>
-                        <Check size={18} />
-                    </div>
                 </aside>
             </div>
 
