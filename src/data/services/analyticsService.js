@@ -7,6 +7,7 @@ import {
     compareWriting,
     createWeaknessReport,
 } from "../../api/writingApi";
+import { getProblemDetail } from "./problemService";
 import { getResponsesByProblemId } from "./responseService";
 
 function buildCompetencyHistory(responses) {
@@ -39,6 +40,21 @@ function buildCompetencyScores(radarData) {
     }));
 }
 
+function normalizeWeaknessReport(report) {
+    if (!report) {
+        return null;
+    }
+
+    return {
+        ...report,
+        weakCompetencies: (report.weakCompetencies || []).map((item) => ({
+            ...item,
+            competencyType: item.competencyType || item.competency,
+            averageScore: item.averageScore ?? item.score,
+        })),
+    };
+}
+
 async function getComparisonSource(recentResponses) {
     const uniqueProblemIds = [...new Set(recentResponses.map((item) => item.problemId))];
 
@@ -49,8 +65,11 @@ async function getComparisonSource(recentResponses) {
         );
 
         if (sorted.length >= 2) {
+            const problem = await getProblemDetail(problemId);
+
             return {
                 problemId,
+                problem,
                 previous: sorted[1],
                 current: sorted[0],
             };
@@ -73,14 +92,15 @@ export async function getLearningAnalytics() {
 
     const [adjustmentResult, weaknessReportResult, compareResult] = await Promise.all([
         competencyHistory.length > 0
-            ? adjustCurriculum({ competencyHistory }).then((result) => result.data)
+            ? adjustCurriculum({ competencyHistory })
             : null,
         competencyScores.length > 0
-            ? createWeaknessReport({ competencyScores }).then((result) => result.data)
+            ? createWeaknessReport({ competencyScores })
             : null,
         comparisonSource
             ? compareWriting({
-                  problemId: comparisonSource.problemId,
+                  questionText: comparisonSource.problem?.questionText || "",
+                  modelAnswer: comparisonSource.problem?.modelAnswer || "",
                   previousAnswer: comparisonSource.previous.answerText,
                   previousScore:
                       comparisonSource.previous.finalScore ??
@@ -91,7 +111,8 @@ export async function getLearningAnalytics() {
                       comparisonSource.current.finalScore ??
                       comparisonSource.current.rawScore ??
                       0,
-              }).then((result) => result.data)
+                  keywords: comparisonSource.problem?.keywords || [],
+              })
             : null,
     ]);
 
@@ -99,7 +120,7 @@ export async function getLearningAnalytics() {
         radarData,
         recentResponses,
         adjustmentResult,
-        weaknessReportResult,
+        weaknessReportResult: normalizeWeaknessReport(weaknessReportResult),
         compareResult,
         comparisonSource,
     };

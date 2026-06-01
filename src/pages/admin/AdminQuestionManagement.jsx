@@ -330,7 +330,7 @@ function AdminQuestionManagement() {
                 ...generateForm,
                 difficulty: clampDifficulty(generateForm.difficulty),
             });
-            const detail = result.data || {};
+            const detail = result || {};
             await loadCurrentPageProblems();
 
             if (detail.passageText || detail.questionText) {

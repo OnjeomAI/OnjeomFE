@@ -13,6 +13,5 @@ export async function askAiTutor({ question, problemId, passageText }) {
 
     const result = await askTutor(payload);
 
-    return result.data || null;
+    return result || null;
 }
-
