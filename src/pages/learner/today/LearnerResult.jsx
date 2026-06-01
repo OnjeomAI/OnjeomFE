@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     ArrowLeft,
@@ -48,48 +48,9 @@ function formatDateLabel(value) {
     }).format(new Date(value));
 }
 
-function isGradingFallbackMessage(value) {
-    const text = String(value || "").toLowerCase();
-
-    return (
-        text.includes("채점 서버") ||
-        text.includes("서버 연결 실패") ||
-        text.includes("server") ||
-        text.includes("failed")
-    );
-}
-
-function buildFallbackFeedback(responseData) {
-    const score = Number(responseData?.finalScore ?? 0);
-    const answerLength = String(responseData?.answerText || "").trim().length;
-
-    if (score >= 80) {
-        return "핵심 내용을 안정적으로 반영한 답안입니다. 근거 문장을 함께 제시하면 더 완성도 높은 답안이 됩니다.";
-    }
-
-    if (score >= 60) {
-        return "답안이 정상 제출되었습니다. 다만 현재 AI 상세 피드백을 불러오지 못해 기본 분석만 표시합니다.";
-    }
-
-    if (answerLength < 80) {
-        return "답안 분량이 짧아 핵심 근거와 설명이 충분히 드러나지 않았을 수 있습니다. 지문 근거를 포함해 다시 정리해 보세요.";
-    }
-
-    return "답안이 정상 제출되었습니다. 주장, 근거, 결론의 연결이 분명한지 다시 점검해 보세요.";
-}
-
-function buildFallbackScoringBasis(responseData) {
-    const score = Number(responseData?.finalScore ?? 0);
-    const rawScore = Number(responseData?.rawScore ?? score);
-    const answerLength = String(responseData?.answerText || "").trim().length;
-
-    return `기본 채점 결과 ${score}점, 원점수 ${rawScore}점, 답안 ${answerLength}자 기준으로 표시했습니다.`;
-}
-
 function LearnerResult() {
     const navigate = useNavigate();
     const [responseData, setResponseData] = useState(null);
-    const [aiGrading, setAiGrading] = useState(null);
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -102,8 +63,6 @@ function LearnerResult() {
                 navigate("/today", { replace: true });
                 return;
             }
-
-            setAiGrading(latestContext.aiGrading || null);
 
             try {
                 const nextResponseData = await getResponseById(
@@ -129,47 +88,13 @@ function LearnerResult() {
         };
     }, [navigate]);
 
-    const foundKeywords = useMemo(() => {
-        if (Array.isArray(aiGrading?.matchedKeywords)) {
-            return aiGrading.matchedKeywords;
-        }
-
-        return Array.isArray(responseData?.foundKeywords)
-            ? responseData.foundKeywords
-            : [];
-    }, [aiGrading, responseData]);
-    const displayedFinalScore = aiGrading?.finalScore ?? responseData?.finalScore ?? 0;
-    const displayedRawScore = aiGrading?.rawScore ?? responseData?.rawScore ?? 0;
-    const feedbackText = useMemo(() => {
-        if (!responseData && !aiGrading) {
-            return "";
-        }
-
-        if (aiGrading?.feedback) {
-            return aiGrading.feedback;
-        }
-
-        if (isGradingFallbackMessage(responseData?.feedbackText)) {
-            return buildFallbackFeedback(responseData);
-        }
-
-        return responseData?.feedbackText || buildFallbackFeedback(responseData);
-    }, [aiGrading, responseData]);
-    const scoringBasis = useMemo(() => {
-        if (!responseData && !aiGrading) {
-            return "";
-        }
-
-        if (aiGrading?.feedbackType) {
-            return `AI 직접 채점 결과: ${aiGrading.feedbackType}`;
-        }
-
-        if (isGradingFallbackMessage(responseData?.scoringBasis)) {
-            return buildFallbackScoringBasis(responseData);
-        }
-
-        return responseData?.scoringBasis || buildFallbackScoringBasis(responseData);
-    }, [aiGrading, responseData]);
+    const foundKeywords = Array.isArray(responseData?.foundKeywords)
+        ? responseData.foundKeywords
+        : [];
+    const displayedFinalScore = responseData?.finalScore ?? 0;
+    const displayedRawScore = responseData?.rawScore ?? 0;
+    const feedbackText = responseData?.feedbackText || "피드백 없음";
+    const scoringBasis = responseData?.scoringBasis || "-";
 
     const handleBack = () => {
         navigate("/today");
@@ -311,7 +236,7 @@ function LearnerResult() {
 
                     <aside className="result-side-actions">
                         <Card className="expert-insight-card">
-                            <p className="expert-label">핵심 키워드</p>
+                            <p className="expert-label">답안 키워드</p>
 
                             <span>{foundKeywords.length}개 추출</span>
 
@@ -339,7 +264,7 @@ function LearnerResult() {
                             className="next-problem-button"
                             onClick={handleNextProblem}
                         >
-                            다음 문제 풀기
+                            다음 문제 대기
                         </Button>
 
                         <Button
@@ -359,8 +284,8 @@ function LearnerResult() {
                         <h2>답안 기록이 저장되었습니다</h2>
 
                         <p>
-                            같은 문제의 이전 응답과 점수 변화를 리뷰 화면에서
-                            비교할 수 있습니다.
+                            같은 문제의 이전 응답과 점수 변화는 리뷰 화면에서 비교할 수
+                            있습니다.
                         </p>
                     </div>
                 </section>

@@ -1,14 +1,25 @@
-import { aiPost } from "./aiClient";
+import { apiPost } from "./client";
 
 export async function askTutor(payload) {
-    return aiPost("/api/tutor/ask", payload);
+    const result = await apiPost("/api/ai/tutor", payload, {
+        requireAuth: true,
+    });
+
+    return result.data || null;
 }
 
 export async function explainTerm(payload) {
-    return aiPost("/api/tutor/explain", payload);
+    const result = await apiPost("/api/ai/explain", payload, {
+        requireAuth: true,
+    });
+
+    return result.data || null;
 }
 
 export async function generateAiProblem(payload) {
-    return aiPost("/api/problems/generate", payload);
-}
+    const result = await apiPost("/api/admin/cms/problems/generate", payload, {
+        requireAuth: true,
+    });
 
+    return result.data || null;
+}

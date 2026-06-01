@@ -99,8 +99,7 @@ export async function getLearningAnalytics() {
             : null,
         comparisonSource
             ? compareWriting({
-                  questionText: comparisonSource.problem?.questionText || "",
-                  modelAnswer: comparisonSource.problem?.modelAnswer || "",
+                  problemId: comparisonSource.problemId,
                   previousAnswer: comparisonSource.previous.answerText,
                   previousScore:
                       comparisonSource.previous.finalScore ??
@@ -111,7 +110,6 @@ export async function getLearningAnalytics() {
                       comparisonSource.current.finalScore ??
                       comparisonSource.current.rawScore ??
                       0,
-                  keywords: comparisonSource.problem?.keywords || [],
               })
             : null,
     ]);

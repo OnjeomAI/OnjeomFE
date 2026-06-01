@@ -1,27 +1,27 @@
-import { aiPost } from "./aiClient";
+import { apiPost } from "./client";
 
 export async function generateWeaknessReport(payload) {
-    return aiPost("/api/writing/weakness-report", payload);
+    const result = await apiPost("/api/writing/weakness-report", payload, {
+        requireAuth: true,
+    });
+
+    return result.data || null;
 }
 
 export async function adjustCurriculum(payload) {
-    return aiPost("/api/writing/curriculum/adjust", payload);
+    const result = await apiPost("/api/writing/curriculum/adjust", payload, {
+        requireAuth: true,
+    });
+
+    return result.data || null;
 }
 
 export async function compareAnswers(payload) {
-    return aiPost("/api/writing/compare", payload);
-}
+    const result = await apiPost("/api/writing/compare", payload, {
+        requireAuth: true,
+    });
 
-export async function evaluateWriting(payload) {
-    return aiPost("/api/writing/evaluate", payload);
-}
-
-export async function estimateIrt(payload) {
-    return aiPost("/api/writing/irt/estimate", payload);
-}
-
-export async function createCurriculumPlan(payload) {
-    return aiPost("/api/writing/curriculum-plan", payload);
+    return result.data || null;
 }
 
 export const compareWriting = compareAnswers;

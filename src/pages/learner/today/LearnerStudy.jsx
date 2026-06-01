@@ -23,7 +23,6 @@ import {
     submitResponse,
 } from "../../../data/services/responseService";
 import { askAiTutor } from "../../../data/services/aiTutorService";
-import { evaluateWriting } from "../../../api/writingApi";
 
 function renderParagraph(paragraph) {
     if (paragraph.type !== "highlight") {
@@ -150,21 +149,6 @@ function LearnerStudy() {
         setError("");
 
         try {
-            let aiGrading = null;
-            try {
-                aiGrading = await evaluateWriting({
-                    passageText: studyData.passageText,
-                    questionText: studyData.question,
-                    modelAnswer: studyData.modelAnswer,
-                    userAnswer: answer.trim(),
-                    keywords: studyData.keywords || [],
-                });
-            } catch (gradingError) {
-                aiGrading = {
-                    error: gradingError.message,
-                };
-            }
-
             const response = await submitResponse({
                 problemId: studyData.problemId,
                 answerText: answer.trim(),
@@ -180,7 +164,6 @@ function LearnerStudy() {
                 responseId: response.id,
                 problemId: response.problemId,
                 curriculumItemId: studyData.curriculumItemId,
-                aiGrading,
             });
 
             navigate("/today/result");
