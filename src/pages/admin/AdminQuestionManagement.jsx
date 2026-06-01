@@ -1,5 +1,16 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { Bot, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+    Bot,
+    Check,
+    FileText,
+    ListChecks,
+    Pencil,
+    Plus,
+    RefreshCw,
+    Save,
+    Sparkles,
+    Trash2,
+} from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import Input from "../../components/common/Input";
@@ -24,8 +35,8 @@ const readingTypeOptions = [
 ];
 
 const problemTypeOptions = [
-    { label: "객관식", value: "MULTIPLE_CHOICE" },
     { label: "주관식", value: "SHORT_ANSWER" },
+    { label: "객관식", value: "MULTIPLE_CHOICE" },
 ];
 
 function createKeywordItem() {
@@ -40,7 +51,11 @@ function createProblemForm() {
         readingType: "FACTUAL",
         difficulty: 3,
         modelAnswer: "",
-        keywords: [createKeywordItem()],
+        keywords: [
+            { keyword: "핵심 근거", weight: 40 },
+            { keyword: "추론 과정", weight: 30 },
+            { keyword: "표현 정확성", weight: 30 },
+        ],
     };
 }
 
@@ -56,7 +71,10 @@ function normalizeAdminProblemList(data) {
 }
 
 function normalizeKeywords(keywords = []) {
-    return keywords.map((item) => ({ keyword: item.keyword || "", weight: Number(item.weight) || 1 }));
+    return keywords.map((item) => ({
+        keyword: item.keyword || "",
+        weight: Number(item.weight) || 1,
+    }));
 }
 
 function toUpdateForm(problem) {
@@ -86,6 +104,10 @@ function clampKeywordWeight(value) {
     return Math.max(1, Math.min(100, numeric));
 }
 
+function getReadingTypeLabel(value) {
+    return readingTypeOptions.find((option) => option.value === value)?.label || value;
+}
+
 function AdminQuestionManagement() {
     const [user, setUser] = useState(null);
     const [readingType, setReadingType] = useState("ALL");
@@ -110,6 +132,13 @@ function AdminQuestionManagement() {
         if (readingType === "ALL") return problems;
         return problems.filter((problem) => problem.readingType === readingType);
     }, [problems, readingType]);
+
+    const keywordWeightTotal = useMemo(() => {
+        return createForm.keywords.reduce(
+            (total, item) => total + (Number(item.weight) || 0),
+            0
+        );
+    }, [createForm.keywords]);
 
     useEffect(() => {
         getUserByType("admin").then(setUser);
@@ -136,7 +165,9 @@ function AdminQuestionManagement() {
 
                 setProblems(nextProblems);
                 setSelectedProblemId((currentId) => {
-                    const hasCurrent = nextProblems.some((problem) => problem.id === currentId);
+                    const hasCurrent = nextProblems.some(
+                        (problem) => problem.id === currentId
+                    );
                     return hasCurrent ? currentId : nextProblems[0]?.id ?? null;
                 });
             } catch (error) {
@@ -193,7 +224,10 @@ function AdminQuestionManagement() {
     }, [selectedProblemId]);
 
     const handleCreateFieldChange = (field, value) => {
-        setCreateForm((current) => ({ ...current, [field]: field === "difficulty" ? clampDifficulty(value) : value }));
+        setCreateForm((current) => ({
+            ...current,
+            [field]: field === "difficulty" ? clampDifficulty(value) : value,
+        }));
     };
 
     const handleCreateKeywordChange = (index, field, value) => {
@@ -201,7 +235,11 @@ function AdminQuestionManagement() {
             ...current,
             keywords: current.keywords.map((item, itemIndex) =>
                 itemIndex === index
-                    ? { ...item, [field]: field === "weight" ? clampKeywordWeight(value) : value }
+                    ? {
+                          ...item,
+                          [field]:
+                              field === "weight" ? clampKeywordWeight(value) : value,
+                      }
                     : item
             ),
         }));
@@ -210,7 +248,10 @@ function AdminQuestionManagement() {
     const handleAddCreateKeyword = () => {
         setCreateForm((current) => ({
             ...current,
-            keywords: current.keywords.length >= 10 ? current.keywords : [...current.keywords, createKeywordItem()],
+            keywords:
+                current.keywords.length >= 10
+                    ? current.keywords
+                    : [...current.keywords, createKeywordItem()],
         }));
     };
 
@@ -225,8 +266,14 @@ function AdminQuestionManagement() {
         if (!createForm.passageText.trim()) return "지문을 입력해 주세요.";
         if (!createForm.questionText.trim()) return "문항을 입력해 주세요.";
         if (!createForm.modelAnswer.trim()) return "모범 답안을 입력해 주세요.";
-        if (createForm.keywords.length > 10) return "키워드는 최대 10개까지 등록할 수 있습니다.";
-        const invalidKeyword = createForm.keywords.find((item) => item.keyword.trim() && (item.weight < 1 || item.weight > 100));
+        if (createForm.keywords.length > 10) {
+            return "키워드는 최대 10개까지 등록할 수 있습니다.";
+        }
+
+        const invalidKeyword = createForm.keywords.find(
+            (item) =>
+                item.keyword.trim() && (item.weight < 1 || item.weight > 100)
+        );
         if (invalidKeyword) return "키워드 가중치는 1부터 100 사이여야 합니다.";
         return "";
     };
@@ -247,7 +294,10 @@ function AdminQuestionManagement() {
                 ...createForm,
                 difficulty: clampDifficulty(createForm.difficulty),
                 keywords: createForm.keywords
-                    .map((item) => ({ keyword: item.keyword.trim(), weight: clampKeywordWeight(item.weight) }))
+                    .map((item) => ({
+                        keyword: item.keyword.trim(),
+                        weight: clampKeywordWeight(item.weight),
+                    }))
                     .filter((item) => item.keyword),
             });
             const nextProblems = await loadCurrentPageProblems();
@@ -262,7 +312,10 @@ function AdminQuestionManagement() {
     };
 
     const handleGenerateFieldChange = (field, value) => {
-        setGenerateForm((current) => ({ ...current, [field]: field === "difficulty" ? clampDifficulty(value) : value }));
+        setGenerateForm((current) => ({
+            ...current,
+            [field]: field === "difficulty" ? clampDifficulty(value) : value,
+        }));
     };
 
     const handleGenerateProblem = async () => {
@@ -271,9 +324,30 @@ function AdminQuestionManagement() {
         setSuccessMessage("");
 
         try {
-            await generateProblem({ ...generateForm, difficulty: clampDifficulty(generateForm.difficulty) });
+            const result = await generateProblem({
+                ...generateForm,
+                difficulty: clampDifficulty(generateForm.difficulty),
+            });
+            const detail = result.data || {};
             await loadCurrentPageProblems();
-            setSuccessMessage("문제를 생성했습니다.");
+
+            if (detail.passageText || detail.questionText) {
+                setCreateForm((current) => ({
+                    ...current,
+                    passageText: detail.passageText || current.passageText,
+                    questionText: detail.questionText || current.questionText,
+                    problemType: detail.problemType || current.problemType,
+                    readingType: detail.readingType || generateForm.readingType,
+                    difficulty: detail.difficulty || generateForm.difficulty,
+                    modelAnswer: detail.modelAnswer || current.modelAnswer,
+                    keywords:
+                        detail.keywords?.length > 0
+                            ? normalizeKeywords(detail.keywords)
+                            : current.keywords,
+                }));
+            }
+
+            setSuccessMessage("AI 생성 요청을 완료했습니다.");
         } catch (error) {
             setErrorMessage(error.message || "문제 생성에 실패했습니다.");
         } finally {
@@ -282,7 +356,10 @@ function AdminQuestionManagement() {
     };
 
     const handleUpdateFieldChange = (field, value) => {
-        setUpdateForm((current) => ({ ...current, [field]: field === "difficulty" ? clampDifficulty(value) : value }));
+        setUpdateForm((current) => ({
+            ...current,
+            [field]: field === "difficulty" ? clampDifficulty(value) : value,
+        }));
     };
 
     const handleUpdateProblem = async () => {
@@ -293,7 +370,10 @@ function AdminQuestionManagement() {
         setSuccessMessage("");
 
         try {
-            await updateAdminProblem(selectedProblemId, { ...updateForm, difficulty: clampDifficulty(updateForm.difficulty) });
+            await updateAdminProblem(selectedProblemId, {
+                ...updateForm,
+                difficulty: clampDifficulty(updateForm.difficulty),
+            });
             const detail = await getProblemDetail(selectedProblemId);
             setSelectedProblem(detail);
             setUpdateForm(toUpdateForm(detail));
@@ -345,7 +425,7 @@ function AdminQuestionManagement() {
     if (!user) return <div></div>;
 
     return (
-        <div className="admin-problem-page">
+        <div className="admin-problem-page admin-question-studio-page">
             <PageHeader
                 title="문항 관리"
                 type="admin"
@@ -354,88 +434,313 @@ function AdminQuestionManagement() {
                 userLevel={user.levelLabel}
             />
 
-            {errorMessage ? <p className="admin-problem-error">{errorMessage}</p> : null}
-            {successMessage ? <p className="auth-success-message">{successMessage}</p> : null}
+            {errorMessage ? (
+                <p className="admin-problem-error">{errorMessage}</p>
+            ) : null}
+            {successMessage ? (
+                <p className="auth-success-message">{successMessage}</p>
+            ) : null}
 
-            <div className="admin-question-grid">
-                <Card className="admin-question-form-card" title="문제 등록">
-                    <div className="admin-question-form">
-                        <div className="admin-question-form-row">
-                            <label className="common-input-group">
-                                <span className="common-input-label">독해 유형</span>
-                                <select className="admin-question-select" value={createForm.readingType} onChange={(event) => handleCreateFieldChange("readingType", event.target.value)}>
-                                    {readingTypeOptions.filter((option) => option.value !== "ALL").map((option) => (
-                                        <option key={option.value} value={option.value}>{option.label}</option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label className="common-input-group">
-                                <span className="common-input-label">문제 유형</span>
-                                <select className="admin-question-select" value={createForm.problemType} onChange={(event) => handleCreateFieldChange("problemType", event.target.value)}>
-                                    {problemTypeOptions.map((option) => (
-                                        <option key={option.value} value={option.value}>{option.label}</option>
-                                    ))}
-                                </select>
-                            </label>
-                            <Input label="난이도" type="number" name="difficulty" value={createForm.difficulty} onChange={(event) => handleCreateFieldChange("difficulty", event.target.value)} />
-                        </div>
-
-                        <Input label="지문" name="passageText" value={createForm.passageText} onChange={(event) => handleCreateFieldChange("passageText", event.target.value)} multiline rows={6} />
-                        <Input label="문항" name="questionText" value={createForm.questionText} onChange={(event) => handleCreateFieldChange("questionText", event.target.value)} multiline rows={4} />
-                        <Input label="모범 답안" name="modelAnswer" value={createForm.modelAnswer} onChange={(event) => handleCreateFieldChange("modelAnswer", event.target.value)} multiline rows={4} />
-
-                        <div className="admin-question-keyword-section">
-                            <div className="admin-question-keyword-header">
-                                <div>
-                                    <h3>키워드</h3>
-                                    <p>최대 10개, 가중치는 1부터 100까지 입력할 수 있습니다.</p>
-                                </div>
-                                <Button variant="outline" size="small" onClick={handleAddCreateKeyword}>
-                                    <Plus size={16} strokeWidth={2} />
-                                    추가
-                                </Button>
+            <div className="admin-question-studio">
+                <section className="admin-question-direct-panel">
+                    <div className="admin-question-editor-card">
+                        <div className="admin-question-editor-toolbar">
+                            <div>
+                                <span>지문 본문 에디터</span>
+                                <strong>직접 문항 제작</strong>
                             </div>
-
-                            {createForm.keywords.map((item, index) => (
-                                <div className="admin-tag-edit-row" key={`create-keyword-${index}`}>
-                                    <input value={item.keyword} onChange={(event) => handleCreateKeywordChange(index, "keyword", event.target.value)} placeholder="키워드" />
-                                    <input type="number" min="1" max="100" value={item.weight} onChange={(event) => handleCreateKeywordChange(index, "weight", event.target.value)} placeholder="가중치" />
-                                    <button type="button" onClick={() => handleRemoveCreateKeyword(index)}>
-                                        <Trash2 size={16} strokeWidth={2} />
-                                    </button>
-                                </div>
-                            ))}
+                            <div className="admin-question-tool-icons">
+                                <button type="button" aria-label="굵게">B</button>
+                                <button type="button" aria-label="기울임">I</button>
+                                <button type="button" aria-label="밑줄">U</button>
+                                <button type="button" aria-label="목록">
+                                    <ListChecks size={15} />
+                                </button>
+                                <button type="button" aria-label="인용">99</button>
+                                <button type="button" aria-label="편집">
+                                    <Pencil size={15} />
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="admin-problem-action-row">
-                            <Button variant="primary" size="medium" onClick={handleCreateProblem} disabled={isCreating}>
-                                <Save size={16} strokeWidth={2} />
-                                {isCreating ? "저장 중..." : "등록"}
-                            </Button>
-                        </div>
+                        <textarea
+                            className="admin-question-passage-editor"
+                            value={createForm.passageText}
+                            onChange={(event) =>
+                                handleCreateFieldChange("passageText", event.target.value)
+                            }
+                            placeholder="학습 지문 내용을 여기에 입력하세요..."
+                        />
                     </div>
-                </Card>
 
-                <Card className="admin-question-ai-card" title="문제 자동 생성">
-                    <div className="admin-question-form">
-                        <label className="common-input-group">
-                            <span className="common-input-label">독해 유형</span>
-                            <select className="admin-question-select" value={generateForm.readingType} onChange={(event) => handleGenerateFieldChange("readingType", event.target.value)}>
-                                {readingTypeOptions.filter((option) => option.value !== "ALL").map((option) => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
+                    <div className="admin-question-prompt-card">
+                        <label>
+                            <span>발문</span>
+                            <input
+                                value={createForm.questionText}
+                                onChange={(event) =>
+                                    handleCreateFieldChange(
+                                        "questionText",
+                                        event.target.value
+                                    )
+                                }
+                                placeholder="예: 위 글의 핵심 논지로 가장 적절한 것은?"
+                            />
                         </label>
-                        <Input label="난이도" type="number" name="difficulty" value={generateForm.difficulty} onChange={(event) => handleGenerateFieldChange("difficulty", event.target.value)} />
-                        <Input label="주제" name="topic" value={generateForm.topic} onChange={(event) => handleGenerateFieldChange("topic", event.target.value)} />
-                        <div className="admin-problem-action-row">
-                            <Button variant="outline" size="medium" onClick={handleGenerateProblem} disabled={isGenerating}>
-                                <Bot size={16} strokeWidth={2} />
-                                {isGenerating ? "생성 중..." : "생성"}
+
+                        <label>
+                            <span>모범 답안 및 해설</span>
+                            <textarea
+                                value={createForm.modelAnswer}
+                                onChange={(event) =>
+                                    handleCreateFieldChange(
+                                        "modelAnswer",
+                                        event.target.value
+                                    )
+                                }
+                                placeholder="정답에 대한 상세한 분석 및 근거를 입력하세요..."
+                            />
+                        </label>
+                    </div>
+                </section>
+
+                <aside className="admin-question-side-column">
+                    <div className="admin-question-settings-card">
+                        <div className="admin-question-card-title">
+                            <FileText size={16} />
+                            <span>문항 설정</span>
+                        </div>
+
+                        <div className="admin-question-setting-block">
+                            <span>독해 영역 선택</span>
+                            <div className="admin-question-reading-grid">
+                                {readingTypeOptions
+                                    .filter((option) => option.value !== "ALL")
+                                    .map((option) => (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            className={
+                                                createForm.readingType === option.value
+                                                    ? "active"
+                                                    : ""
+                                            }
+                                            onClick={() =>
+                                                handleCreateFieldChange(
+                                                    "readingType",
+                                                    option.value
+                                                )
+                                            }
+                                        >
+                                            <span>
+                                                {createForm.readingType === option.value ? (
+                                                    <Check size={13} />
+                                                ) : null}
+                                            </span>
+                                            {option.label}
+                                        </button>
+                                    ))}
+                            </div>
+                        </div>
+
+                        <div className="admin-question-setting-block">
+                            <span>문제 유형</span>
+                            <div className="admin-question-segmented">
+                                {problemTypeOptions.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        className={
+                                            createForm.problemType === option.value
+                                                ? "active"
+                                                : ""
+                                        }
+                                        onClick={() =>
+                                            handleCreateFieldChange(
+                                                "problemType",
+                                                option.value
+                                            )
+                                        }
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="admin-question-setting-block">
+                            <span>난이도 설정</span>
+                            <div className="admin-question-stars">
+                                {[1, 2, 3, 4, 5].map((value) => (
+                                    <button
+                                        key={value}
+                                        type="button"
+                                        className={
+                                            value <= createForm.difficulty ? "active" : ""
+                                        }
+                                        onClick={() =>
+                                            handleCreateFieldChange("difficulty", value)
+                                        }
+                                        aria-label={`난이도 ${value}`}
+                                    >
+                                        ★
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="admin-question-setting-block">
+                            <div className="admin-question-keyword-title">
+                                <span>핵심어 가중치</span>
+                                <strong>합계 {keywordWeightTotal}%</strong>
+                            </div>
+                            <div className="admin-question-keyword-editor">
+                                {createForm.keywords.map((item, index) => (
+                                    <div
+                                        className="admin-question-keyword-row"
+                                        key={`create-keyword-${index}`}
+                                    >
+                                        <input
+                                            value={item.keyword}
+                                            onChange={(event) =>
+                                                handleCreateKeywordChange(
+                                                    index,
+                                                    "keyword",
+                                                    event.target.value
+                                                )
+                                            }
+                                            placeholder="키워드"
+                                        />
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="100"
+                                            value={item.weight}
+                                            onChange={(event) =>
+                                                handleCreateKeywordChange(
+                                                    index,
+                                                    "weight",
+                                                    event.target.value
+                                                )
+                                            }
+                                            aria-label="가중치"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveCreateKeyword(index)}
+                                            aria-label="키워드 삭제"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    className="admin-question-add-keyword"
+                                    type="button"
+                                    onClick={handleAddCreateKeyword}
+                                >
+                                    <Plus size={14} />
+                                    키워드 추가
+                                </button>
+                            </div>
+                        </div>
+
+                        <Button
+                            variant="primary"
+                            size="large"
+                            fullWidth
+                            onClick={handleCreateProblem}
+                            disabled={isCreating}
+                        >
+                            <Save size={17} />
+                            {isCreating ? "저장 중..." : "아카이브 저장"}
+                        </Button>
+                    </div>
+
+                    <div className="admin-question-ai-studio-card">
+                        <div className="admin-question-card-title">
+                            <Sparkles size={16} />
+                            <span>AI 문항 생성</span>
+                        </div>
+                        <div className="admin-question-ai-form">
+                            <label>
+                                <span>생성 영역</span>
+                                <select
+                                    value={generateForm.readingType}
+                                    onChange={(event) =>
+                                        handleGenerateFieldChange(
+                                            "readingType",
+                                            event.target.value
+                                        )
+                                    }
+                                >
+                                    {readingTypeOptions
+                                        .filter((option) => option.value !== "ALL")
+                                        .map((option) => (
+                                            <option
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                </select>
+                            </label>
+                            <label>
+                                <span>난이도</span>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="5"
+                                    value={generateForm.difficulty}
+                                    onChange={(event) =>
+                                        handleGenerateFieldChange(
+                                            "difficulty",
+                                            event.target.value
+                                        )
+                                    }
+                                />
+                            </label>
+                            <label>
+                                <span>주제</span>
+                                <input
+                                    value={generateForm.topic}
+                                    onChange={(event) =>
+                                        handleGenerateFieldChange(
+                                            "topic",
+                                            event.target.value
+                                        )
+                                    }
+                                    placeholder="예: 논리적 오류, 과학 기술 윤리"
+                                />
+                            </label>
+                            <Button
+                                variant="outline"
+                                size="medium"
+                                fullWidth
+                                onClick={handleGenerateProblem}
+                                disabled={isGenerating}
+                            >
+                                <Bot size={16} />
+                                {isGenerating ? "생성 중..." : "AI로 생성"}
                             </Button>
                         </div>
                     </div>
-                </Card>
+
+                    <div className="admin-question-status-card">
+                        <div>
+                            <span>입력 상태</span>
+                            <strong>
+                                {createForm.passageText &&
+                                createForm.questionText &&
+                                createForm.modelAnswer
+                                    ? "저장 준비 완료"
+                                    : "작성 중"}
+                            </strong>
+                        </div>
+                        <Check size={18} />
+                    </div>
+                </aside>
             </div>
 
             <div className="admin-problem-layout">
@@ -447,7 +752,9 @@ function AdminQuestionManagement() {
                                 <button
                                     key={option.value}
                                     type="button"
-                                    className={readingType === option.value ? "active" : ""}
+                                    className={
+                                        readingType === option.value ? "active" : ""
+                                    }
                                     onClick={() => setReadingType(option.value)}
                                 >
                                     {option.label}
@@ -457,53 +764,188 @@ function AdminQuestionManagement() {
                     </div>
 
                     <div className="admin-problem-list-head">
-                        <span>ID</span><span>문항</span><span>유형</span><span>난이도</span><span>독해</span>
+                        <span>ID</span>
+                        <span>문항</span>
+                        <span>유형</span>
+                        <span>난이도</span>
+                        <span>독해</span>
                     </div>
-                    {loading ? <p className="admin-problem-empty">문제 목록을 불러오는 중입니다.</p> : filteredProblems.length === 0 ? <p className="admin-problem-empty">등록된 문제가 없습니다.</p> : (
+                    {loading ? (
+                        <p className="admin-problem-empty">
+                            문제 목록을 불러오는 중입니다.
+                        </p>
+                    ) : filteredProblems.length === 0 ? (
+                        <p className="admin-problem-empty">
+                            등록된 문제가 없습니다.
+                        </p>
+                    ) : (
                         <div className="admin-problem-list-body">
                             {filteredProblems.map((problem) => (
-                                <button key={problem.id} type="button" className={`admin-problem-row ${selectedProblemId === problem.id ? "active" : ""}`} onClick={() => setSelectedProblemId(problem.id)}>
-                                    <span>{problem.id}</span><span>{problem.questionText}</span><span>{problem.problemType}</span><span>{problem.difficulty}</span><span>{problem.readingType}</span>
+                                <button
+                                    key={problem.id}
+                                    type="button"
+                                    className={`admin-problem-row ${
+                                        selectedProblemId === problem.id
+                                            ? "active"
+                                            : ""
+                                    }`}
+                                    onClick={() => setSelectedProblemId(problem.id)}
+                                >
+                                    <span>{problem.id}</span>
+                                    <span>{problem.questionText}</span>
+                                    <span>{problem.problemType || "-"}</span>
+                                    <span>{problem.difficulty}</span>
+                                    <span>{getReadingTypeLabel(problem.readingType)}</span>
                                 </button>
                             ))}
                         </div>
                     )}
                     <div className="admin-problem-pagination">
-                        <button type="button" disabled={page === 0} onClick={() => setPage((current) => Math.max(0, current - 1))}>이전</button>
+                        <button
+                            type="button"
+                            disabled={page === 0}
+                            onClick={() =>
+                                setPage((current) => Math.max(0, current - 1))
+                            }
+                        >
+                            이전
+                        </button>
                         <span>{page + 1}페이지</span>
-                        <button type="button" disabled={problems.length < 20} onClick={() => setPage((current) => current + 1)}>다음</button>
+                        <button
+                            type="button"
+                            disabled={problems.length < 20}
+                            onClick={() => setPage((current) => current + 1)}
+                        >
+                            다음
+                        </button>
                     </div>
                 </Card>
 
                 <Card className="admin-problem-detail-card" title="문제 상세">
-                    {detailLoading ? <p className="admin-problem-empty">상세 정보를 불러오는 중입니다.</p> : !selectedProblem || !updateForm ? <p className="admin-problem-empty">확인할 문제를 선택해 주세요.</p> : (
+                    {detailLoading ? (
+                        <p className="admin-problem-empty">
+                            상세 정보를 불러오는 중입니다.
+                        </p>
+                    ) : !selectedProblem || !updateForm ? (
+                        <p className="admin-problem-empty">
+                            확인할 문제를 선택해 주세요.
+                        </p>
+                    ) : (
                         <div className="admin-problem-detail">
                             <div className="admin-problem-meta-grid">
-                                <div><span>문제 ID</span><strong>{selectedProblem.id}</strong></div>
-                                <div><span>등록일</span><strong>{formatDate(selectedProblem.createdAt)}</strong></div>
-                                <div><span>독해 유형</span><strong>{selectedProblem.readingType}</strong></div>
-                                <div><span>벡터 색인</span><strong>{selectedProblem.vectorIndexStatus || "-"}</strong></div>
+                                <div>
+                                    <span>문제 ID</span>
+                                    <strong>{selectedProblem.id}</strong>
+                                </div>
+                                <div>
+                                    <span>등록일</span>
+                                    <strong>{formatDate(selectedProblem.createdAt)}</strong>
+                                </div>
+                                <div>
+                                    <span>독해 유형</span>
+                                    <strong>
+                                        {getReadingTypeLabel(selectedProblem.readingType)}
+                                    </strong>
+                                </div>
+                                <div>
+                                    <span>벡터 색인</span>
+                                    <strong>
+                                        {selectedProblem.vectorIndexStatus || "-"}
+                                    </strong>
+                                </div>
                             </div>
-                            <Input label="지문" name="passageText" value={updateForm.passageText} onChange={(event) => handleUpdateFieldChange("passageText", event.target.value)} multiline rows={6} />
-                            <Input label="문항" name="questionText" value={updateForm.questionText} onChange={(event) => handleUpdateFieldChange("questionText", event.target.value)} multiline rows={4} />
+                            <Input
+                                label="지문"
+                                name="passageText"
+                                value={updateForm.passageText}
+                                onChange={(event) =>
+                                    handleUpdateFieldChange(
+                                        "passageText",
+                                        event.target.value
+                                    )
+                                }
+                                multiline
+                                rows={6}
+                            />
+                            <Input
+                                label="문항"
+                                name="questionText"
+                                value={updateForm.questionText}
+                                onChange={(event) =>
+                                    handleUpdateFieldChange(
+                                        "questionText",
+                                        event.target.value
+                                    )
+                                }
+                                multiline
+                                rows={4}
+                            />
                             <div className="admin-question-form-row">
                                 <label className="common-input-group">
-                                    <span className="common-input-label">독해 유형</span>
-                                    <select className="admin-question-select" value={updateForm.readingType} onChange={(event) => handleUpdateFieldChange("readingType", event.target.value)}>
-                                        {readingTypeOptions.filter((option) => option.value !== "ALL").map((option) => (
-                                            <option key={option.value} value={option.value}>{option.label}</option>
-                                        ))}
+                                    <span className="common-input-label">
+                                        독해 유형
+                                    </span>
+                                    <select
+                                        className="admin-question-select"
+                                        value={updateForm.readingType}
+                                        onChange={(event) =>
+                                            handleUpdateFieldChange(
+                                                "readingType",
+                                                event.target.value
+                                            )
+                                        }
+                                    >
+                                        {readingTypeOptions
+                                            .filter((option) => option.value !== "ALL")
+                                            .map((option) => (
+                                                <option
+                                                    key={option.value}
+                                                    value={option.value}
+                                                >
+                                                    {option.label}
+                                                </option>
+                                            ))}
                                     </select>
                                 </label>
-                                <Input label="난이도" type="number" name="difficulty" value={updateForm.difficulty} onChange={(event) => handleUpdateFieldChange("difficulty", event.target.value)} />
+                                <Input
+                                    label="난이도"
+                                    type="number"
+                                    name="difficulty"
+                                    value={updateForm.difficulty}
+                                    onChange={(event) =>
+                                        handleUpdateFieldChange(
+                                            "difficulty",
+                                            event.target.value
+                                        )
+                                    }
+                                />
                             </div>
-                            <Input label="모범 답안" name="modelAnswer" value={updateForm.modelAnswer} onChange={(event) => handleUpdateFieldChange("modelAnswer", event.target.value)} multiline rows={4} />
+                            <Input
+                                label="모범 답안"
+                                name="modelAnswer"
+                                value={updateForm.modelAnswer}
+                                onChange={(event) =>
+                                    handleUpdateFieldChange(
+                                        "modelAnswer",
+                                        event.target.value
+                                    )
+                                }
+                                multiline
+                                rows={4}
+                            />
                             <div className="admin-problem-section">
                                 <h3>키워드</h3>
-                                {(selectedProblem.keywords || []).length === 0 ? <p>등록된 키워드가 없습니다.</p> : (
+                                {(selectedProblem.keywords || []).length === 0 ? (
+                                    <p>등록된 키워드가 없습니다.</p>
+                                ) : (
                                     <div className="admin-problem-keyword-list">
-                                        {normalizeKeywords(selectedProblem.keywords).map((item) => (
-                                            <div className="admin-problem-keyword" key={`${item.keyword}-${item.weight}`}>
+                                        {normalizeKeywords(
+                                            selectedProblem.keywords
+                                        ).map((item) => (
+                                            <div
+                                                className="admin-problem-keyword"
+                                                key={`${item.keyword}-${item.weight}`}
+                                            >
                                                 <strong>{item.keyword}</strong>
                                                 <span>가중치 {item.weight}</span>
                                             </div>
@@ -512,9 +954,33 @@ function AdminQuestionManagement() {
                                 )}
                             </div>
                             <div className="admin-problem-action-row">
-                                <Button variant="outline" size="medium" onClick={handleReindexProblem} disabled={isReindexing}><RefreshCw size={16} strokeWidth={2} />{isReindexing ? "요청 중..." : "재색인"}</Button>
-                                <Button variant="outline" size="medium" onClick={handleDeleteProblem} disabled={isDeleting}><Trash2 size={16} strokeWidth={2} />{isDeleting ? "삭제 중..." : "삭제"}</Button>
-                                <Button variant="primary" size="medium" onClick={handleUpdateProblem} disabled={isUpdating}><Save size={16} strokeWidth={2} />{isUpdating ? "저장 중..." : "수정"}</Button>
+                                <Button
+                                    variant="outline"
+                                    size="medium"
+                                    onClick={handleReindexProblem}
+                                    disabled={isReindexing}
+                                >
+                                    <RefreshCw size={16} strokeWidth={2} />
+                                    {isReindexing ? "요청 중..." : "재색인"}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="medium"
+                                    onClick={handleDeleteProblem}
+                                    disabled={isDeleting}
+                                >
+                                    <Trash2 size={16} strokeWidth={2} />
+                                    {isDeleting ? "삭제 중..." : "삭제"}
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    size="medium"
+                                    onClick={handleUpdateProblem}
+                                    disabled={isUpdating}
+                                >
+                                    <Save size={16} strokeWidth={2} />
+                                    {isUpdating ? "저장 중..." : "수정"}
+                                </Button>
                             </div>
                         </div>
                     )}
