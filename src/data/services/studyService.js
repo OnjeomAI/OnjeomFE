@@ -98,6 +98,19 @@ function toPassageText(problemDetail) {
     return "";
 }
 
+function toKeywords(problemDetail) {
+    if (!Array.isArray(problemDetail?.keywords)) {
+        return [];
+    }
+
+    return problemDetail.keywords
+        .filter((item) => item?.keyword)
+        .map((item) => ({
+            keyword: item.keyword,
+            weight: item.weight ?? 1,
+        }));
+}
+
 async function getFallbackProblem() {
     let readingType = null;
 
@@ -153,6 +166,7 @@ function buildFallbackStudyViewModel(problemDetail) {
         passageText: toPassageText(problemDetail),
         question: problemDetail.questionText,
         modelAnswer: problemDetail.modelAnswer || "",
+        keywords: toKeywords(problemDetail),
         scheduledAt: null,
         isFallback: true,
     };
@@ -189,6 +203,7 @@ function buildStudyViewModel({
         passageText: toPassageText(problemDetail),
         question: problemDetail?.questionText || currentItem.questionText,
         modelAnswer: problemDetail?.modelAnswer || "",
+        keywords: toKeywords(problemDetail),
         scheduledAt: currentItem.scheduledAt,
     };
 }

@@ -48,9 +48,48 @@ function formatDateLabel(value) {
     }).format(new Date(value));
 }
 
+function isGradingFallbackMessage(value) {
+    const text = String(value || "").toLowerCase();
+
+    return (
+        text.includes("채점 서버") ||
+        text.includes("서버 연결 실패") ||
+        text.includes("server") ||
+        text.includes("failed")
+    );
+}
+
+function buildFallbackFeedback(responseData) {
+    const score = Number(responseData?.finalScore ?? 0);
+    const answerLength = String(responseData?.answerText || "").trim().length;
+
+    if (score >= 80) {
+        return "핵심 내용을 안정적으로 반영한 답안입니다. 근거 문장을 함께 제시하면 더 완성도 높은 답안이 됩니다.";
+    }
+
+    if (score >= 60) {
+        return "답안이 정상 제출되었습니다. 다만 현재 AI 상세 피드백을 불러오지 못해 기본 분석만 표시합니다.";
+    }
+
+    if (answerLength < 80) {
+        return "답안 분량이 짧아 핵심 근거와 설명이 충분히 드러나지 않았을 수 있습니다. 지문 근거를 포함해 다시 정리해 보세요.";
+    }
+
+    return "답안이 정상 제출되었습니다. 주장, 근거, 결론의 연결이 분명한지 다시 점검해 보세요.";
+}
+
+function buildFallbackScoringBasis(responseData) {
+    const score = Number(responseData?.finalScore ?? 0);
+    const rawScore = Number(responseData?.rawScore ?? score);
+    const answerLength = String(responseData?.answerText || "").trim().length;
+
+    return `기본 채점 결과 ${score}점, 원점수 ${rawScore}점, 답안 ${answerLength}자 기준으로 표시했습니다.`;
+}
+
 function LearnerResult() {
     const navigate = useNavigate();
     const [responseData, setResponseData] = useState(null);
+    const [aiGrading, setAiGrading] = useState(null);
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -63,6 +102,8 @@ function LearnerResult() {
                 navigate("/today", { replace: true });
                 return;
             }
+
+            setAiGrading(latestContext.aiGrading || null);
 
             try {
                 const nextResponseData = await getResponseById(
@@ -89,10 +130,46 @@ function LearnerResult() {
     }, [navigate]);
 
     const foundKeywords = useMemo(() => {
+        if (Array.isArray(aiGrading?.matchedKeywords)) {
+            return aiGrading.matchedKeywords;
+        }
+
         return Array.isArray(responseData?.foundKeywords)
             ? responseData.foundKeywords
             : [];
-    }, [responseData]);
+    }, [aiGrading, responseData]);
+    const displayedFinalScore = aiGrading?.finalScore ?? responseData?.finalScore ?? 0;
+    const displayedRawScore = aiGrading?.rawScore ?? responseData?.rawScore ?? 0;
+    const feedbackText = useMemo(() => {
+        if (!responseData && !aiGrading) {
+            return "";
+        }
+
+        if (aiGrading?.feedback) {
+            return aiGrading.feedback;
+        }
+
+        if (isGradingFallbackMessage(responseData?.feedbackText)) {
+            return buildFallbackFeedback(responseData);
+        }
+
+        return responseData?.feedbackText || buildFallbackFeedback(responseData);
+    }, [aiGrading, responseData]);
+    const scoringBasis = useMemo(() => {
+        if (!responseData && !aiGrading) {
+            return "";
+        }
+
+        if (aiGrading?.feedbackType) {
+            return `AI 직접 채점 결과: ${aiGrading.feedbackType}`;
+        }
+
+        if (isGradingFallbackMessage(responseData?.scoringBasis)) {
+            return buildFallbackScoringBasis(responseData);
+        }
+
+        return responseData?.scoringBasis || buildFallbackScoringBasis(responseData);
+    }, [aiGrading, responseData]);
 
     const handleBack = () => {
         navigate("/today");
@@ -151,10 +228,10 @@ function LearnerResult() {
                         <p className="result-score-label">최종 점수</p>
 
                         <div className="result-score-row">
-                            <strong>{responseData.finalScore ?? 0}</strong>
+                            <strong>{displayedFinalScore}</strong>
                             <span>/100</span>
 
-                            <em>{getScoreLabel(responseData.finalScore ?? 0)}</em>
+                            <em>{getScoreLabel(displayedFinalScore)}</em>
                         </div>
 
                         <p className="result-grading-time">
@@ -167,7 +244,7 @@ function LearnerResult() {
                         <span>채점 정보</span>
 
                         <div>
-                            <strong>원점수 {responseData.rawScore ?? 0}</strong>
+                            <strong>원점수 {displayedRawScore}</strong>
                             <strong className="weak">
                                 시도 {responseData.attemptNumber ?? 1}회
                             </strong>
@@ -215,7 +292,7 @@ function LearnerResult() {
 
                                 <div>
                                     <h3>피드백</h3>
-                                    <p>{responseData.feedbackText || "피드백 없음"}</p>
+                                    <p>{feedbackText}</p>
                                 </div>
                             </div>
 
@@ -226,7 +303,7 @@ function LearnerResult() {
 
                                 <div>
                                     <h3>채점 기준</h3>
-                                    <p>{responseData.scoringBasis || "-"}</p>
+                                    <p>{scoringBasis}</p>
                                 </div>
                             </div>
                         </div>
