@@ -52,7 +52,7 @@ function AdminCurriculum() {
     const [selectedCurriculum, setSelectedCurriculum] = useState(null);
     const [curriculumItems, setCurriculumItems] = useState([]);
     const [orderedProblemIds, setOrderedProblemIds] = useState([]);
-    const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
     const [isLoadingCurricula, setIsLoadingCurricula] = useState(false);
     const [isLoadingItems, setIsLoadingItems] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -67,11 +67,20 @@ function AdminCurriculum() {
         let ignore = false;
 
         async function loadUsers() {
+            const query = userQuery.trim();
+
+            if (!query) {
+                setUsers([]);
+                setSelectedUser(null);
+                setIsLoadingUsers(false);
+                return;
+            }
+
             setIsLoadingUsers(true);
             setErrorMessage("");
 
             try {
-                const result = await searchCurriculumUsers(userQuery, 20);
+                const result = await searchCurriculumUsers(query, 20);
                 if (ignore) return;
 
                 const nextUsers = normalizeList(result.data);
@@ -87,7 +96,10 @@ function AdminCurriculum() {
                 if (!ignore) {
                     setUsers([]);
                     setSelectedUser(null);
-                    setErrorMessage(error.message || "사용자 목록을 불러오지 못했습니다.");
+                    setErrorMessage(
+                        error.message ||
+                            "사용자 목록을 불러오지 못했습니다. 백엔드 배포 상태를 확인해 주세요."
+                    );
                 }
             } finally {
                 if (!ignore) setIsLoadingUsers(false);
@@ -276,6 +288,10 @@ function AdminCurriculum() {
 
                     {isLoadingUsers ? (
                         <p className="admin-problem-empty">사용자를 불러오는 중입니다.</p>
+                    ) : !userQuery.trim() ? (
+                        <p className="admin-problem-empty">
+                            이메일 또는 닉네임을 입력해 사용자를 검색해 주세요.
+                        </p>
                     ) : users.length === 0 ? (
                         <p className="admin-problem-empty">검색된 사용자가 없습니다.</p>
                     ) : (
