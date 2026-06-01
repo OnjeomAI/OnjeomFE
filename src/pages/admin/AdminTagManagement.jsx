@@ -4,6 +4,7 @@ import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader";
 import { getUserByType } from "../../data/services/learnerService";
+import { getProblemDetail } from "../../data/services/problemService";
 import { getAdminProblems, updateKeywords } from "../../api/adminApi";
 
 function normalizeAdminProblemList(data) {
@@ -16,10 +17,29 @@ function normalizeAdminProblemList(data) {
 function toEditableKeywords(problem) {
     return Array.isArray(problem?.keywords)
         ? problem.keywords.map((item) => ({
-              keyword: item.keyword || "",
-              weight: item.weight || 1,
+              keyword: item.keyword || item.name || item.tagName || "",
+              weight: item.weight || item.keywordWeight || 1,
           }))
         : [];
+}
+
+async function enrichProblemsWithDetails(problems) {
+    return Promise.all(
+        problems.map(async (problem) => {
+            try {
+                const detail = await getProblemDetail(problem.id);
+                return {
+                    ...problem,
+                    ...detail,
+                    keywords: Array.isArray(detail?.keywords)
+                        ? detail.keywords
+                        : problem.keywords || [],
+                };
+            } catch {
+                return problem;
+            }
+        })
+    );
 }
 
 function clampKeywordWeight(value) {
@@ -50,7 +70,9 @@ function AdminTagManagement() {
                     getUserByType("admin"),
                     getAdminProblems(0, 100),
                 ]);
-                const nextProblems = normalizeAdminProblemList(result.data);
+                const nextProblems = await enrichProblemsWithDetails(
+                    normalizeAdminProblemList(result.data)
+                );
 
                 if (!ignore) {
                     setUser(nextUser);
