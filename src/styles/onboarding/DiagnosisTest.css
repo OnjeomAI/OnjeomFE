@@ -63,14 +63,9 @@
 }
 
 .diagnosis-progress-fill {
-    width: 43%;
     height: 100%;
     background-color: #6d5700;
-}
-
-.diagnosis-progress-fill.indeterminate {
-    width: 36%;
-    animation: diagnosis-progress-slide 1.8s ease-in-out infinite;
+    transition: width 0.25s ease;
 }
 
 .diagnosis-progress-text {
@@ -316,20 +311,6 @@
     color: #4d4b45;
     font-size: calc(16px * var(--app-font-scale));
     font-weight: 700;
-}
-
-@keyframes diagnosis-progress-slide {
-    0% {
-        transform: translateX(0);
-    }
-
-    50% {
-        transform: translateX(170px);
-    }
-
-    100% {
-        transform: translateX(0);
-    }
 }
 
 @media (max-width: 1024px) {

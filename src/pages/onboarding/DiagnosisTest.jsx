@@ -92,6 +92,11 @@ function DiagnosisTest() {
     const minLength = useMemo(() => {
         return currentQuestion?.questionText?.length > 80 ? 50 : 20;
     }, [currentQuestion]);
+    const totalQuestionCount = 3;
+    const progressPercent = Math.min(
+        100,
+        Math.max(0, (questionIndex / totalQuestionCount) * 100)
+    );
 
     const handleAnswerChange = (event) => {
         setAnswer(event.target.value);
@@ -176,11 +181,14 @@ function DiagnosisTest() {
 
                     <div className="diagnosis-progress-wrap">
                         <div className="diagnosis-progress-track">
-                            <div className="diagnosis-progress-fill indeterminate"></div>
+                            <div
+                                className="diagnosis-progress-fill"
+                                style={{ width: `${progressPercent}%` }}
+                            ></div>
                         </div>
 
                         <span className="diagnosis-progress-text">
-                            현재 문항 {questionIndex}
+                            현재 문항 {questionIndex} / {totalQuestionCount}
                         </span>
                     </div>
                 </div>
