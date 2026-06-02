@@ -8,6 +8,7 @@ import AdminLogin from "./pages/auth/AdminLogin";
 import EmailVerification from "./pages/auth/EmailVerification";
 import PasswordReset from "./pages/auth/PasswordReset";
 import PasswordResetRequest from "./pages/auth/PasswordResetRequest";
+import SessionExpired from "./pages/auth/SessionExpired";
 import GoalSetting from "./pages/onboarding/GoalSetting.jsx";
 import DiagnosisTest from "./pages/onboarding/DiagnosisTest";
 import DiagnosisResult from "./pages/onboarding/DiagnosisResult";
@@ -51,6 +52,7 @@ function App() {
                 <Route path="/signup/verify" element={<EmailVerification />} />
                 <Route path="/password/reset-request" element={<PasswordResetRequest />} />
                 <Route path="/password/reset" element={<PasswordReset />} />
+                <Route path="/session-expired" element={<SessionExpired />} />
                 <Route path="/admin" element={<AdminLogin />} />
 
                 <Route element={<RequireAuth role="learner" />}>

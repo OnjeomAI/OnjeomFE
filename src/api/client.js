@@ -62,13 +62,16 @@ function buildUrl(path, query) {
     return url.toString();
 }
 
-function redirectToLogin() {
+function redirectToLogin(sessionExpired = false) {
     if (typeof window === "undefined") {
         return;
     }
 
-    const nextPath = window.location.pathname.startsWith("/admin")
+    const isAdmin = window.location.pathname.startsWith("/admin");
+    const nextPath = isAdmin
         ? "/admin"
+        : sessionExpired
+        ? "/session-expired"
         : "/login";
 
     if (window.location.pathname !== nextPath) {
@@ -104,7 +107,7 @@ async function parseResponseByType(response, responseType) {
 
 async function handleAuthFailure() {
     clearAuthSession();
-    redirectToLogin();
+    redirectToLogin(true);
 }
 
 async function requestTokenReissue(refreshToken) {
