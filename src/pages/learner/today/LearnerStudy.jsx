@@ -154,6 +154,7 @@ function LearnerStudy() {
                 answerText: answer.trim(),
                 responseTimeSec: Math.max(0, elapsedSeconds),
                 curriculumItemId: studyData.curriculumItemId,
+                readingType: studyData.readingType,
             });
 
             await markTodayStudySubmitted({
