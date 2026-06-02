@@ -4,6 +4,7 @@ import {
     mapUserTypeFromRole,
     normalizeUserProfile,
 } from "../../utils/mappers";
+import { getDiagnosticResult } from "../../api/diagnosticApi";
 import { getMyProfile, updateMyProfile } from "./userService";
 
 export async function getUserByType(type) {
@@ -49,7 +50,31 @@ export async function getAfterLoginPath(type) {
 
     const learner = normalizeUserProfile(getAuthUser(), "learner");
 
-    return learner.hasCompletedDiagnosis ? "/dashboard" : "/onboarding/diagnosis";
+    if (learner.hasCompletedDiagnosis) {
+        return "/dashboard";
+    }
+
+    try {
+        const result = await getDiagnosticResult();
+
+        if (result.data) {
+            const nextUser = {
+                ...learner,
+                hasCompletedDiagnosis: true,
+                learningState: {
+                    ...(learner.learningState || {}),
+                    hasCompletedDiagnosis: true,
+                },
+            };
+
+            setAuthUser(nextUser);
+            return "/dashboard";
+        }
+    } catch {
+        return "/onboarding/diagnosis";
+    }
+
+    return "/onboarding/diagnosis";
 }
 
 export async function updateProfile(type, updatedProfile) {
