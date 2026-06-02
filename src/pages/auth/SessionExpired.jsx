@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { LogIn, RefreshCw } from "lucide-react";
 import Button from "../../components/common/Button";
+import "../../styles/auth/sessionExpired.css";
 
 function SessionExpired() {
     const navigate = useNavigate();
