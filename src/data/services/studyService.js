@@ -128,6 +128,7 @@ export async function getTodayStudySession() {
 
 export async function getTodayStudyStatus() {
     let curriculum;
+    let progress = null;
 
     try {
         curriculum = await getMyCurriculum();
@@ -139,10 +140,28 @@ export async function getTodayStudyStatus() {
         throw error;
     }
 
+    try {
+        progress = await getCurriculumProgress();
+    } catch (error) {
+        if (!isMissingCurriculumError(error)) {
+            throw error;
+        }
+    }
+
     const currentItem = getActiveTodayItem(curriculum);
 
     if (!currentItem) {
-        return "COMPLETED";
+        const totalItems = progress?.totalItems ?? curriculum.totalItems ?? 0;
+        const completedItems =
+            progress?.completedItems ?? curriculum.completedItems ?? 0;
+        const skippedItems = progress?.skippedItems ?? 0;
+        const finishedItems = completedItems + skippedItems;
+
+        if (totalItems > 0 && finishedItems >= totalItems) {
+            return "CURRICULUM_COMPLETED";
+        }
+
+        return "TODAY_COMPLETED";
     }
 
     return currentItem.status;

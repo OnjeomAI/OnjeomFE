@@ -61,8 +61,12 @@ function getStudyButtonLabel(status) {
         return "이어 하기";
     }
 
-    if (status === "COMPLETED") {
-        return "오늘 학습 보기";
+    if (status === "TODAY_COMPLETED") {
+        return "오늘 학습 완료";
+    }
+
+    if (status === "CURRICULUM_COMPLETED") {
+        return "커리큘럼 완료";
     }
 
     return "오늘 학습 시작";
@@ -156,6 +160,13 @@ function LearnerDashboard() {
     const handleStartStudy = async () => {
         if (todayStudyStatus === "NO_CURRICULUM") {
             navigate("/onboarding/diagnosis");
+            return;
+        }
+
+        if (
+            todayStudyStatus === "TODAY_COMPLETED" ||
+            todayStudyStatus === "CURRICULUM_COMPLETED"
+        ) {
             return;
         }
 
@@ -402,6 +413,10 @@ function LearnerDashboard() {
                             size="medium"
                             className="review-start-button"
                             onClick={handleStartStudy}
+                            disabled={
+                                todayStudyStatus === "TODAY_COMPLETED" ||
+                                todayStudyStatus === "CURRICULUM_COMPLETED"
+                            }
                         >
                             {getStudyButtonLabel(todayStudyStatus)}
                         </Button>
