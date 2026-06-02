@@ -77,6 +77,7 @@ function buildStudyViewModel({
         problemId: currentItem.problemId,
         curriculumItemId: currentItem.itemId,
         title: `Stage ${currentItem.stage} · ${currentItem.orderIndex}번 학습`,
+        readingType: currentItem.readingType,
         category: mapReadingTypeLabel(currentItem.readingType),
         difficulty: currentItem.difficulty,
         passageTitle: `문제 ${currentItem.problemId}`,
