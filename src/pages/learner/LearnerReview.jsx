@@ -5,7 +5,11 @@ import { ChevronRight, Edit3, Sparkles } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
-import { getReviewArchive } from "../../data/services/reviewService";
+import {
+    getLatestReviewProblemId,
+    getReviewArchiveByProblemId,
+    getReviewProblemList,
+} from "../../data/services/reviewService";
 
 function getLinePoints(scores) {
     if (scores.length === 1) {
@@ -41,24 +45,36 @@ function getLinePoints(scores) {
 function LearnerReview() {
     const navigate = useNavigate();
     const [reviewData, setReviewData] = useState(null);
+    const [problems, setProblems] = useState([]);
+    const [selectedProblemId, setSelectedProblemId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isArchiveLoading, setIsArchiveLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         let ignore = false;
 
-        async function loadReview() {
+        async function loadProblemList() {
             setIsLoading(true);
             setErrorMessage("");
 
             try {
-                const nextReviewData = await getReviewArchive();
+                const nextProblems = await getReviewProblemList();
 
                 if (ignore) {
                     return;
                 }
 
-                setReviewData(nextReviewData);
+                const latestProblemId = getLatestReviewProblemId();
+                const firstProblemId = nextProblems[0]?.id ?? null;
+                const nextSelectedProblemId = nextProblems.some(
+                    (problem) => problem.id === latestProblemId
+                )
+                    ? latestProblemId
+                    : firstProblemId;
+
+                setProblems(nextProblems);
+                setSelectedProblemId(nextSelectedProblemId);
             } catch (error) {
                 if (!ignore) {
                     setErrorMessage(
@@ -72,12 +88,49 @@ function LearnerReview() {
             }
         }
 
-        loadReview();
+        loadProblemList();
 
         return () => {
             ignore = true;
         };
     }, []);
+
+    useEffect(() => {
+        let ignore = false;
+
+        async function loadArchive() {
+            setIsArchiveLoading(true);
+            setErrorMessage("");
+
+            try {
+                const nextReviewData =
+                    await getReviewArchiveByProblemId(selectedProblemId);
+
+                if (!ignore) {
+                    setReviewData(nextReviewData);
+                }
+            } catch (error) {
+                if (!ignore) {
+                    setReviewData(null);
+                    setErrorMessage(
+                        error.message || "복습 데이터를 불러오지 못했습니다."
+                    );
+                }
+            } finally {
+                if (!ignore) {
+                    setIsArchiveLoading(false);
+                }
+            }
+        }
+
+        if (!isLoading) {
+            loadArchive();
+        }
+
+        return () => {
+            ignore = true;
+        };
+    }, [selectedProblemId, isLoading]);
 
     if (isLoading) {
         return <div className="learner-review-page">복습 데이터를 불러오는 중입니다.</div>;
@@ -87,11 +140,18 @@ function LearnerReview() {
         return <div className="learner-review-page">{errorMessage}</div>;
     }
 
+    if (isArchiveLoading && !reviewData) {
+        return <div className="learner-review-page">복습 데이터를 불러오는 중입니다.</div>;
+    }
+
     if (!reviewData) {
         return <div className="learner-review-page">복습 데이터를 찾을 수 없습니다.</div>;
     }
 
     const linePoints = getLinePoints(reviewData.achievement.scores);
+    const selectedProblem = problems.find(
+        (problem) => problem.id === selectedProblemId
+    );
 
     const handleStartNewAttempt = () => {
         navigate("/today");
@@ -109,6 +169,43 @@ function LearnerReview() {
                 userName=""
                 userLevel=""
             />
+
+            <Card className="review-problem-picker-card">
+                <div className="review-problem-picker-header">
+                    <div>
+                        <span>Problem List</span>
+                        <h2>복습할 문제 선택</h2>
+                    </div>
+
+                    <strong>
+                        {selectedProblem
+                            ? `PROB-${selectedProblem.id}`
+                            : "선택된 문제가 없습니다"}
+                    </strong>
+                </div>
+
+                {problems.length === 0 ? (
+                    <p className="review-problem-empty">
+                        복습 가능한 문제 목록이 없습니다.
+                    </p>
+                ) : (
+                    <div className="review-problem-list">
+                        {problems.map((problem) => (
+                            <button
+                                key={problem.id}
+                                type="button"
+                                className={
+                                    problem.id === selectedProblemId ? "active" : ""
+                                }
+                                onClick={() => setSelectedProblemId(problem.id)}
+                            >
+                                <span>PROB-{problem.id}</span>
+                                <strong>{problem.title}</strong>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </Card>
 
             <Card className="review-hero-card">
                 <div className="review-hero-content">
@@ -168,7 +265,15 @@ function LearnerReview() {
                             })}
                         </svg>
 
-                        <div className="review-chart-labels">
+                        <div
+                            className="review-chart-labels"
+                            style={{
+                                gridTemplateColumns: `repeat(${Math.max(
+                                    1,
+                                    reviewData.achievement.scores.length
+                                )}, 1fr)`,
+                            }}
+                        >
                             {reviewData.achievement.scores.map((item) => (
                                 <span key={item.id}>{item.label}</span>
                             ))}

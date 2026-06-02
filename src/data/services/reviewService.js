@@ -1,8 +1,21 @@
 import { formatKoreanDateTime } from "../selectors/dateSelectors.js";
+import { getProblemDetail, getProblems } from "./problemService";
 import {
     getLatestResponseContext,
     getResponsesByProblemId,
 } from "./responseService";
+
+function normalizeProblemId(problem) {
+    return problem?.id ?? problem?.problemId ?? null;
+}
+
+function normalizeProblemTitle(problem) {
+    return (
+        problem?.questionText ||
+        problem?.title ||
+        `문제 ${normalizeProblemId(problem) ?? "-"}`
+    );
+}
 
 function toScoreBand(score) {
     if (score >= 85) {
@@ -23,7 +36,28 @@ function toScoreBand(score) {
 export async function getReviewArchive() {
     const latestContext = getLatestResponseContext();
 
-    if (!latestContext?.problemId) {
+    return getReviewArchiveByProblemId(latestContext?.problemId);
+}
+
+export async function getReviewProblemList() {
+    const problems = await getProblems({ page: 0, size: 100 });
+
+    return problems
+        .map((problem) => ({
+            id: normalizeProblemId(problem),
+            title: normalizeProblemTitle(problem),
+            readingType: problem.readingType,
+            difficulty: problem.difficulty,
+        }))
+        .filter((problem) => problem.id !== null && problem.id !== undefined);
+}
+
+export function getLatestReviewProblemId() {
+    return getLatestResponseContext()?.problemId ?? null;
+}
+
+export async function getReviewArchiveByProblemId(problemId) {
+    if (!problemId) {
         return {
             subtitle: "응답 이력 분석",
             title: "문제별 응답 조회",
@@ -45,19 +79,23 @@ export async function getReviewArchive() {
         };
     }
 
-    const responses = await getResponsesByProblemId(latestContext.problemId);
+    const [problemDetail, responses] = await Promise.all([
+        getProblemDetail(problemId),
+        getResponsesByProblemId(problemId),
+    ]);
     const sortedResponses = [...responses].sort((left, right) => {
         return new Date(right.createdAt) - new Date(left.createdAt);
     });
     const latestResponse = sortedResponses[0] || null;
+    const problemTitle = normalizeProblemTitle(problemDetail);
 
     return {
         subtitle: "응답 이력 분석",
         title: "문제별 응답 조회",
         archive: {
-            badge: "오늘의 학습",
-            code: `PROB-${latestContext.problemId}`,
-            title: `문제 ${latestContext.problemId} 응답 기록`,
+            badge: "학습 문제",
+            code: `PROB-${problemId}`,
+            title: problemTitle,
         },
         achievement: {
             title: "응답 점수 추이",
