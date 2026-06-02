@@ -30,6 +30,7 @@ export async function submitResponse({
     answerText,
     responseTimeSec,
     curriculumItemId,
+    readingType,
 }) {
     const payload = {
         problemId,
@@ -39,6 +40,10 @@ export async function submitResponse({
 
     if (curriculumItemId !== undefined && curriculumItemId !== null) {
         payload.curriculumItemId = curriculumItemId;
+    }
+
+    if (readingType) {
+        payload.readingType = readingType;
     }
 
     const result = await submitResponseApi(payload);
