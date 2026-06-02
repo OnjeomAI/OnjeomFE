@@ -36,6 +36,14 @@ const readingTypeOptions = [
     { label: "논리 이해", value: "LOGICAL" },
 ];
 
+// AI 자동 생성 가능 유형 (어휘·논리는 모델 미학습으로 제외)
+const generateReadingTypeOptions = [
+    { label: "사실 이해", value: "FACTUAL" },
+    { label: "추론 이해", value: "INFERENTIAL" },
+    { label: "비판 이해", value: "CRITICAL" },
+    { label: "창의 이해", value: "CREATIVE" },
+];
+
 const problemTypeOptions = [
     { label: "주관식", value: "SHORT_ANSWER" },
     { label: "객관식", value: "MULTIPLE_CHOICE" },
@@ -542,8 +550,7 @@ function AdminQuestionManagement() {
                         <div className="admin-question-setting-block">
                             <span>독해 영역 선택</span>
                             <div className="admin-question-reading-grid">
-                                {readingTypeOptions
-                                    .filter((option) => option.value !== "ALL")
+                                {generateReadingTypeOptions
                                     .map((option) => (
                                         <button
                                             key={option.value}
