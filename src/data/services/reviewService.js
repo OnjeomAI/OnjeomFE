@@ -1,5 +1,6 @@
 import { formatKoreanDateTime } from "../selectors/dateSelectors.js";
-import { getProblemDetail, getProblems } from "./problemService";
+import { getRecentResponses } from "../../api/dashboardApi";
+import { getProblemDetail } from "./problemService";
 import {
     getLatestResponseContext,
     getResponsesByProblemId,
@@ -40,16 +41,35 @@ export async function getReviewArchive() {
 }
 
 export async function getReviewProblemList() {
-    const problems = await getProblems({ page: 0, size: 100 });
+    const pageSize = 100;
+    const submittedProblems = new Map();
+    let page = 0;
+    let totalPages = 1;
 
-    return problems
-        .map((problem) => ({
-            id: normalizeProblemId(problem),
-            title: normalizeProblemTitle(problem),
-            readingType: problem.readingType,
-            difficulty: problem.difficulty,
-        }))
-        .filter((problem) => problem.id !== null && problem.id !== undefined);
+    while (page < totalPages) {
+        const result = await getRecentResponses(page, pageSize);
+        const data = result.data || {};
+        const responses = Array.isArray(data.responses)
+            ? data.responses
+            : Array.isArray(data.content)
+              ? data.content
+              : [];
+
+        responses.forEach((response) => {
+            if (!submittedProblems.has(response.problemId)) {
+                submittedProblems.set(response.problemId, {
+                    id: response.problemId,
+                    title: response.questionText || `문제 ${response.problemId}`,
+                    readingType: response.readingType,
+                });
+            }
+        });
+
+        totalPages = data.totalPages || 1;
+        page += 1;
+    }
+
+    return Array.from(submittedProblems.values());
 }
 
 export function getLatestReviewProblemId() {
