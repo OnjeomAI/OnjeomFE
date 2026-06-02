@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
     Bell,
     CircleUserRound,
@@ -13,6 +13,7 @@ import Button from "../../../components/common/Button";
 import Card from "../../../components/common/Card";
 import Input from "../../../components/common/Input";
 import {
+    getReviewStudySession,
     getTodayStudySession,
     markTodayStudySubmitted,
     skipTodayStudyItem,
@@ -51,7 +52,9 @@ function formatElapsedTime(seconds) {
 
 function LearnerStudy() {
     const navigate = useNavigate();
+    const location = useLocation();
     const timerRef = useRef(0);
+    const reviewProblemId = location.state?.reviewProblemId ?? null;
 
     const [studyData, setStudyData] = useState(null);
     const [answer, setAnswer] = useState("");
@@ -81,6 +84,21 @@ function LearnerStudy() {
             setError("");
 
             try {
+                if (reviewProblemId) {
+                    const reviewStudyData =
+                        await getReviewStudySession(reviewProblemId);
+
+                    if (ignore) {
+                        return;
+                    }
+
+                    setStudyData(reviewStudyData);
+                    setAnswer("");
+                    setElapsedSeconds(0);
+                    timerRef.current = Date.now();
+                    return;
+                }
+
                 const nextStudyData = await getTodayStudySession();
 
                 if (ignore) {
@@ -116,7 +134,7 @@ function LearnerStudy() {
         return () => {
             ignore = true;
         };
-    }, []);
+    }, [reviewProblemId]);
 
     useEffect(() => {
         if (!studyData) {
@@ -157,14 +175,17 @@ function LearnerStudy() {
                 readingType: studyData.readingType,
             });
 
-            await markTodayStudySubmitted({
-                itemId: studyData.itemId,
-            });
+            if (!studyData.reviewMode) {
+                await markTodayStudySubmitted({
+                    itemId: studyData.itemId,
+                });
+            }
 
             saveLatestResponseContext({
                 responseId: response.id,
                 problemId: response.problemId,
                 curriculumItemId: studyData.curriculumItemId,
+                source: studyData.reviewMode ? "review" : "today",
             });
 
             navigate("/today/result");
@@ -370,16 +391,18 @@ function LearnerStudy() {
                             {isSubmitting ? "제출 중..." : "정답 제출하기"}
                         </Button>
 
-                        <Button
-                            variant="outline"
-                            size="large"
-                            fullWidth
-                            className="study-skip-button"
-                            onClick={handleSkip}
-                            disabled={isSubmitting || isSkipping}
-                        >
-                            {isSkipping ? "건너뛰는 중..." : "오늘 항목 건너뛰기"}
-                        </Button>
+                        {!studyData.reviewMode ? (
+                            <Button
+                                variant="outline"
+                                size="large"
+                                fullWidth
+                                className="study-skip-button"
+                                onClick={handleSkip}
+                                disabled={isSubmitting || isSkipping}
+                            >
+                                {isSkipping ? "건너뛰는 중..." : "오늘 항목 건너뛰기"}
+                            </Button>
+                        ) : null}
 
                         <Button
                             variant="outline"

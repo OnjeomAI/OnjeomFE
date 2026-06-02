@@ -89,6 +89,49 @@ function buildStudyViewModel({
     };
 }
 
+function buildReviewStudyViewModel(problemDetail) {
+    return {
+        curriculumId: null,
+        curriculumStatus: "REVIEW",
+        currentStage: null,
+        totalItems: 1,
+        completedItems: 0,
+        progressPercent: 0,
+        sessionLabel: "복습 노트 다시 풀기",
+        sessionId: `review-${problemDetail.id}`,
+        status: "REVIEW",
+        itemId: null,
+        questionId: problemDetail.id,
+        problemId: problemDetail.id,
+        curriculumItemId: null,
+        title: `문제 ${problemDetail.id} 복습`,
+        readingType: problemDetail.readingType,
+        category: mapReadingTypeLabel(problemDetail.readingType),
+        difficulty: Number(problemDetail.difficulty) || 0,
+        passageTitle: `문제 ${problemDetail.id}`,
+        passageParagraphs: toPassageParagraphs(problemDetail),
+        passageText: toPassageText(problemDetail),
+        question: problemDetail.questionText,
+        modelAnswer: problemDetail.modelAnswer || "",
+        scheduledAt: null,
+        reviewMode: true,
+    };
+}
+
+export async function getReviewStudySession(problemId) {
+    if (!problemId) {
+        return null;
+    }
+
+    const problemDetail = await getProblemDetail(problemId);
+
+    if (!problemDetail) {
+        return null;
+    }
+
+    return buildReviewStudyViewModel(problemDetail);
+}
+
 export async function getTodayStudySession() {
     let curriculum;
     let progress = null;

@@ -154,7 +154,15 @@ function LearnerReview() {
     );
 
     const handleStartNewAttempt = () => {
-        navigate("/today");
+        if (!selectedProblemId) {
+            return;
+        }
+
+        navigate("/today", {
+            state: {
+                reviewProblemId: selectedProblemId,
+            },
+        });
     };
 
     return (
@@ -337,6 +345,7 @@ function LearnerReview() {
                     size="large"
                     className="review-new-attempt-button"
                     onClick={handleStartNewAttempt}
+                    disabled={!selectedProblemId}
                 >
                     새로운 시도 시작하기
                     <Edit3 size={18} strokeWidth={2.2} />
