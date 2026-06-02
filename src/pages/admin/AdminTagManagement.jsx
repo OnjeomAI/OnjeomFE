@@ -5,7 +5,10 @@ import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader";
 import { getUserByType } from "../../data/services/learnerService";
 import { getProblemDetail } from "../../data/services/problemService";
-import { getAdminProblems, updateKeywords } from "../../api/adminApi";
+import {
+    getAdminProblems,
+    updateKeywords,
+} from "../../data/services/adminService";
 
 function normalizeAdminProblemList(data) {
     if (Array.isArray(data)) return data;

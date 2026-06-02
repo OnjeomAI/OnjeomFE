@@ -24,7 +24,7 @@ import {
     getAdminProblems,
     reindexProblem,
     updateAdminProblem,
-} from "../../api/adminApi";
+} from "../../data/services/adminService";
 
 const readingTypeOptions = [
     { label: "전체", value: "ALL" },

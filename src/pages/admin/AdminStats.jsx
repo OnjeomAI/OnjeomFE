@@ -4,7 +4,10 @@ import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PageHeader from "../../components/common/PageHeader";
 import { getUserByType } from "../../data/services/learnerService";
-import { exportAdminStatsCsv, getAdminStats } from "../../api/adminApi";
+import {
+    exportAdminStatsCsv,
+    getAdminStats,
+} from "../../data/services/adminService";
 
 const statCards = [
     {
