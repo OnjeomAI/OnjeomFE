@@ -26,23 +26,16 @@ import {
     updateAdminProblem,
 } from "../../data/services/adminService";
 
+// 문제 유형: 사실·추론·비판·창의 4가지 (어휘·논리는 역량으로만 분류)
 const readingTypeOptions = [
     { label: "전체", value: "ALL" },
     { label: "사실 이해", value: "FACTUAL" },
     { label: "추론 이해", value: "INFERENTIAL" },
     { label: "비판 이해", value: "CRITICAL" },
     { label: "창의 이해", value: "CREATIVE" },
-    { label: "어휘 이해", value: "VOCABULARY" },
-    { label: "논리 이해", value: "LOGICAL" },
 ];
 
-// AI 자동 생성 가능 유형 (어휘·논리는 모델 미학습으로 제외)
-const generateReadingTypeOptions = [
-    { label: "사실 이해", value: "FACTUAL" },
-    { label: "추론 이해", value: "INFERENTIAL" },
-    { label: "비판 이해", value: "CRITICAL" },
-    { label: "창의 이해", value: "CREATIVE" },
-];
+const generateReadingTypeOptions = readingTypeOptions.filter((o) => o.value !== "ALL");
 
 const problemTypeOptions = [
     { label: "주관식", value: "SHORT_ANSWER" },
