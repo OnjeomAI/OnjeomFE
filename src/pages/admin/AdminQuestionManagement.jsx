@@ -32,6 +32,8 @@ const readingTypeOptions = [
     { label: "추론 이해", value: "INFERENTIAL" },
     { label: "비판 이해", value: "CRITICAL" },
     { label: "창의 이해", value: "CREATIVE" },
+    { label: "어휘 이해", value: "VOCABULARY" },
+    { label: "논리 이해", value: "LOGICAL" },
 ];
 
 const problemTypeOptions = [
