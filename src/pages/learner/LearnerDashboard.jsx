@@ -348,19 +348,19 @@ function LearnerDashboard() {
                         </span>
 
                         <span className="ability-label ability-right">
-                            {abilityItems[4]?.label}
+                            {abilityItems[1]?.label}
                         </span>
 
                         <span className="ability-label ability-bottom-right">
-                            {abilityItems[3]?.label}
-                        </span>
-
-                        <span className="ability-label ability-bottom-left">
                             {abilityItems[2]?.label}
                         </span>
 
+                        <span className="ability-label ability-bottom-left">
+                            {abilityItems[3]?.label}
+                        </span>
+
                         <span className="ability-label ability-left">
-                            {abilityItems[1]?.label}
+                            {abilityItems[4]?.label}
                         </span>
                     </div>
                 </Card>

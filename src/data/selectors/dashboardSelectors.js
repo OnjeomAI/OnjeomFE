@@ -1,6 +1,26 @@
 import { getScoreType, mapReadingTypeLabel } from "../../utils/mappers.js";
 import { formatDotDate } from "./dateSelectors.js";
 
+const RADAR_COMPETENCY_ORDER = [
+    "FACTUAL",
+    "INFERENTIAL",
+    "CRITICAL",
+    "VOCABULARY",
+    "LOGICAL",
+];
+
+function sortRadarCompetencies(items) {
+    return [...items].sort((a, b) => {
+        const aIndex = RADAR_COMPETENCY_ORDER.indexOf(a.type);
+        const bIndex = RADAR_COMPETENCY_ORDER.indexOf(b.type);
+
+        return (
+            (aIndex === -1 ? RADAR_COMPETENCY_ORDER.length : aIndex) -
+            (bIndex === -1 ? RADAR_COMPETENCY_ORDER.length : bIndex)
+        );
+    });
+}
+
 function mapLevelLabel(level) {
     const labels = {
         HIGH: "높음",
@@ -47,7 +67,7 @@ export function toDashboardViewModel({
                 0
             ),
         },
-        abilityStats: competencies.map((item) => ({
+        abilityStats: sortRadarCompetencies(competencies).map((item) => ({
             key: item.type,
             label: mapReadingTypeLabel(item.type),
             current: item.score || 0,
