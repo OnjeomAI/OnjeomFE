@@ -9,14 +9,17 @@ const RADAR_COMPETENCY_ORDER = [
     "LOGICAL",
 ];
 
-function sortRadarCompetencies(items) {
-    return [...items].sort((a, b) => {
-        const aIndex = RADAR_COMPETENCY_ORDER.indexOf(a.type);
-        const bIndex = RADAR_COMPETENCY_ORDER.indexOf(b.type);
+function buildRadarCompetencies(items) {
+    const itemByType = new Map(items.map((item) => [item.type, item]));
 
+    return RADAR_COMPETENCY_ORDER.map((type) => {
         return (
-            (aIndex === -1 ? RADAR_COMPETENCY_ORDER.length : aIndex) -
-            (bIndex === -1 ? RADAR_COMPETENCY_ORDER.length : bIndex)
+            itemByType.get(type) || {
+                type,
+                score: 0,
+                delta: 0,
+                level: null,
+            }
         );
     });
 }
@@ -67,7 +70,7 @@ export function toDashboardViewModel({
                 0
             ),
         },
-        abilityStats: sortRadarCompetencies(competencies).map((item) => ({
+        abilityStats: buildRadarCompetencies(competencies).map((item) => ({
             key: item.type,
             label: mapReadingTypeLabel(item.type),
             current: item.score || 0,
