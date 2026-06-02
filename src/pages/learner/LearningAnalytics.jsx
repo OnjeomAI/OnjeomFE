@@ -11,6 +11,8 @@ function mapReadingTypeLabel(type) {
         INFERENTIAL: "추론 이해",
         CRITICAL: "비판 이해",
         CREATIVE: "창의 이해",
+        VOCABULARY: "어휘 이해",
+        LOGICAL: "논리 이해",
     };
 
     return labels[type] || type || "-";
