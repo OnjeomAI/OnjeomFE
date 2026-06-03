@@ -245,18 +245,50 @@
     word-break: break-word;
 }
 
-.user-answer-card p {
-    background:
-            linear-gradient(transparent 48%, rgba(176, 219, 211, 0.75) 48%);
+.result-highlight-section {
+    padding: 48px 0 54px;
+    border-bottom: 1px solid #dedad0;
+}
+
+.result-passage-card.common-card {
+    width: 100%;
+    padding: 36px 38px;
+    border: none;
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(43, 36, 21, 0.08);
+}
+
+.result-passage-card p {
+    margin: 0;
+    color: #211d16;
+    font-size: calc(18px * var(--app-font-scale));
+    font-weight: 500;
+    line-height: 2;
+    letter-spacing: -0.04em;
+    white-space: pre-wrap;
+    word-break: keep-all;
+}
+
+.result-passage-highlight {
+    padding: 1px 4px;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
 }
 
-.model-answer-card p {
-    background:
-            linear-gradient(transparent 48%, rgba(176, 219, 211, 0.75) 48%);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
+.result-passage-highlight.yellow {
+    background-color: #f6d98b;
+}
+
+.result-passage-highlight.green {
+    background-color: #b8dfc2;
+}
+
+.result-passage-highlight.blue {
+    background-color: #b9ddf2;
+}
+
+.result-passage-highlight.pink {
+    background-color: #f4c6d5;
 }
 
 .result-detail-section {

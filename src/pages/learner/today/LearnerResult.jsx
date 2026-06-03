@@ -17,6 +17,15 @@ import {
     getLatestResponseContext,
     getResponseById,
 } from "../../../data/services/responseService";
+import { getProblemDetail } from "../../../data/services/problemService";
+import { getHighlights } from "../../../api/highlightApi";
+
+const highlightClassByColor = {
+    YELLOW: "yellow",
+    GREEN: "green",
+    BLUE: "blue",
+    PINK: "pink",
+};
 
 function getScoreLabel(score) {
     if (score >= 85) {
@@ -48,9 +57,92 @@ function formatDateLabel(value) {
     }).format(new Date(value));
 }
 
+function getHighlightSegments(text, highlights) {
+    if (!text) {
+        return [];
+    }
+
+    const normalizedHighlights = (Array.isArray(highlights) ? highlights : [])
+        .map((highlight) => ({
+            startOffset: Number(highlight.startOffset),
+            endOffset: Number(highlight.endOffset),
+            color: highlight.color,
+        }))
+        .filter(
+            (highlight) =>
+                Number.isInteger(highlight.startOffset) &&
+                Number.isInteger(highlight.endOffset) &&
+                highlight.startOffset >= 0 &&
+                highlight.endOffset > highlight.startOffset &&
+                highlight.startOffset < text.length
+        )
+        .sort((left, right) => left.startOffset - right.startOffset);
+
+    if (normalizedHighlights.length === 0) {
+        return [{ text, highlighted: false }];
+    }
+
+    const segments = [];
+    let cursor = 0;
+
+    normalizedHighlights.forEach((highlight) => {
+        const startOffset = Math.max(cursor, highlight.startOffset);
+        const endOffset = Math.min(text.length, highlight.endOffset);
+
+        if (endOffset <= startOffset) {
+            return;
+        }
+
+        if (cursor < startOffset) {
+            segments.push({
+                text: text.slice(cursor, startOffset),
+                highlighted: false,
+            });
+        }
+
+        segments.push({
+            text: text.slice(startOffset, endOffset),
+            highlighted: true,
+            color: highlight.color,
+        });
+
+        cursor = endOffset;
+    });
+
+    if (cursor < text.length) {
+        segments.push({
+            text: text.slice(cursor),
+            highlighted: false,
+        });
+    }
+
+    return segments;
+}
+
+function renderHighlightedText(text, highlights) {
+    return getHighlightSegments(text, highlights).map((segment, index) => {
+        if (!segment.highlighted) {
+            return segment.text;
+        }
+
+        const colorClass = highlightClassByColor[segment.color] || "yellow";
+
+        return (
+            <span
+                key={`${segment.color}-${index}`}
+                className={`result-passage-highlight ${colorClass}`}
+            >
+                {segment.text}
+            </span>
+        );
+    });
+}
+
 function LearnerResult() {
     const navigate = useNavigate();
     const [responseData, setResponseData] = useState(null);
+    const [problemData, setProblemData] = useState(null);
+    const [highlights, setHighlights] = useState([]);
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -68,12 +160,26 @@ function LearnerResult() {
                 const nextResponseData = await getResponseById(
                     latestContext.responseId
                 );
+                const problemId =
+                    nextResponseData?.problemId ?? latestContext.problemId;
+                const [nextProblemData, nextHighlightsResult] = problemId
+                    ? await Promise.all([
+                          getProblemDetail(problemId).catch(() => null),
+                          getHighlights(problemId).catch(() => ({ data: [] })),
+                      ])
+                    : [null, { data: [] }];
 
                 if (ignore) {
                     return;
                 }
 
                 setResponseData(nextResponseData);
+                setProblemData(nextProblemData);
+                setHighlights(
+                    Array.isArray(nextHighlightsResult?.data)
+                        ? nextHighlightsResult.data
+                        : []
+                );
             } catch (loadError) {
                 if (!ignore) {
                     setError(loadError.message);
@@ -95,6 +201,7 @@ function LearnerResult() {
     const displayedRawScore = responseData?.rawScore ?? 0;
     const feedbackText = responseData?.feedbackText || "피드백 없음";
     const scoringBasis = responseData?.scoringBasis || "-";
+    const passageText = problemData?.passageText || "";
 
     const handleBack = () => {
         navigate("/today");
@@ -190,10 +297,23 @@ function LearnerResult() {
                     </div>
                 </section>
 
+                {passageText ? (
+                    <section className="result-highlight-section">
+                        <div className="answer-column-header">
+                            <span className="answer-dot"></span>
+                            <h2>지문 하이라이트</h2>
+                            <em>{highlights.length}개 저장됨</em>
+                        </div>
+
+                        <Card className="result-passage-card">
+                            <p>{renderHighlightedText(passageText, highlights)}</p>
+                        </Card>
+                    </section>
+                ) : null}
+
                 <section className="result-detail-section">
                     <div className="result-analysis-area">
                         <h2>응답 분석 정보</h2>
-                        <p>Response API가 제공하는 채점 결과와 피드백입니다.</p>
 
                         <div className="analysis-list">
                             <div className="analysis-item good">
