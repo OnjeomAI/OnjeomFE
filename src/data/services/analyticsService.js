@@ -35,8 +35,8 @@ function buildCompetencyHistory(responses) {
 
 function buildCompetencyScores(radarData) {
     return (radarData?.competencies || []).map((item) => ({
-        competency: item.type,
-        score: item.score,
+        competency: String(item.type || "").toLowerCase(),
+        score: Number(item.score ?? 0),
     }));
 }
 
