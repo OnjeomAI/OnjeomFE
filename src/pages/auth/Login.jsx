@@ -63,7 +63,7 @@ function Login() {
                             <br />
                             차곡차곡 기록합니다
                         </h1>
-                        <p>기존 화면 구조는 유지하고 실제 인증 API로 연결된 로그인 화면입니다.</p>
+                        <p>온점에 오신 것을 환영합니다. 당신의 지적 여정을 위해 큐레이션된 개인 디지털 기록 보관소를 확인하세요.</p>
                         <div className="auth-visual-caption">
                             <span></span>
                             Personal learning archive

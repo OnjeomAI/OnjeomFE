@@ -49,12 +49,7 @@ function AdminLogin() {
                         <span className="admin-login-brand-mark" />
                         <strong>온점</strong>
                     </div>
-                    <h1>학습자와 같은 인증 체계로 관리자 화면에 진입합니다.</h1>
-                    <p>
-                        별도 관리자 인증 API 없이 동일한 로그인 API를 사용합니다.
-                        <br />
-                        관리자 role을 가진 계정이면 자동으로 관리자 화면으로 이동합니다.
-                    </p>
+                    <h1>관리자 role을 가진 계정이면 자동으로 관리자 화면으로 이동합니다.</h1>
                     <span className="admin-login-caption">Admin console</span>
                 </div>
             </section>
@@ -63,7 +58,6 @@ function AdminLogin() {
                 <div className="admin-login-form-container">
                     <div className="admin-login-title">
                         <h2>관리자 로그인</h2>
-                        <p>기존 계정 시스템을 그대로 사용합니다.</p>
                     </div>
 
                     <form className="admin-login-form" onSubmit={handleLogin} autoComplete="off">
